@@ -1,0 +1,23 @@
+.input-text-tag {
+  width: 50%;
+}
+
+.h5-form-label {
+  font-weight: 500;
+  margin: 1% 0 3%;
+}
+
+.top-margin-model-input {
+  margin-top: 3%;
+}
+
+.assign-rough-date-wrapper {
+  .bx--date-picker-container {
+    flex-direction: row;
+    align-items: baseline;
+  }
+  label {
+    margin: 0 4% 0px 0;
+    font-size: 14px;
+  }
+}

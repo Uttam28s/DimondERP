@@ -1,0 +1,49 @@
+// PageStyle.scss
+.pagetop-wrapper {
+  background-color: #f3f3f3;
+  // height: 8vh;
+  // display: flex;
+}
+
+.page-wrapper {
+  height: 88.9vh;
+}
+
+.add-things-button {
+  height: 14px;
+  padding: 1% 2% !important;
+  width: 140px;
+  svg {
+    stroke: white;
+    fill: white;
+  }
+}
+
+.functionaliti-on-top {
+  display: flex;
+  width: 80%;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.search-input {
+  width: 32% !important;
+  margin-bottom: 0.5%;
+  input {
+    height: 2rem !important;
+    padding-right: 0rem !important;
+  }
+}
+
+.top-page-title {
+  width: 20%;
+  padding: 0.3% 0 0 1%;
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+}
+
+.top-side-icon {
+  margin: 1.2% 1.6%;
+}

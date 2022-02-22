@@ -1,0 +1,186 @@
+.splashScreen_Logo {
+  height: 15%;
+  width: 15%;
+}
+
+.splashScreen_Background {
+  height: 100vh;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  // animation: cssAnimation 0s 2s forwards;
+  // animation-duration: 0.4s;
+  // opacity: 1;
+}
+
+.bx--side-nav__items {
+  a {
+    color: transparent !important;
+  }
+}
+@keyframes cssAnimation {
+  to {
+    opacity: 0;
+  }
+}
+
+.diamond_erp_text {
+  text-align: center;
+  margin: 1px;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.diamond_erp_logo_container {
+  text-align: center;
+}
+
+.login_page_wrapper {
+  display: flex;
+  height: 100vh;
+}
+
+.login_page_diamond_logo_wrapper {
+  padding: 8% 0 0 0;
+  .splashScreen_Logo {
+    height: 28%;
+    width: 28%;
+  }
+}
+
+.left_side_wrapper {
+  width: 30%;
+  background-color: #171717;
+  color: white;
+  .message_text_wrapper {
+    padding: 0 3% 0 12%;
+    .thankyou_text {
+      padding: 12% 0 3% 0;
+      font-size: 48px;
+      margin: 0;
+    }
+    .thanku_msg {
+      color: #8d8d8d;
+    }
+  }
+  .zeonlabs_logo_wrapper {
+    text-align: center;
+    position: absolute;
+    bottom: 0;
+    width: 30%;
+    svg {
+      height: 30%;
+      width: 35%;
+    }
+    .all_right_reserve {
+      height: 46px;
+      margin-top: 20px;
+      background-color: #242424;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+      p {
+        margin: 0px;
+      }
+    }
+  }
+}
+
+.right_side_wrapper {
+  width: 70%;
+  background-color: #f3f3f3;
+  .right_side_inner_wrapper {
+    padding: 10% 25%;
+    .sign_up_form_div {
+      display: flex;
+      justify-content: space-between;
+      .signup_form_single_element {
+        width: 48%;
+      }
+    }
+    .sign_up_form_wrappper {
+      margin-top: 32px;
+    }
+    .contact_for_more_info {
+      margin-bottom: 16px;
+      font-size: 12px;
+      .for_more_info_icon {
+        width: 12px;
+        height: 12px;
+      }
+    }
+    .form_submit_button_wrapper {
+      width: 50%;
+      display: flex;
+      justify-content: space-between;
+      button {
+        width: 45%;
+        padding: 4%;
+        place-content: center;
+      }
+    }
+    .sign_in_page_links_wrapper {
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+}
+
+/////______________________________________Sidebar Div_______________________________________________///////
+
+.sidebar_div_wrapper {
+  display: flex;
+  height: 32px;
+  align-items: center;
+  padding: 0px 1rem;
+  &:hover {
+    cursor: pointer;
+    background-color: #e5e5e5;
+    color: black;
+  }
+  svg {
+    height: 1rem;
+    width: 1rem;
+    margin-right: 1.5rem;
+    opacity: 0.7;
+  }
+  p {
+    margin: 0;
+    line-height: inherit;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #525252;
+  }
+}
+
+.sub-menu-side-bar {
+  padding: 0px 0 0 3rem;
+  background-color: #f8f8f8;
+}
+
+.collaps-arrow {
+  margin-left: auto;
+  margin-right: 0 !important;
+  transition: all 5s ease-out;
+}
+
+.collaps-up-arrow {
+  transform: rotateZ(180deg);
+}
+
+.activate-menu {
+  background-color: black;
+  border-left: 4px solid blue;
+  svg {
+    fill: white;
+    opacity: 1;
+  }
+  p {
+    color: white;
+  }
+  &:hover {
+    background-color: black;
+    color: white;
+  }
+}

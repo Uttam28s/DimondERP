@@ -1,0 +1,84 @@
+.seller-detail-page-wrapper {
+  background-color: #f3f3f3;
+  height: 95px;
+  position: relative;
+  padding: 18px;
+  .seller-functionality-wrapper {
+    position: absolute;
+    right: 0;
+    .seller-functionality {
+      display: flex;
+      .seller-page-serch {
+        width: 250px;
+        height: 38px;
+      }
+    }
+  }
+}
+
+.seller-detail-wrapper {
+  display: flex;
+  flex-flow: wrap;
+  .seller-card-wrapper {
+    margin: 14px 7px 0px 7px;
+    width: 31.8%;
+    background-color: #f3f3f3;
+    .seller-card-first-section-wrapper {
+      display: flex;
+      padding: 10px;
+      justify-content: space-between;
+    }
+    .manage-view {
+      display: flex;
+      flex-direction: column;
+    }
+    .heading {
+      font-weight: bold;
+      margin-top: 6px;
+      span {
+        font-size: small;
+        margin-left: 12px;
+        color: #0f61fd;
+      }
+    }
+    .title-of-data {
+      font-size: 11px;
+      margin-top: 6px;
+    }
+    .seller-card-second-section-wrapper {
+      padding: 10px;
+    }
+    .seller-card-thired-section-wrapper {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      background-color: #eaeaea;
+      align-items: center;
+      .total-payment-wrapper {
+      }
+      .center-percentage {
+        h1 {
+          color: #000000;
+          opacity: 0.1;
+          font-weight: bold;
+        }
+      }
+      .last-div-wrapper {
+        span {
+          color: #949494;
+          font-size: smaller;
+        }
+        .amount-details {
+          .payed-amount {
+            color: #0d9f37;
+            font-weight: bolder;
+          }
+          .unpayed-amount {
+            color: #ff3d00;
+            font-weight: bolder;
+          }
+        }
+      }
+    }
+  }
+}
