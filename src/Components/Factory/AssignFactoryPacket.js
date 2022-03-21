@@ -6,7 +6,13 @@ import TextField, {
   DateSelection,
   DropDownSelection,
 } from "../Common/CommonComponents";
+import {getFactoryList, getFactorySubList} from "../../Actions/Factory";
+import {
+  connect
+} from "react-redux";
+import moment from "moment";
 // import { Tab } from "carbon-components-react";
+import {select} from "async";
 // import TabView from "../Common/Tabs";
 
 const validationSchema = Yup.object().shape({
@@ -25,8 +31,30 @@ class AssignSubPacket extends Component {
     this.state = {};
   }
 
-  handelSubmit = (e) => {
-    console.log(e);
+  handelSubmit = (values) => {
+    console.log("🚀 ~ file: AssignFactoryPacket.js ~ line 33 ~ AssignSubPacket ~ values", values)
+    let data = {
+      factory_id: values.factorySubPacketAssignRoughId.id,
+      process_name: values.factoryAssignprocessName,
+      main_carat: Number(values.factoryAssignRoughId.label),
+      assign_name: values.factoryAssignAssignName,
+      factory_carat: Number(values.factoryAssignPacketId.label),
+      assign_carat: values.factoryAssignCarat,
+      piece: values.factoryAssignpcs,
+      purity: values.factoryPacketPurity,
+      size: values.assignFactroryPacketSize,
+      yeild: values.assignFactroryPacketYeild,
+      assign_date: moment(values.factoryPaketcreateDate, "DD-MM-YYYY").format("YYYY-MM-DD"),
+      status: "update"
+    }
+    this.props.createFactoryPacket(data).then((result) => {
+
+    }).catch((err) => {
+
+    });
+
+    console.log("🚀 ~ file: AssignFactoryPacket.js ~ line 33 ~ AssignSubPacket ~ values", data)
+
   };
 
   handelOnChange = (e) => {
@@ -36,6 +64,18 @@ class AssignSubPacket extends Component {
     });
   };
 
+
+
+  getFactoryRoughList = (id) => {
+    this.props.getFactoryList({roughId: id}).then((result) => {
+      this.setState({
+        subRoughList: result?.data?.map((data) => {
+          return {id: data._id, label: data.factory_total_carat.toString()}
+        }) || []
+      })
+    }).catch((err) => {});
+  }
+
   render() {
     return (
       <div style={{ marginBottom: "15%" }}>
@@ -43,6 +83,7 @@ class AssignSubPacket extends Component {
           initialValues={{
             factoryAssignRoughId: "",
             factoryAssignPacketId: "",
+            factorySubPacketAssignRoughId: "",
             factoryAssignAssignName: "",
             factoryAssignprocessName: "",
             factoryAssignCarat: "",
@@ -51,12 +92,14 @@ class AssignSubPacket extends Component {
             factoryPacketPurity: "",
             assignFactroryPacketSize: "",
             assignFactroryPacketYeild: "",
+
           }}
           validationSchema={validationSchema}
           onSubmit={(values, { setSubmitting, resetForm }) => {
             // When button submits form and form is in the process of submitting, submit button is disabled
             setSubmitting(true);
             console.log("AddRoughModal -> render -> values", values);
+            this.handelSubmit(values)
             this.props.close();
             // Simulate submitting to database, shows us values submitted, resets form
             // setTimeout(() => {
@@ -91,6 +134,9 @@ class AssignSubPacket extends Component {
               </div>
               <div className="bx--row">
                 <div className="bx--col-md-4">
+
+                </div>
+                <div className="bx--col-md-4">
                   <DateSelection
                     dateFormat="d/m/Y"
                     datePickerType="single"
@@ -109,7 +155,7 @@ class AssignSubPacket extends Component {
                     labelText="Create packet Date"
                     className={
                       touched.factoryPaketcreateDate &&
-                      errors.factoryPaketcreateDate
+                        errors.factoryPaketcreateDate
                         ? "error"
                         : "bx--col"
                     }
@@ -119,7 +165,7 @@ class AssignSubPacket extends Component {
                     onBlur={handleBlur}
                   />
                   {touched.factoryPaketcreateDate &&
-                  errors.factoryPaketcreateDate ? (
+                    errors.factoryPaketcreateDate ? (
                     <div className="error-message">
                       {errors.factoryPaketcreateDate}
                     </div>
@@ -129,7 +175,7 @@ class AssignSubPacket extends Component {
                   <DropDownSelection
                     className={
                       touched.factoryAssignRoughId &&
-                      errors.factoryAssignRoughId
+                        errors.factoryAssignRoughId
                         ? "error"
                         : "bx--col dropdown-padding"
                     }
@@ -138,69 +184,29 @@ class AssignSubPacket extends Component {
                     value={values.factoryAssignRoughId}
                     // itemToString={(item) => (item ? item.text : "")}
                     id="factory-assign-rough-id"
-                    items={[
-                      "Option 1",
-                      "Option 2",
-                      "Option 3",
-                      "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Vitae, aliquam. Blanditiis quia nemo enim voluptatibus quos ducimus porro molestiae nesciunt error cumque quaerat, tempore vero unde eum aperiam eligendi repellendus.",
-                      "Option 5",
-                      "Option 6",
-                    ]}
+                    items={this.props.caratList}
                     label="Select Rough id"
                     light
-                    onChange={(select) =>
-                      setFieldValue("factoryAssignRoughId", select.selectedItem)
+                    onChange={(select) => {
+                      setFieldValue("factoryAssignRoughId", select.selectedItem);
+                      select.selectedItem?.id && this.getFactoryRoughList(select.selectedItem.id)
+                    }
                     }
                     titleText="Rough Id"
                     type="default"
                   />
                   {touched.factoryAssignRoughId &&
-                  errors.factoryAssignRoughId ? (
+                    errors.factoryAssignRoughId ? (
                     <div className="error-message">
                       {errors.factoryAssignRoughId}
                     </div>
                   ) : null}
                 </div>
                 <div className="bx--col-md-4">
-                  {/* <DropDownSelection
-                    className={
-                      touched.roughName && errors.roughName
-                        ? "error"
-                        : "bx--col dropdown-padding"
-                    }
-                    name="roughName"
-                    selectedItem={values.roughName}
-                    value={values.roughName}
-                    // itemToString={(item) => (item ? item.text : "")}
-                    id="rough-name-office"
-                    items={[
-                      "Option 1",
-                      "Option 2",
-                      "Option 3",
-                      "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Vitae, aliquam. Blanditiis quia nemo enim voluptatibus quos ducimus porro molestiae nesciunt error cumque quaerat, tempore vero unde eum aperiam eligendi repellendus.",
-                      "Option 5",
-                      "Option 6",
-                    ]}
-                    label="Select Rough name"
-                    light
-                    onChange={(select) =>
-                      setFieldValue("roughName", select.selectedItem)
-                    }
-                    titleText="Rough Name"
-                    type="default"
-                  />
-                  {touched.roughName && errors.roughName ? (
-                    <div className="error-message">{errors.roughName}</div>
-                  ) : null} */}
-                </div>
-                {/* <div className="bx--col-md-4"></div> */}
-              </div>
-              <div className="bx--row top-margin-model-input">
-                <div className="bx--col-md-4">
                   <DropDownSelection
                     className={
                       touched.factoryAssignPacketId &&
-                      errors.factoryAssignPacketId
+                        errors.factoryAssignPacketId
                         ? "error"
                         : "bx--col dropdown-padding"
                     }
@@ -209,29 +215,80 @@ class AssignSubPacket extends Component {
                     value={values.factoryAssignPacketId}
                     // itemToString={(item) => (item ? item.text : "")}
                     id="rough-assignee-packet-id"
-                    items={[
-                      "Option 1",
-                      "Option 2",
-                      "Option 3",
-                      "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Vitae, aliquam. Blanditiis quia nemo enim voluptatibus quos ducimus porro molestiae nesciunt error cumque quaerat, tempore vero unde eum aperiam eligendi repellendus.",
-                      "Option 5",
-                      "Option 6",
-                    ]}
+                    items={this.state.subRoughList || []}
                     label="Select Packet id"
                     light
                     onChange={(select) =>
+                    {
+                      console.log("🚀 ~ file: AssignFactoryPacket.js ~ line 197 ~ AssignSubPacket ~ render ~ select", select?.selectedItem?.id)
+
+
                       setFieldValue(
                         "factoryAssignPacketId",
                         select.selectedItem
                       )
-                    }
+
+
+                      select?.selectedItem?.id && this.props.getFactorySubList({factory_id: select.selectedItem.id}).then((res) => {
+                        this.setState({
+                          subPacketData: res.data.map((val) => {
+                            if (val.occupy_by == "false") {
+                              console.log("🚀 ~ file: ReturnPacket.js ~ line 201 ~ ReturnSubPacket ~ select?.selectedItem?.id&&this.props.getFactorySubList ~ data", val)
+                              return {
+                                id: val._id.toString(),
+                                label: val.last_carat.toString(),
+                                processName: val.occupy_by,
+                               // assign_name: val.all_process.filter((v) => v.process_name == val.occupy_by)[0].assign_name,
+                             //   process_id: val.all_process.filter((v) => v.process_name == val.occupy_by)[0].process_carat_id,
+                              }
+                            }
+                          }).filter((val) => val !== undefined)
+                        });
+                      })
+                    }}
                     titleText="Packet id"
                     type="default"
                   />
                   {touched.factoryAssignPacketId &&
-                  errors.factoryAssignPacketId ? (
+                    errors.factoryAssignPacketId ? (
                     <div className="error-message">
                       {errors.factoryAssignPacketId}
+                    </div>
+                  ) : null}
+
+                </div>
+
+                {/* <div className="bx--col-md-4"></div> */}
+              </div>
+              <div className="bx--row top-margin-model-input">
+                <div className="bx--col-md-4">
+                  <DropDownSelection
+                    className={
+                      touched.factorySubPacketAssignRoughId &&
+                        errors.factorySubPacketAssignRoughId
+                        ? "error"
+                        : "bx--col dropdown-padding"
+                    }
+                    name="factoryAssignRoughId"
+                    selectedItem={values.factorySubPacketAssignRoughId}
+                    value={values.factorySubPacketAssignRoughId}
+                    // itemToString={(item) => (item ? item.text : "")}
+                    id="factory-assign-rough-id"
+                    items={this.state.subPacketData || []}
+                    label="Select Sub Packet"
+                    light
+                    onChange={(select) => {
+                      setFieldValue("factorySubPacketAssignRoughId", select.selectedItem);
+                      //  select.selectedItem?.id && this.getFactoryRoughList(select.selectedItem.id)
+                    }
+                    }
+                    titleText="Sub Packet"
+                    type="default"
+                  />
+                  {touched.factorySubPacketAssignRoughId &&
+                    errors.factorySubPacketAssignRoughId ? (
+                    <div className="error-message">
+                      {errors.factorySubPacketAssignRoughId}
                     </div>
                   ) : null}
                 </div>
@@ -239,7 +296,7 @@ class AssignSubPacket extends Component {
                   <DropDownSelection
                     className={
                       touched.factoryAssignprocessName &&
-                      errors.factoryAssignprocessName
+                        errors.factoryAssignprocessName
                         ? "error"
                         : "bx--col dropdown-padding"
                     }
@@ -249,12 +306,11 @@ class AssignSubPacket extends Component {
                     // itemToString={(item) => (item ? item.text : "")}
                     id="process-assign-name-factory"
                     items={[
-                      "Option 1",
-                      "Option 2",
-                      "Option 3",
-                      "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Vitae, aliquam. Blanditiis quia nemo enim voluptatibus quos ducimus porro molestiae nesciunt error cumque quaerat, tempore vero unde eum aperiam eligendi repellendus.",
-                      "Option 5",
-                      "Option 6",
+                      "Sarin",
+                      "Tiching",
+                      "4P",
+                      "Table",
+                      "Polish"
                     ]}
                     label="Select Process name"
                     light
@@ -268,7 +324,7 @@ class AssignSubPacket extends Component {
                     type="default"
                   />
                   {touched.factoryAssignprocessName &&
-                  errors.factoryAssignprocessName ? (
+                    errors.factoryAssignprocessName ? (
                     <div className="error-message">
                       {errors.factoryAssignprocessName}
                     </div>
@@ -280,7 +336,7 @@ class AssignSubPacket extends Component {
                   <DropDownSelection
                     className={
                       touched.factoryAssignAssignName &&
-                      errors.factoryAssignAssignName
+                        errors.factoryAssignAssignName
                         ? "error"
                         : "bx--col dropdown-padding"
                     }
@@ -309,7 +365,7 @@ class AssignSubPacket extends Component {
                     type="default"
                   />
                   {touched.factoryAssignAssignName &&
-                  errors.factoryAssignAssignName ? (
+                    errors.factoryAssignAssignName ? (
                     <div className="error-message">
                       {errors.factoryAssignAssignName}
                     </div>
@@ -330,7 +386,11 @@ class AssignSubPacket extends Component {
                     invalidText="Please fill"
                     labelText="Carat :"
                     light={true}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      if (Number(e.target.value) <= values.factorySubPacketAssignRoughId.label) {
+                        handleChange(e)
+                      }
+                    }}
                     onBlur={handleBlur}
                     // onClick={function noRefCheck() {}}
                     required
@@ -359,7 +419,13 @@ class AssignSubPacket extends Component {
                     invalidText="Please fill"
                     labelText="Piece :"
                     light={true}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      handleChange(e)
+                      let size = (e.target.value || 0) / (values.factoryAssignCarat || 0)
+                      let yeild = (size || 0) / (values.factoryAssignCarat || 0)
+                      setFieldValue("assignFactroryPacketSize", size)
+                      setFieldValue("assignFactroryPacketYeild", yeild)
+                    }}
                     onBlur={handleBlur}
                     // onClick={function noRefCheck() {}}
                     required
@@ -411,7 +477,7 @@ class AssignSubPacket extends Component {
                   <TextField
                     className={
                       touched.assignFactroryPacketSize &&
-                      errors.assignFactroryPacketSize
+                        errors.assignFactroryPacketSize
                         ? "error"
                         : "bx--col"
                     }
@@ -422,6 +488,7 @@ class AssignSubPacket extends Component {
                     // invalid={false}
                     invalidText="Please fill"
                     labelText="Size :"
+                    disabled={true}
                     light={true}
                     onChange={handleChange}
                     onBlur={handleBlur}
@@ -430,7 +497,7 @@ class AssignSubPacket extends Component {
                     type="number"
                   />
                   {touched.assignFactroryPacketSize &&
-                  errors.assignFactroryPacketSize ? (
+                    errors.assignFactroryPacketSize ? (
                     <div className="error-message">
                       {errors.assignFactroryPacketSize}
                     </div>
@@ -440,7 +507,7 @@ class AssignSubPacket extends Component {
                   <TextField
                     className={
                       touched.assignFactroryPacketYeild &&
-                      errors.assignFactroryPacketYeild
+                        errors.assignFactroryPacketYeild
                         ? "error"
                         : "bx--col"
                     }
@@ -451,6 +518,7 @@ class AssignSubPacket extends Component {
                     // invalid={false}
                     invalidText="Please fill"
                     labelText="Yeild :"
+                    disabled={true}
                     light={true}
                     onChange={handleChange}
                     onBlur={handleBlur}
@@ -459,7 +527,7 @@ class AssignSubPacket extends Component {
                     type="number"
                   />
                   {touched.assignFactroryPacketYeild &&
-                  errors.assignFactroryPacketYeild ? (
+                    errors.assignFactroryPacketYeild ? (
                     <div className="error-message">
                       {errors.assignFactroryPacketYeild}
                     </div>
@@ -492,4 +560,4 @@ class AssignSubPacket extends Component {
   }
 }
 
-export default AssignSubPacket;
+export default connect(null, {getFactoryList, getFactorySubList})(AssignSubPacket);

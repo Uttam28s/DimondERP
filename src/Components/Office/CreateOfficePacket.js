@@ -1,14 +1,14 @@
-import React, { Component } from "react";
-import { Form } from "carbon-components-react";
-import { Formik } from "formik";
+import React, {Component} from "react";
+import {Form, Toggle} from "carbon-components-react";
+import {Formik} from "formik";
 import * as Yup from "yup";
 import TextField, {
   DateSelection,
   DropDownSelection,
 } from "../Common/CommonComponents";
-import { connect } from "react-redux";
-import { getRoughPrefrence } from "../../Actions/Rough";
-import { getpacketSrNo } from "../../Actions/Office";
+import {connect} from "react-redux";
+import {getRoughPrefrence} from "../../Actions/Rough";
+import {getpacketSrNo} from "../../Actions/Office";
 import moment from "moment";
 // import { Tab } from "carbon-components-react";
 // import TabView from "../Common/Tabs";
@@ -20,6 +20,7 @@ const validationSchema = Yup.object().shape({
   // officeIssuepiece: Yup.string().required("*Piece is required"),
   officeIssueprocessName: Yup.string().required("*Process Name is required"),
   officeIssueassigneName: Yup.string().required("*Assign Name is required"),
+  assigneName: Yup.string(),
   officePaketcreateDate: Yup.string().required("*Date is required"),
   officeIssueRoughList: Yup.string().required("*Rough Id is required"),
   officeIssueOfficeList: Yup.string().required("*Select Office Id"),
@@ -33,6 +34,7 @@ class CreateOfficePacket extends Component {
       officeItems: [],
       srno: 0,
       remaining: 0,
+      toggle: false
     };
   }
 
@@ -56,7 +58,7 @@ class CreateOfficePacket extends Component {
     // console.log("CreateOfficePacket -> handelChangeRough -> data", data);
     // this.props.roughOnChange(data.id);
     this.props
-      .getRoughPrefrence({ roughId: data === null ? 0 : data.id })
+      .getRoughPrefrence({roughId: data === null ? 0 : data.id})
       .then((res) => {
         console.log("CreateOfficePacket -> handelChangeRough -> res", res);
         this.setState({
@@ -68,25 +70,36 @@ class CreateOfficePacket extends Component {
 
   handleOfficeSrno = (data) => {
     const remaining = this.state.officeIdList.find(
-      (value) => data.id === value._id
+      (value) => data?.id === value?._id
     );
     // this.props.roughOnChange(data.id);
     this.props
-      .getpacketSrNo({ officeId: data === null ? 0 : data.id })
+      .getpacketSrNo({officeId: data === null ? 0 : data.id})
       .then((res) => {
-        console.log("CreateOfficePacket -> handleOfficeSrno -> res", res);
+        //  console.log('this.props.caratList', res)
+
         this.setState({
-          srno: res.packetSrNo[0].packetNo,
+          srno: res.packetSrNo.packetNo,
           remaining: remaining.copyCarat,
+          assigneName: res.packetSrNo.office_assigne_name
         });
       })
       .catch((e) => console.log(e));
   };
 
+  clearState = () => {
+    this.setState({
+      toggle: !this.state.toggle,
+      remaining: 0,
+      assigneName: "",
+      srno: ""
+    })
+  }
+
   render() {
     let items = [];
     this.props.caratList.map((value) =>
-      items.push({ id: value._id, label: value.carat.toString() })
+      items.push({id: value._id, label: value.carat.toString()})
     );
     let officeItem = [];
     this.state.officeIdList.map((value) =>
@@ -95,11 +108,12 @@ class CreateOfficePacket extends Component {
         label: value.office_total_carat
           ? value.office_total_carat.toString()
           : "no Data",
+        assigneName: value.office_assigne_name
       })
     );
-    // console.log("SAdasassadasdas------------------------>", this.props.data);
+    // console.log("SAdasassadasdas------------------------>", this.state.officeIdList);
     return (
-      <div style={{ marginBottom: "15%" }}>
+      <div style={{marginBottom: "15%"}}>
         <Formik
           initialValues={{
             officeIssueassigneName: "",
@@ -113,10 +127,10 @@ class CreateOfficePacket extends Component {
             officeIssueOfficeList: "",
           }}
           validationSchema={validationSchema}
-          onSubmit={(values, { setSubmitting, resetForm }) => {
+          onSubmit={(values, {setSubmitting, resetForm}) => {
             // When button submits form and form is in the process of submitting, submit button is disabled
             setSubmitting(true);
-            console.log("AddRoughModal -> render -> values", values);
+            //console.log("AddRoughModal -> render -> values", values);
             this.handelSubmit(values);
 
             // Simulate submitting to database, shows us values submitted, resets form
@@ -143,7 +157,7 @@ class CreateOfficePacket extends Component {
                   <DropDownSelection
                     className={
                       touched.officeIssueRoughList &&
-                      errors.officeIssueRoughList
+                        errors.officeIssueRoughList
                         ? "error"
                         : "bx--col dropdown-padding"
                     }
@@ -156,10 +170,10 @@ class CreateOfficePacket extends Component {
                     label="Select Rough"
                     light
                     onChange={(select) => {
-                      setFieldValue(
-                        "officeIssueRoughList",
-                        select.selectedItem
-                      );
+                      setFieldValue("officeIssueRoughList", select.selectedItem);
+                      setFieldValue("officeIssueOfficeList", "");
+                      setFieldValue("officeIssuecarat", "")
+                      this.clearState()
                       this.handelChangeRough(select.selectedItem);
                       // this.props.roughOnChange(
                       //   select.selectedItem ? select.selectedItem.id : 0
@@ -173,7 +187,7 @@ class CreateOfficePacket extends Component {
                     type="default"
                   />
                   {touched.officeIssueRoughList &&
-                  errors.officeIssueRoughList ? (
+                    errors.officeIssueRoughList ? (
                     <div className="error-message">
                       {errors.officeIssueRoughList}
                     </div>
@@ -183,7 +197,7 @@ class CreateOfficePacket extends Component {
                   <DropDownSelection
                     className={
                       touched.officeIssueOfficeList &&
-                      errors.officeIssueOfficeList
+                        errors.officeIssueOfficeList
                         ? "error"
                         : "bx--col dropdown-padding"
                     }
@@ -196,12 +210,15 @@ class CreateOfficePacket extends Component {
                     label="Select Office Packet"
                     light
                     onChange={(select) => {
-                      setFieldValue(
-                        "officeIssueOfficeList",
-                        select.selectedItem
-                      );
-                      this.handleOfficeSrno(select.selectedItem);
-                      // this.props.selectedId(select.selectedItem.id);
+                      setFieldValue("officeIssueOfficeList", select.selectedItem || "");
+                      setFieldValue("officeIssuecarat", "")
+                      console.log('first', select.selectedItem)
+                      // setFieldValue("assigneName", select.selectedItem.office_assigne_name)
+                      select.selectedItem && this.handleOfficeSrno(select.selectedItem);
+                      this.clearState()
+
+
+                      // this.props.selectedId(select.selectedItem?.id);
                       // this.handelSelectedId(
                       //   select.selectedItem ? select.selectedItem.id : 0
                       // );
@@ -210,17 +227,26 @@ class CreateOfficePacket extends Component {
                     type="default"
                   />
                   {touched.officeIssueOfficeList &&
-                  errors.officeIssueOfficeList ? (
+                    errors.officeIssueOfficeList ? (
                     <div className="error-message">
                       {errors.officeIssueOfficeList}
                     </div>
                   ) : null}
                 </div>
-                <h5 className="h5-form-label">
-                  Packet No :{" "}
-                  <span style={{ color: "#0F61FD" }}>{this.state.srno}</span>
-                </h5>
-              </div>
+
+                <div className="bx--row top-margin-model-input">
+                  <div className="bx--col-md-3">
+                    <h6 className="h5-form-label">
+                      Packet No :{" "}
+                      <span style={{color: "#0F61FD"}}>{this.state.srno}</span>
+                    </h6>
+                    <h6 className="h5-form-label">
+                      Assignee Name :{" "}
+                      {console.log('this.state', this.state)}
+                      <span style={{color: "#0F61FD"}}>{this.state.assigneName}</span>
+                    </h6>
+                  </div>
+                </div></div>
               <div className="bx--row top-margin-model-input">
                 <div className="bx--col-md-3">
                   <DateSelection
@@ -242,7 +268,7 @@ class CreateOfficePacket extends Component {
                     labelText="Create packet Date"
                     className={
                       touched.officePaketcreateDate &&
-                      errors.officePaketcreateDate
+                        errors.officePaketcreateDate
                         ? "error"
                         : "bx--col"
                     }
@@ -252,7 +278,7 @@ class CreateOfficePacket extends Component {
                     onBlur={handleBlur}
                   />
                   {touched.officePaketcreateDate &&
-                  errors.officePaketcreateDate ? (
+                    errors.officePaketcreateDate ? (
                     <div className="error-message">
                       {errors.officePaketcreateDate}
                     </div>
@@ -262,7 +288,7 @@ class CreateOfficePacket extends Component {
                   <DropDownSelection
                     className={
                       touched.officeIssueassigneName &&
-                      errors.officeIssueassigneName
+                        errors.officeIssueassigneName
                         ? "error"
                         : "bx--col dropdown-padding"
                     }
@@ -284,14 +310,14 @@ class CreateOfficePacket extends Component {
                     onChange={(select) =>
                       setFieldValue(
                         "officeIssueassigneName",
-                        select.selectedItem
+                        select.selectedItem || ""
                       )
                     }
                     titleText="Assign id"
                     type="default"
                   />
                   {touched.officeIssueassigneName &&
-                  errors.officeIssueassigneName ? (
+                    errors.officeIssueassigneName ? (
                     <div className="error-message">
                       {errors.officeIssueassigneName}
                     </div>
@@ -347,9 +373,14 @@ class CreateOfficePacket extends Component {
                     labelText="Carat :"
                     placeholder="enter carat here"
                     light={true}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      if (Number(e.target.value) <= Number(this.state.remaining) && Number(e.target.value) >= 0) {
+                        setFieldValue("officeIssuecarat", e.target.value)
+                        this.setState({toggle: !this.state.toggle})
+                      }
+                    }}
                     onBlur={handleBlur}
-                    // onClick={function noRefCheck() {}}
+                    // onClick={function noRefCheck() { }}
                     required
                     type="number"
                   />
@@ -363,7 +394,7 @@ class CreateOfficePacket extends Component {
                   <DropDownSelection
                     className={
                       touched.officeIssueprocessName &&
-                      errors.officeIssueprocessName
+                        errors.officeIssueprocessName
                         ? "error"
                         : "bx--col dropdown-padding"
                     }
@@ -379,14 +410,14 @@ class CreateOfficePacket extends Component {
                     onChange={(select) =>
                       setFieldValue(
                         "officeIssueprocessName",
-                        select.selectedItem
+                        select.selectedItem || ""
                       )
                     }
                     titleText="Process Name"
                     type="default"
                   />
                   {touched.officeIssueprocessName &&
-                  errors.officeIssueprocessName ? (
+                    errors.officeIssueprocessName ? (
                     <div className="error-message">
                       {errors.officeIssueprocessName}
                     </div>
@@ -417,12 +448,24 @@ class CreateOfficePacket extends Component {
                     </div>
                   ) : null} */}
                 </div>
-                <p style={{ display: "grid" }}>
-                  Available Carat :{" "}
-                  <span style={{ color: "#DA1E28" }}>
-                    {this.state.remaining}
-                  </span>
-                </p>
+              </div>
+              <div className="bx--row top-margin-model-input">
+                <div className="bx--col-md-3">
+                  <p style={{display: "grid"}}>
+                    Remaining Carat :{" "}
+                    <span style={{color: "#DA1E28"}}>
+                      {this.state.remaining - values?.officeIssuecarat || 0}
+                    </span>
+                  </p>
+                </div>
+                <div className="bx--col-md-3">
+                  <p style={{display: "grid"}}>
+                    Available Carat :{" "}
+                    <span style={{color: "#DA1E28"}}>
+                      {this.state.remaining || 0}
+                    </span>
+                  </p>
+                </div>
               </div>
               <div className="bx--row top-margin-model-input">
                 <div className="bx--col-md-3"></div>
@@ -485,8 +528,8 @@ class CreateOfficePacket extends Component {
     );
   }
 }
-const mapStateToProps = (state) => ({ ...state.Test });
+const mapStateToProps = (state) => ({...state});
 
-export default connect(mapStateToProps, { getRoughPrefrence, getpacketSrNo })(
+export default connect(mapStateToProps, {getRoughPrefrence, getpacketSrNo})(
   CreateOfficePacket
 );

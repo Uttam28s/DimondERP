@@ -1,12 +1,12 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 import Sidebar from "../Common/Sidebar";
 import CreateOfficePacket from "./CreateOfficePacket";
 import Model from "../Common/Model";
 import ReturnOfficePacket from "./ReturnPacket";
 import ReturnOfficeRough from "./ReturnOfficeRough";
 // import { TableData } from "../Common/TableData";
-import { OfficeRough } from "../Collumn/Office/OfficeRough";
-import { connect } from "react-redux";
+import {OfficeRough} from "../Collumn/Office/OfficeRough";
+import {connect} from "react-redux";
 import {
   getOfficeList,
   getOfficeSubList,
@@ -14,13 +14,13 @@ import {
   createSubPacket,
   returnOfficePacket,
 } from "../../Actions/Office";
-import { ChapkaList } from "./SubPacket/ChapkaList";
-import { SawingList } from "./SubPacket/SawingList";
+import {ChapkaList} from "./SubPacket/ChapkaList";
+import {SawingList} from "./SubPacket/SawingList";
 import {
   OfficeSawingSubPackets,
   OfficeSubPackets,
 } from "../Collumn/Office/OfficeSubpackets";
-import { getRoughPrefrence } from "../../Actions/Rough";
+import {getRoughPrefrence} from "../../Actions/Rough";
 
 class OfficeIndex extends Component {
   constructor(props) {
@@ -71,7 +71,7 @@ class OfficeIndex extends Component {
     this.props
       .getRoughPrefrence()
       .then((res) => {
-        console.log("OfficeIndex -> componentDidMount -> res", res);
+        //   console.log("OfficeIndex -> componentDidMount -> res", res);
         this.setState({
           roughList: res.commonGet.caratList,
         });
@@ -120,6 +120,7 @@ class OfficeIndex extends Component {
         })
       )
       .catch((e) => console.log(e));
+    console.log('data', data)
     this.setState({
       subPacketModel: true,
       model: true,
@@ -150,11 +151,11 @@ class OfficeIndex extends Component {
   };
 
   handleCreateSubpacket = (data) => {
-    console.log("OfficeIndex -> handleCreateSubpacket -> data", data);
+    //  console.log("OfficeIndex -> handleCreateSubpacket -> data", data);
     this.props
       .createSubPacket(data)
-      .then((res) =>
-        console.log("OfficeIndex -> handleCreateSubpacket -> res", res)
+      .then((res) => {}
+        //  console.log("OfficeIndex -> handleCreateSubpacket -> res", res)
       )
       .catch((e) => console.log(e));
   };
@@ -173,7 +174,7 @@ class OfficeIndex extends Component {
   // };
 
   handelReturnOffice = (data) => {
-    console.log("OfficeIndex -> handelReturnOffice -> data", data);
+    // console.log("OfficeIndex -> handelReturnOffice -> data", data);
     // this.props
     //   .returnOfficePacket(data)
     //   .then((res) => console.log(res))
@@ -181,31 +182,32 @@ class OfficeIndex extends Component {
   };
 
   onPageChange = (page) => {
-    console.log("RoughIndex -> onPageChange -> page", page);
-    // this.setState({
-    //   pageinationRef: {
-    //     ...this.state.pageinationRef,
-    //     currentPage: page,
-    //     skip: (page - 1) * this.state.pageinationRef.limit,
-    //   },
-    // });
-    // const pageData = {
-    //   skip: (page - 1) * this.state.pageinationRef.limit,
-    //   limit: this.state.pageinationRef.limit,
-    // };
-
-    // this.props
-    //   .getRough(pageData)
-    //   .then((res) =>
-    //     this.setState({
-    //       tableData: res.data,
-    //       pageinationRef: {
-    //         ...this.state.pageinationRef,
-    //         totalCount: res.count,
-    //       },
-    //     })
-    //   )
-    //   .catch((e) => console.log(e));
+    // console.log("RoughIndex -> onPageChange -> page", page);
+    this.setState({
+      pageinationRef: {
+        ...this.state.pageinationRef,
+        currentPage: page,
+        skip: (page - 1) * this.state.pageinationRef.limit,
+      },
+    });
+    const pageData = {
+      skip: (page - 1) * this.state.pageinationRef.limit,
+      limit: this.state.pageinationRef.limit,
+      currentPage: page
+    };
+    this.props
+      .getOfficeList(pageData)
+      .then((res) => {
+        this.setState({
+          tableData: res.data,
+          pageinationRef: {
+            ...this.state.pageinationRef,
+            totalCount: res.count,
+          },
+        })
+      }
+      )
+      .catch((e) => console.log(e));
   };
 
   render() {
@@ -218,7 +220,7 @@ class OfficeIndex extends Component {
             close={this.closeModal}
             caratList={this.state.roughList}
             handleCreateSubpacket={this.handleCreateSubpacket}
-            // data={this.state.singleOfiiceData}
+          // data={this.state.singleOfiiceData}
           />
         ),
       },
@@ -257,7 +259,7 @@ class OfficeIndex extends Component {
             column={OfficeSubPackets}
             pageSize={this.onPageChange}
             totalData={this.state.subPacketpageinationRef}
-            // data={this.state.singleOfiiceData}
+          // data={this.state.singleOfiiceData}
           />
         ),
       },
@@ -295,16 +297,15 @@ class OfficeIndex extends Component {
           handelModelTabChange={this.handelModelTabChange}
           tabContent={this.state.subPacketModel === true ? subPacket : tabArray}
           tabSelected={this.state.tabSelected}
-          // data={this.state.singleOfiiceData}
+        // data={this.state.singleOfiiceData}
         />
       </Sidebar>
     );
   }
 }
 
-const mapStateToProps = (state) => ({ ...state.Test });
-
-export default connect(mapStateToProps, {
+const mapStateToProps = (state) => ({...state});
+export default connect(null, {
   getOfficeList,
   getOfficeSubList,
   getRoughPrefrence,

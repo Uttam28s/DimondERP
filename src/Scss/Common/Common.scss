@@ -75,8 +75,8 @@ main-content,
 
 @media (min-width: 66rem) {
   .sidebar-content {
-    margin-left: 16.5% !important;
-    max-width: 83.5%;
+    margin-left: 12.5% !important;
+    // max-width: 83.5%;
   }
 }
 
@@ -84,6 +84,10 @@ main-content,
   .bx--grid {
     padding-right: 1rem !important;
   }
+}
+
+.bx--grid{
+  max-width: 100% !important;
 }
 
 .bx--side-nav__navigation {
@@ -130,7 +134,7 @@ main-content,
   overflow-x: scroll;
   width: 100%;
   .bx--data-table {
-    width: max-content !important;
+    // width: max-content !important;
   }
 }
 

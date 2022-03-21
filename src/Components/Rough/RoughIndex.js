@@ -1,11 +1,11 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 import Sidebar from "../Common/Sidebar";
 import Model from "../Common/Model";
 import AddRoughModal from "./AddRoughModal";
 import AssignRough from "./AssignRough";
 import RoughSorting from "./RoughSorting";
-import { RoughColumn } from "../Collumn/Rough";
-import { connect } from "react-redux";
+import {OfficeSubRoughColumn, RoughColumn} from "../Collumn/Rough";
+import {connect} from "react-redux";
 import {
   getRough,
   addRough,
@@ -13,7 +13,13 @@ import {
   getSortingData,
   addSortingData,
 } from "../../Actions/Rough";
-import { assignOffice } from "../../Actions/Office";
+import {getOfficeList} from "../../Actions/Office";
+import {getOfficeSubList} from "../../Actions/Office";
+
+import {assignOffice, getUnusedList} from "../../Actions/Office";
+import {assignFactory} from "../../Actions/Factory";
+import OfficeSubRough from "./SubRough/OfficeSubRough";
+import FactorySubRough from "./SubRough/FactorySubRough";
 
 class RoughIndex extends Component {
   constructor(props) {
@@ -28,37 +34,72 @@ class RoughIndex extends Component {
         skip: 0,
         currentPage: 1,
       },
+
+
+      subPacketpageinationRef: {
+        totalCount: 0,
+        limit: 10,
+        skip: 0,
+        currentPage: 1,
+      },
       caratList: [],
       sortingData: [],
       singleOfiiceData: "",
-      subPacketModel: false,
+      subRoughModel: false,
+      subOfficeAndFactoryData: []
     };
   }
 
-  componentDidMount = () => {
+
+
+  componentDidMount = async () => {
     // const pageData = {
     //   skip: this.state.skip,
     //   limit: this.state.limit,
     // };
-    this.props
-      .getRough(this.state.pageinationRef)
-      .then((res) =>
-        this.setState({
-          tableData: res.data,
+    var roughList;
+    if (this.props.roughList.length) {roughList = this.props.roughList}
+    else {
+      await this.props.getRough(this.state.pageinationRef).then((res) => {roughList = res.data})
+    }
+    this.setState({
+      tableData: roughList,
           pageinationRef: {
             ...this.state.pageinationRef,
-            totalCount: res.count,
+            totalCount: roughList.length,
           },
-        })
-      )
-      .catch((e) => console.log(e));
-
-    this.props.getRoughPrefrence().then((res) => {
-      console.log("RoughIndex -> componentDidMount -> res", res);
+    })
+    var caratList
+    if (this.props.roughPreference.length) {caratList = this.props.roughPreference.caratList}
+    else {
+      await this.props.getRoughPrefrence().then((res) => {caratList = res.commonGet.caratList})
+    }
+    console.log("🚀 ~ file: RoughIndex.js ~ line 73 ~ RoughIndex ~ componentDidMount= ~ caratList", this.props.roughPreference, caratList)
       this.setState({
-        caratList: res.commonGet.caratList,
+        caratList: caratList,
       });
-    });
+  };
+
+  handelModelTabChange = (e) => {
+    const value = {
+      ...this.state.subPacketpageinationRef,
+      // id: this.state.officeSubId._id,
+      type: e === 0 ? "chapka" : "sawing",
+    };
+    //  console.log("OfficeIndex -> handelModelTabChange -> value", value, e);
+    // this.props
+    //   .getOfficeSubList(value)
+    //   .then((res) =>
+    //     this.setState({
+    //       subPacketData: res.data,
+    //       subPacketpageinationRef: {
+    //         ...this.state.subPacketpageinationRef,
+    //         totalCount: res.count,
+    //       },
+    //       tabSelected: e,
+    //     })
+    //   )
+    //   .catch((e) => console.log(e));
   };
 
   // componentDidUpdate = (prevProps, prevState) => {
@@ -70,17 +111,25 @@ class RoughIndex extends Component {
   //   }
   // };
   closeModal = () => {
-    console.log("log in a close modal");
+    //console.log("log in a close modal");
     this.setState({
       model: false,
+      subRoughModel: false
     });
   };
 
   onModelPopup = (data) => {
+    this.props.getOfficeList({roughId: data._id}).then((result) => {
+      console.log('result', result)
+      this.setState({subOfficeAndFactoryData: result.data});
+    }).catch((err) => {
+
+    });
+
     this.setState({
-      singleOfiiceData: data,
-      subPacketModel: true,
-      // model: true,
+      //  singleOfiiceData: data,
+      subRoughModel: true,
+      model: true,
     });
   };
 
@@ -107,7 +156,7 @@ class RoughIndex extends Component {
           })
           .catch((e) => console.log(e));
         this.props.getRoughPrefrence().then((res) => {
-          console.log("RoughIndex -> componentDidMount -> res", res);
+          // console.log("RoughIndex -> componentDidMount -> res", res);
           this.setState({
             caratList: res.commonGet.caratList,
           });
@@ -124,7 +173,7 @@ class RoughIndex extends Component {
       .catch((e) => console.log(e));
   };
 
-  onPageChange = (page) => {
+  onPageChange = async (page) => {
     console.log("RoughIndex -> onPageChange -> page", page);
     this.setState({
       pageinationRef: {
@@ -136,11 +185,11 @@ class RoughIndex extends Component {
     const pageData = {
       skip: (page - 1) * this.state.pageinationRef.limit,
       limit: this.state.pageinationRef.limit,
+      currentPage: page
     };
-
-    this.props
+    await this.props
       .getRough(pageData)
-      .then((res) =>
+      .then((res) => {
         this.setState({
           tableData: res.data,
           pageinationRef: {
@@ -148,8 +197,13 @@ class RoughIndex extends Component {
             totalCount: res.count,
           },
         })
+      }
       )
-      .catch((e) => console.log(e));
+      .catch((e) => {
+        console.log('res111111', e)
+
+        console.log(e)
+      });
   };
 
   // onModelPopup = () => {
@@ -166,12 +220,23 @@ class RoughIndex extends Component {
       .catch((e) => console.log(e));
   };
 
+
+
+  handelAssignFactory = (data) => {
+    console.log("RoughIndex -> handelAssignFactory -> data", data);
+    this.props
+      .assignFactory(data)
+      .then((res) => console.log("this is add assign", res))
+      .catch((e) => console.log(e));
+  }
+
   render() {
+    const {subRoughModel} = this.state;
     const tabArray = [
       {
         id: "1",
         lebal: "Add Rough",
-        tabContent: (
+        tabContent: (this.state.model &&
           <AddRoughModal
             close={this.closeModal}
             handelAddRough={this.handelAddRough}
@@ -182,7 +247,7 @@ class RoughIndex extends Component {
         id: "2",
         lebal: "Sorting Rough",
         tabContent: (
-          <RoughSorting
+          this.state.model && <RoughSorting
             caratList={this.state.caratList}
             handelAddSorting={this.handelAddSorting}
             sortingData={this.state.sortingData}
@@ -194,14 +259,55 @@ class RoughIndex extends Component {
         id: "3",
         lebal: "Assign Rough",
         tabContent: (
-          <AssignRough
+          this.state.model && <AssignRough
             close={this.closeModal}
             caratList={this.state.caratList}
             handelAssignOffice={this.handelAssignOffice}
+            handelAssignFactory={this.handelAssignFactory}
+            getSortingData={this.props.getSortingData}
+            //getRough={this.props.getRough}
+            getUnusedList={this.props.getUnusedList}
+            getOfficeList={this.props.getOfficeList}
+            getOfficeSubList={
+              this.props.getOfficeSubList
+            }
           />
         ),
       },
     ];
+
+    const subRoughTab = [
+      {
+        id: "1",
+        lebal: "Office Rough",
+        tabContent:
+          (<OfficeSubRough
+            close={this.closeModal}
+            rowData={this.state.subOfficeAndFactoryData}
+            column={OfficeSubRoughColumn}
+            pageSize={this.onPageChange}
+            totalData={this.state.subPacketpageinationRef}
+          />)
+      },
+      {
+        id: "2",
+        lebal: "Factory Rough",
+        tabContent:
+          (<FactorySubRough
+            close={this.closeModal}
+            rowData={this.state.subOfficeAndFactoryData}
+            column={OfficeSubRoughColumn}
+            pageSize={this.onPageChange}
+            totalData={this.state.subPacketpageinationRef}
+          />)
+      }
+    ]
+
+
+
+    {console.log("log in render1", this.state)}
+
+
     return (
       <Sidebar
         title="Rough List"
@@ -213,20 +319,26 @@ class RoughIndex extends Component {
         pageSize={this.onPageChange}
         totalData={this.state.pageinationRef}
       >
-        {/* {console.log("log in render")} */}
-        {/* <h1>Hello Fuck</h1> */}
         <Model
           modalName="Rough Details"
           open={this.state.model}
           close={this.closeModal}
-          tabContent={tabArray}
+          handelModelTabChange={this.handelModelTabChange}
+
+          tabContent={subRoughModel ? subRoughTab : tabArray}
         />
       </Sidebar>
     );
   }
 }
 
-const mapStateToProps = (state) => ({ ...state.Test });
+const mapStateToProps = (state) => {
+  let reducerState = state.reducerState
+  return {
+    roughList: reducerState.roughList,
+    roughPreference: reducerState.roughPreference
+  }
+};
 
 export default connect(mapStateToProps, {
   getRough,
@@ -234,5 +346,5 @@ export default connect(mapStateToProps, {
   getRoughPrefrence,
   getSortingData,
   addSortingData,
-  assignOffice,
+  assignOffice, getUnusedList, getOfficeList, getOfficeSubList, assignFactory
 })(RoughIndex);

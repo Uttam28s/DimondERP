@@ -1,22 +1,23 @@
-import React, { Component } from "react";
-import { Form } from "carbon-components-react";
-import { Formik } from "formik";
+import React, {Component} from "react";
+import {Form} from "carbon-components-react";
+import {Formik} from "formik";
 import * as Yup from "yup";
 import TextField, {
   DateSelection,
   DropDownSelection,
 } from "../Common/CommonComponents";
-import { connect } from "react-redux";
-import { getRoughPrefrence } from "../../Actions/Rough";
-import { getpacketSrNo, getOfficeSubList } from "../../Actions/Office";
+import {connect} from "react-redux";
+import {getRoughPrefrence} from "../../Actions/Rough";
+import {getpacketSrNo, getOfficeSubList} from "../../Actions/Office";
 import moment from "moment";
+import {ThisSideUp16} from "@carbon/icons-react";
 // import { Tab } from "carbon-components-react";
 // import TabView from "../Common/Tabs";
 
 const validationSchema = Yup.object().shape({
   officeReturnpacketId: Yup.string().required("*Packet Id is required"),
   // roughName: Yup.string().required("*Rough Name is required"),
-  // officeReturncarat: Yup.string().required("*carat is required"),
+  officeReturncarat: Yup.string().required("*carat is required"),
   // officeReturnpiece: Yup.string().required("*Piece is required"),
   // officeReturnprocessName: Yup.string().required("*Process Name is required"),
   officeReturnDate: Yup.string().required("*Date is required"),
@@ -35,6 +36,7 @@ class ReturnOfficePacket extends Component {
       packetCarat: "",
       packetType: "",
       officeSelected: "",
+      toggle: false
     };
   }
 
@@ -42,7 +44,8 @@ class ReturnOfficePacket extends Component {
     const data = {
       packet_id: value.officeReturnpacketId.id,
       office_id: value.officeReturnOfficeList.id,
-      packet_status: value.officeReturnprocessName || this.state.packetType,
+      weightLoss: value.weightLoss,
+      packet_status: this.state.packetType,
       return: true,
       returnCarat: value.officeReturncarat || this.state.packetCarat,
       returnDate: moment(value.officeReturnDate, "DD-MM-YYYY").format(
@@ -58,7 +61,7 @@ class ReturnOfficePacket extends Component {
     // console.log("CreateOfficePacket -> handelChangeRough -> data", data);
     // this.props.roughOnChange(data.id);
     this.props
-      .getRoughPrefrence({ roughId: data === null ? 0 : data.id })
+      .getRoughPrefrence({roughId: data === null ? 0 : data.id})
       .then((res) => {
         console.log("CreateOfficePacket -> handelChangeRough -> res", res);
         // const officeSelected =
@@ -75,7 +78,7 @@ class ReturnOfficePacket extends Component {
   handleOfficeSrno = (data) => {
     // this.props.roughOnChange(data.id);
     this.props
-      .getpacketSrNo({ officeId: data === null ? 0 : data.id, srno: true })
+      .getpacketSrNo({officeId: data === null ? 0 : data.id, srno: true})
       .then((res) => {
         console.log("CreateOfficePacket -> handleOfficeSrno -> res", res);
         this.setState({
@@ -88,9 +91,9 @@ class ReturnOfficePacket extends Component {
   handlePacketDetails = (data) => {
     console.log("ReturnOfficePacket -> handlePacketDetails -> data", data);
     this.props
-      .getOfficeSubList({ packetId: data === null ? 0 : data.id })
+      .getOfficeSubList({packetId: data === null ? 0 : data.id})
       .then((res) => {
-        console.log("ReturnOfficePacket -> handlePacketDetails -> res", res);
+        //   console.log("ReturnOfficePacket -> handlePacketDetails -> res", res.packetdetail.packet_name);
         this.setState({
           packetCarat:
             res.packetdetail.chapka_issueCarat ||
@@ -101,17 +104,15 @@ class ReturnOfficePacket extends Component {
       .catch((e) => console.log(e));
   };
 
-  // handelOnChange = (e) => {
-  //   console.log("AddRoughModal -> handelOnChange -> e", e.target);
-  //   this.setState({
-  //     [e.target.name]: e.target.value,
-  //   });
-  // };
+  clearField = (func, data) => {
+    data.map((val) => {func(val, "")})
+    this.setState({packetCarat: ""})
+  }
 
   render() {
     let items = [];
     this.props.caratList.map((value) =>
-      items.push({ id: value._id, label: value.carat.toString() })
+      items.push({id: value._id, label: value.carat.toString()})
     );
     let officeItem = [];
     this.state.officeIdList.map((value) =>
@@ -124,10 +125,10 @@ class ReturnOfficePacket extends Component {
     );
     let srnoList = [];
     this.state.packetId.map((value) =>
-      srnoList.push({ id: value._id, label: value.srno.toString() })
+      srnoList.push({id: value._id, label: value.srno.toString()})
     );
     return (
-      <div style={{ marginBottom: "15%" }}>
+      <div style={{marginBottom: "15%"}}>
         <Formik
           initialValues={{
             officeReturnpacketId: "",
@@ -138,9 +139,11 @@ class ReturnOfficePacket extends Component {
             officeReturnDate: "",
             officeReturnRoughList: "",
             officeReturnOfficeList: "",
+            weightLoss: "",
+            carat: ""
           }}
           validationSchema={validationSchema}
-          onSubmit={(values, { setSubmitting, resetForm }) => {
+          onSubmit={(values, {setSubmitting, resetForm}) => {
             // When button submits form and form is in the process of submitting, submit button is disabled
             setSubmitting(true);
             console.log("AddRoughModal -> render -> values", values);
@@ -172,7 +175,7 @@ class ReturnOfficePacket extends Component {
                   <DropDownSelection
                     className={
                       touched.officeReturnRoughList &&
-                      errors.officeReturnRoughList
+                        errors.officeReturnRoughList
                         ? "error"
                         : "bx--col dropdown-padding"
                     }
@@ -185,10 +188,8 @@ class ReturnOfficePacket extends Component {
                     label="Select Rough"
                     light
                     onChange={(select) => {
-                      setFieldValue(
-                        "officeReturnRoughList",
-                        select.selectedItem
-                      );
+                      this.clearField(setFieldValue, ["officeReturnOfficeList", "officeReturnpacketId", "officeReturncarat"])
+                      setFieldValue("officeReturnRoughList", select.selectedItem || "");
                       this.handelChangeRough(select.selectedItem);
                       // this.props.roughOnChange(
                       //   select.selectedItem ? select.selectedItem.id : 0
@@ -202,7 +203,7 @@ class ReturnOfficePacket extends Component {
                     type="default"
                   />
                   {touched.officeReturnRoughList &&
-                  errors.officeReturnRoughList ? (
+                    errors.officeReturnRoughList ? (
                     <div className="error-message">
                       {errors.officeReturnRoughList}
                     </div>
@@ -212,7 +213,7 @@ class ReturnOfficePacket extends Component {
                   <DropDownSelection
                     className={
                       touched.officeReturnOfficeList &&
-                      errors.officeReturnOfficeList
+                        errors.officeReturnOfficeList
                         ? "error"
                         : "bx--col dropdown-padding"
                     }
@@ -227,10 +228,8 @@ class ReturnOfficePacket extends Component {
                     label="Select Office Packet"
                     light
                     onChange={(select) => {
-                      setFieldValue(
-                        "officeReturnOfficeList",
-                        select.selectedItem
-                      );
+                      setFieldValue("officeReturnOfficeList", select.selectedItem || "");
+                      this.clearField(setFieldValue, ["officeReturnpacketId", "officeReturncarat"])
                       this.handleOfficeSrno(select.selectedItem);
                       // this.props.selectedId(select.selectedItem.id);
                       // this.handelSelectedId(
@@ -241,7 +240,7 @@ class ReturnOfficePacket extends Component {
                     type="default"
                   />
                   {touched.officeReturnOfficeList &&
-                  errors.officeReturnOfficeList ? (
+                    errors.officeReturnOfficeList ? (
                     <div className="error-message">
                       {errors.officeReturnOfficeList}
                     </div>
@@ -253,7 +252,7 @@ class ReturnOfficePacket extends Component {
                   <DropDownSelection
                     className={
                       touched.officeReturnpacketId &&
-                      errors.officeReturnpacketId
+                        errors.officeReturnpacketId
                         ? "error"
                         : "bx--col dropdown-padding"
                     }
@@ -266,17 +265,15 @@ class ReturnOfficePacket extends Component {
                     label="Select Packet id"
                     light
                     onChange={(select) => {
-                      setFieldValue(
-                        "officeReturnpacketId",
-                        select.selectedItem
-                      );
+                      setFieldValue("officeReturnpacketId", select.selectedItem || "");
+                      this.clearField(setFieldValue, ["officeReturncarat"])
                       this.handlePacketDetails(select.selectedItem);
                     }}
                     titleText="Packet id"
                     type="default"
                   />
                   {touched.officeReturnpacketId &&
-                  errors.officeReturnpacketId ? (
+                    errors.officeReturnpacketId ? (
                     <div className="error-message">
                       {errors.officeReturnpacketId}
                     </div>
@@ -290,14 +287,19 @@ class ReturnOfficePacket extends Component {
                         : "bx--col"
                     }
                     name="officeReturncarat"
-                    value={values.officeReturncarat || this.state.packetCarat}
+                    value={values.officeReturncarat}
                     id="return-office-packet-carat"
                     // invalid={false}
                     invalidText="Please fill"
                     labelText="Carat :"
                     placeholder="enter carat here"
                     light={true}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      if (Number(e.target.value) <= Number(this.state.packetCarat) && Number(e.target.value) >= 0) {
+                        handleChange(e)
+                        this.setState({toggle: !this.state.toggle})
+                      }
+                    }}
                     onBlur={handleBlur}
                     // onClick={function noRefCheck() {}}
                     required
@@ -310,8 +312,19 @@ class ReturnOfficePacket extends Component {
                   ) : null}
                 </div>
 
-                <p style={{ display: "grid" }}>
-                  Wight lose : <span style={{ color: "#DA1E28" }}>00.00</span>
+              </div>
+              <div className="bx--row top-margin-model-input">
+                <p style={{display: "grid"}} className={"bx--col-md-3"}>
+                  Packet Carat
+                  <span style={{color: "#DA1E28"}}>
+                    {this.state.packetCarat || 0}
+                  </span>
+                </p>
+                <p style={{display: "grid"}} className={"bx--col-md-3"}>
+                  Wight lose
+                  <span style={{color: "#DA1E28"}}>
+                    {((((this.state?.packetCarat || 0) - (values?.officeReturncarat || 0)) / (this.state.packetCarat || 1)) * 100).toFixed(4) || 0}%
+                  </span>
                 </p>
               </div>
               <div className="bx--row top-margin-model-input">
@@ -352,7 +365,7 @@ class ReturnOfficePacket extends Component {
                   <DropDownSelection
                     className={
                       touched.officeReturnprocessName &&
-                      errors.officeReturnprocessName
+                        errors.officeReturnprocessName
                         ? "error"
                         : "bx--col dropdown-padding"
                     }
@@ -364,7 +377,8 @@ class ReturnOfficePacket extends Component {
                     direction="top"
                     // itemToString={(item) => (item ? item.text : "")}
                     id="return-process-name-office"
-                    items={["sawing", "chapka"]}
+                    items={[this.state.packetType]}
+                    disabled={true}
                     label="Select Process name"
                     light
                     onChange={(select) =>
@@ -377,7 +391,7 @@ class ReturnOfficePacket extends Component {
                     type="default"
                   />
                   {touched.officeReturnprocessName &&
-                  errors.officeReturnprocessName ? (
+                    errors.officeReturnprocessName ? (
                     <div className="error-message">
                       {errors.officeReturnprocessName}
                     </div>
@@ -410,8 +424,8 @@ class ReturnOfficePacket extends Component {
   }
 }
 
-const mapStateToProps = (state) => ({ ...state.Test });
-export default connect(mapStateToProps, {
+const mapStateToProps = (state) => ({...state});
+export default connect(null, {
   getRoughPrefrence,
   getpacketSrNo,
   getOfficeSubList,

@@ -12,12 +12,18 @@ export const actionName = {
 };
 
 export const rough = {
-  roughGet: "VIEW_ROUGH",
   roughPreference: "ROUGH_PREFERENCE",
   sortingData: "SORTING_DATA",
+  unUsedRough: "UNUSED_ROUGH",
+  roughGet: "VIEW_ROUGH",
 };
 
 export const office = {
-  officeGet: "VIEW_Office",
-  officeSubGet: "VIEW_Office_SUB_PACKET",
+  officeGet: "VIEW_OFFICE",
+  officeSubGet: "VIEW_OFFICE_SUB_PACKET",
 };
+
+
+export const factory = {
+  factoryGet: "VIEW_FACTORY",
+}

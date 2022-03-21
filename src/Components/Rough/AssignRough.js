@@ -7,6 +7,8 @@ import TextField, {
   DropDownSelection,
 } from "../Common/CommonComponents";
 import moment from "moment";
+import {getUnusedView} from "../../Actions/Office";
+import {textChangeRangeIsUnchanged} from "typescript";
 // import { Tab } from "carbon-components-react";
 // import TabView from "../Common/Tabs";
 
@@ -21,21 +23,30 @@ class AssignRough extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {};
+    this.state = {
+      availableCaret: 0,
+      remainingCarat: 0
+    };
   }
 
   handelSubmit = (e) => {
-    console.log(e);
   };
 
-  handelOnChange = (e) => {
-    console.log("AddRoughModal -> handelOnChange -> e", e.target);
-    this.setState({
-      [e.target.name]: e.target.value,
-    });
+  handleChange = (e) => {
   };
 
+  getRoughData = async (select, workName) => {
+    await this.props.getUnusedList(select.id).then((data) => {
+      console.log("🚀 ~ file: AssignRough.js ~ line 40 ~ AssignRough ~ awaitthis.props.getUnusedList ~ data", data)
+
+      this.setState({
+        availableCaret: workName == "Office" ? (Number(data?.data?.copyCarat == undefined ? select.label : data?.data.copyCarat)) : Number(data.data?.mackable) || 0,
+        remainingCarat: workName == "Office" ? (Number(data?.data?.copyCarat == undefined ? select.label : data?.data.copyCarat)) : Number(data.data?.mackable) || 0
+      })
+    })
+  }
   render() {
+    const {availableCaret, remainingCarat} = this.state
     let items = [];
     this.props.caratList.map((value) =>
       items.push({ id: value._id, label: value.carat.toString() })
@@ -56,18 +67,24 @@ class AssignRough extends Component {
             setSubmitting(true);
             const data = {
               rough_id: values.sortinRoughId.id,
+              assign_date: moment(values.assignRoughDate, "DD-MM-YYYY").format("YYYY-MM-DD"),
+            };
+            const officeData = {
+              ...data,
               office_assigne_name: values.assignName,
               office_total_carat: values.carat,
-              assign_date: moment(values.assignRoughDate, "DD-MM-YYYY").format(
-                "YYYY-MM-DD"
-              ),
-            };
-            console.log("AddRoughModal -> render -> values", values);
-            this.props.handelAssignOffice(data);
+            }
+            const factoryData = {
+              ...data,
+              factory_assigne_name: values.assignName,
+              factory_total_carat: values.carat,
+
+            }
+
+            values.workPlace === "Office" && this.props.handelAssignOffice(officeData);
+            values.workPlace === "Factory" && this.props.handelAssignFactory(factoryData);
             this.props.close();
-            // Simulate submitting to database, shows us values submitted, resets form
             setTimeout(() => {
-              // alert(JSON.stringify(values, null, 2));
               resetForm();
               setSubmitting(false);
             }, 500);
@@ -103,10 +120,10 @@ class AssignRough extends Component {
                       light
                       onChange={(select) => {
                         setFieldValue("sortinRoughId", select.selectedItem);
-                        // console.log(
-                        //   "AssignRough -> select.selectedItem",
-                        //   select.selectedItem
-                        // );
+                        setFieldValue("carat", "")
+                        setFieldValue("workPlace", "")
+                        this.setState({availableCaret: 0, remainingCarat: 0})
+
                         // this.props.selectedId(select.selectedItem.id);
                       }}
                       titleText="Rough"
@@ -177,8 +194,13 @@ class AssignRough extends Component {
                     label="Select work place"
                     light
                     onChange={
-                      (select) =>
+                      (select) => {
                         setFieldValue("workPlace", select.selectedItem)
+                        select.selectedItem && this.getRoughData(values.sortinRoughId, select.selectedItem)
+
+                        // console.log('111111111111', select.selectedItem)
+
+                      }
                       // setFieldValue("workPlace", select.selectedItem.text)
                       // console.log("AssignRough -> select", select)
                     }
@@ -229,7 +251,7 @@ class AssignRough extends Component {
                 <div className="bx--col-md-4">
                   <TextField
                     className={
-                      touched.carat && errors.carat ? "error" : "bx--col"
+                      touched.carat && errors.carat && !this.state.carat ? "error" : "bx--col"
                     }
                     name="carat"
                     value={values.carat}
@@ -239,23 +261,34 @@ class AssignRough extends Component {
                     labelText="Carat :"
                     placeholder="enter carat here"
                     light={true}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      if (Number(e.target.value) <= this.state.availableCaret) {
+                        this.setState({
+                          remainingCarat: Number(this.state.availableCaret) - (Number(e.target.value))
+                        })
+                        return (handleChange(e))
+                      }
+                    }}
                     onBlur={handleBlur}
                     // onClick={function noRefCheck() {}}
                     required
                     type="number"
                   />
-                  {touched.carat && errors.carat ? (
+                  {touched.carat && errors.carat && !this.state.carat ? (
                     <div className="error-message">{errors.carat}</div>
                   ) : null}
                 </div>
 
-                <div className="bx--col-md-2">
+                <div className="bx--col-md-4">
                   {/*               
                 <div className="bx--col-md-3"> */}
                   <p style={{ marginTop: "6%" }}>
                     Remaining Carat :{" "}
-                    <span style={{ color: "#FF3D00" }}>5.56</span>
+                    <span style={{color: "#FF3D00"}}>{remainingCarat?.toFixed(4) || 0}</span>
+                  </p>
+                  <p style={{marginTop: "6%"}}>
+                    Available Carat :{" "}
+                    <span style={{color: "#FF3D00"}}>{availableCaret?.toFixed(4)}</span>
                   </p>
                 </div>
               </div>
@@ -270,9 +303,9 @@ class AssignRough extends Component {
                 </button>
                 <button
                   tabindex="0"
-                  className="bx--btn bx--btn--primary"
+                  className="bx--btn bx--btn--primary "
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={this.state.availableCaret ? isSubmitting : true}
                 >
                   Save
                 </button>

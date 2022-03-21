@@ -1,20 +1,39 @@
 // import { rough } from "../js/actions";
-import { fetchUrl } from "../js/fetchUrl";
-import { Office } from "../js/apiList";
-import { office } from "../js/actions";
+import {fetchUrl} from "../js/fetchUrl";
+import {Office} from "../js/apiList";
+import {office, rough} from "../js/actions";
 
 export const getOfficeList = (id) => (dispatch) =>
   new Promise((resolve, reject) => {
-    // console.log("TCL: data", id);
-    fetchUrl(Office.getOffice.method, Office.getOffice.url, id)
+    console.log("TCL: data", id);
+    fetchUrl(Office.getOffice.method, `${Office.getOffice.url}`, id)
       .then((res) => {
         // console.log("res", res);
-        dispatch({ type: office.officeGet, payload: res.docs });
+        dispatch({type: office.officeGet, payload: res.data});
         // dispatch({ type: listing.chequeTotal, payload: res });
         resolve(res);
       })
       .catch((e) => {
         reject(e);
+      });
+  });
+
+
+export const getUnusedList = (id) => (dispatch) =>
+  new Promise((resolve, reject) => {
+    //  console.log("TCL: data111", id, Office.unusedList.method, `${Office.unusedList.url}${id ? `?roughId=${id}` : ""}`);
+    fetchUrl(Office.unusedList.method, `${Office.unusedList.url}${id ? `?roughId=${id}` : ""}`)
+      .then((res) => {
+        console.log("TCL: data111", res);
+        dispatch({type: rough.unUsedRough, payload: res.docs});
+
+        resolve(res);
+      })
+      .catch((e) => {
+        reject(e);
+        // console.log("TCL: data111", e);
+
+
       });
   });
 
@@ -24,7 +43,7 @@ export const getOfficeSubList = (id) => (dispatch) =>
     fetchUrl(Office.getSubOffice.method, Office.getSubOffice.url, id)
       .then((res) => {
         // console.log("res", res);
-        dispatch({ type: office.officeSubGet, payload: res.docs });
+        dispatch({type: office.officeSubGet, payload: res.docs});
         // dispatch({ type: listing.chequeTotal, payload: res });
         resolve(res);
       })
@@ -35,8 +54,8 @@ export const getOfficeSubList = (id) => (dispatch) =>
 
 export const getpacketSrNo = (id) => (dispatch) =>
   new Promise((resolve, reject) => {
-    // console.log("TCL: data", id);
-    fetchUrl(Office.getOfficeSr.method, Office.getOfficeSr.url, id)
+    //console.log("TCL: data11112", id, `${Office.getOfficeSr.url}?roughId=${id.officeId}}?srno=${id.srno}`, id);
+    fetchUrl(Office.getOfficeSr.method, `${Office.getOfficeSr.url}`, id)
       .then((res) => {
         console.log("res", res);
         // dispatch({ type: office.officeSubGet, payload: res.docs });
@@ -109,7 +128,7 @@ export const createSubPacket = (data) => (dispatch) => {
 
 export const returnOfficePacket = (data) => (dispatch) => {
   new Promise((resolve, reject) => {
-    // console.log("TCL: data", data);
+    // console.log("returnOfficePacket", data);
     fetchUrl(
       Office.returnOfficePacket.method,
       Office.returnOfficePacket.url,

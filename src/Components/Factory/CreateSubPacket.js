@@ -6,6 +6,10 @@ import TextField, {
   DateSelection,
   DropDownSelection,
 } from "../Common/CommonComponents";
+import {result} from "lodash";
+import {date} from "joi";
+import moment from "moment";
+import {endsWith} from "lodash";
 // import { Tab } from "carbon-components-react";
 // import TabView from "../Common/Tabs";
 
@@ -16,14 +20,33 @@ const validationSchema = Yup.object().shape({
   factoryIssueCarat: Yup.string().required("*carat Name is required"),
   factoryIssuepcs: Yup.string().required("*Piece is required"),
   factoryPaketcreateDate: Yup.string().required("*Date is required"),
+  factoryPaketsize: Yup.string().required("Packet Size is required"),
+  factoryPaketYeild: Yup.string().required("Yeild  Size is required"),
+  factoryPacketPurity: Yup.string().required("Purity  Size is required"),
+  roughName: Yup.string().required("RoughName  Size is required")
 });
 class CreateSubPacket extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {};
+    this.state = {
+      items: [],
+      toggle: false
+    };
   }
 
+  componentDidMount() {
+    // this.setState({
+    //   items: this.props.caretList?.map((data) => {
+    //     return { id: data._id, label: data.carat.toString() }
+    //   })
+    // })
+  }
+  componentDidUpdate(preProps) {
+    // if (preProps.caretList.length !== this.props.caratList.length) {
+    //   this.setState({ toggle: !this.state.toggle });
+    // }
+  }
   handelSubmit = (e) => {
     console.log(e);
   };
@@ -35,7 +58,27 @@ class CreateSubPacket extends Component {
     });
   };
 
+
+  getFactoryRoughList = (id) => {
+    this.props.getFactoryList({roughId: id}).then((result) => {
+      console.log('result', result)
+      this.setState({
+        subRoughList: result?.data?.map((data) => {
+          return {id: data._id, label: data.factory_total_carat.toString(), remainingCarat: data.copyCarat == 0 ? "0" : (data.copyCarat || data.factory_total_carat.toString())}
+        }) || [],
+      })
+    }).catch((err) => {});
+  }
+
+
+  clearState = () => {
+    this.setState({subRoughList: []});
+  }
+
+
+
   render() {
+    const {items, subRoughList} = this.state
     return (
       <div style={{ marginBottom: "15%" }}>
         <Formik
@@ -54,8 +97,27 @@ class CreateSubPacket extends Component {
           onSubmit={(values, { setSubmitting, resetForm }) => {
             // When button submits form and form is in the process of submitting, submit button is disabled
             setSubmitting(true);
-            console.log("AddRoughModal -> render -> values", values);
             this.props.close();
+            let data = {
+              factory_id: values.roughName.id,
+              process_name: values.factoryIssueprocessName,
+              main_carat: Number(values.factoryIssueRoughId.label),
+              assign_name: values.factoryIssueAssignName,
+              factory_carat: Number(values.roughName.label),
+              assign_carat: values.factoryIssueCarat,
+              piece: values.factoryIssuepcs,
+              purity: values.factoryPacketPurity,
+              size: values.factoryPaketsize,
+              yeild: values.factoryPaketYeild,
+              assign_date: moment(values.factoryPaketcreateDate, "DD-MM-YYYY").format("YYYY-MM-DD"),
+            }
+            console.log("🚀 ~ file: CreateSubPacket.js ~ line 110 ~ CreateSubPacket ~ render ~ data", Number(values.roughName.label), values.factoryIssueCarat, data)
+
+            // this.props.createFactoryPacket(data).then((result) => {
+
+            // }).catch((err) => {
+
+            // });
             // Simulate submitting to database, shows us values submitted, resets form
             // setTimeout(() => {
             //   // alert(JSON.stringify(values, null, 2));
@@ -80,14 +142,47 @@ class CreateSubPacket extends Component {
                   Packet Id : <span style={{ color: "#0F61FD" }}>#PID001</span>
                 </h5>
                 <h5 className="h5-form-label">
-                  Total Carat : <span style={{ color: "#0F61FD" }}>650.00</span>
+                  Total Carat : <span style={{color: "#0F61FD"}}>{this.props.totalFactoryCarat}</span>
                 </h5>
                 <h5 className="h5-form-label">
-                  Remaining Carat :{" "}
-                  <span style={{ color: "#E7301C" }}>#AID001</span>
+                  Remaining Carat :
+                  <span style={{color: "#E7301C"}}>{values?.roughName?.remainingCarat || 0}</span>
                 </h5>
               </div>
               <div className="bx--row">
+                <div className="bx--col-md-4">
+                  <DropDownSelection
+                    className={
+                      touched.factoryIssueRoughId && errors.factoryIssueRoughId
+                        ? "error"
+                        : "bx--col dropdown-padding"
+                    }
+                    name="factoryIssueRoughId"
+                    selectedItem={values.factoryIssueRoughId}
+                    value={values.factoryIssueRoughId}
+                    // itemToString={(item) => (item ? item.text : "")}
+                    id="factory-rough-id"
+                    items={this.props.caratList || []}
+                    label="Select Rough id"
+                    light
+                    onChange={(select) => {
+                      setFieldValue("factoryIssueRoughId", select.selectedItem);
+                      setFieldValue("roughName", "")
+                      this.clearState()
+                      console.log('select.selectedItem', select.selectedItem)
+                      select.selectedItem?.id && this.getFactoryRoughList(select.selectedItem.id)
+                    }}
+                    titleText="Rough"
+                    type="default"
+                  />
+                  {
+                    touched.factoryIssueRoughId && errors.factoryIssueRoughId ? (
+                      <div className="error-message">
+                        {errors.factoryIssueRoughId}
+                      </div>
+                    ) : null
+                  }
+                </div>
                 <div className="bx--col-md-4">
                   <DateSelection
                     dateFormat="d/m/Y"
@@ -107,7 +202,7 @@ class CreateSubPacket extends Component {
                     labelText="Create packet Date"
                     className={
                       touched.factoryPaketcreateDate &&
-                      errors.factoryPaketcreateDate
+                        errors.factoryPaketcreateDate
                         ? "error"
                         : "bx--col"
                     }
@@ -117,53 +212,20 @@ class CreateSubPacket extends Component {
                     onBlur={handleBlur}
                   />
                   {touched.factoryPaketcreateDate &&
-                  errors.factoryPaketcreateDate ? (
+                    errors.factoryPaketcreateDate ? (
                     <div className="error-message">
                       {errors.factoryPaketcreateDate}
                     </div>
                   ) : null}
                 </div>
-                {/* <div className="bx--col-md-4">
-                  <DropDownSelection
-                    className={
-                      touched.officeIssueassigneName &&
-                      errors.officeIssueassigneName
-                        ? "error"
-                        : "bx--col dropdown-padding"
-                    }
-                    name="officeIssueassigneName"
-                    selectedItem={values.officeIssueassigneName}
-                    value={values.officeIssueassigneName}
-                    // itemToString={(item) => (item ? item.text : "")}
-                    id="rough-assignee-id"
-                    items={[
-                      "Option 1",
-                      "Option 2",
-                      "Option 3",
-                      "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Vitae, aliquam. Blanditiis quia nemo enim voluptatibus quos ducimus porro molestiae nesciunt error cumque quaerat, tempore vero unde eum aperiam eligendi repellendus.",
-                      "Option 5",
-                      "Option 6",
-                    ]}
-                    label="Select Assign id"
-                    light
-                    onChange={(select) =>
-                      setFieldValue(
-                        "officeIssueassigneName",
-                        select.selectedItem
-                      )
-                    }
-                    titleText="Assign id"
-                    type="default"
-                  />
-                  {touched.officeIssueassigneName &&
-                  errors.officeIssueassigneName ? (
-                    <div className="error-message">
-                      {errors.officeIssueassigneName}
-                    </div>
-                  ) : null}
-                </div> */}
+
+              </div>
+              <div className="bx--row top-margin-model-input">
+
+
+
                 <div className="bx--col-md-4">
-                  {/* <DropDownSelection
+                  <DropDownSelection
                     className={
                       touched.roughName && errors.roughName
                         ? "error"
@@ -174,14 +236,7 @@ class CreateSubPacket extends Component {
                     value={values.roughName}
                     // itemToString={(item) => (item ? item.text : "")}
                     id="rough-name-office"
-                    items={[
-                      "Option 1",
-                      "Option 2",
-                      "Option 3",
-                      "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Vitae, aliquam. Blanditiis quia nemo enim voluptatibus quos ducimus porro molestiae nesciunt error cumque quaerat, tempore vero unde eum aperiam eligendi repellendus.",
-                      "Option 5",
-                      "Option 6",
-                    ]}
+                    items={this.state.subRoughList || []}
                     label="Select Rough name"
                     light
                     onChange={(select) =>
@@ -192,50 +247,15 @@ class CreateSubPacket extends Component {
                   />
                   {touched.roughName && errors.roughName ? (
                     <div className="error-message">{errors.roughName}</div>
-                  ) : null} */}
-                </div>
-                {/* <div className="bx--col-md-4"></div> */}
-              </div>
-              <div className="bx--row top-margin-model-input">
-                <div className="bx--col-md-4">
-                  <DropDownSelection
-                    className={
-                      touched.factoryIssueRoughId && errors.factoryIssueRoughId
-                        ? "error"
-                        : "bx--col dropdown-padding"
-                    }
-                    name="factoryIssueRoughId"
-                    selectedItem={values.factoryIssueRoughId}
-                    value={values.factoryIssueRoughId}
-                    // itemToString={(item) => (item ? item.text : "")}
-                    id="factory-rough-id"
-                    items={[
-                      "Option 1",
-                      "Option 2",
-                      "Option 3",
-                      "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Vitae, aliquam. Blanditiis quia nemo enim voluptatibus quos ducimus porro molestiae nesciunt error cumque quaerat, tempore vero unde eum aperiam eligendi repellendus.",
-                      "Option 5",
-                      "Option 6",
-                    ]}
-                    label="Select Rough id"
-                    light
-                    onChange={(select) =>
-                      setFieldValue("factoryIssueRoughId", select.selectedItem)
-                    }
-                    titleText="Rough Id"
-                    type="default"
-                  />
-                  {touched.factoryIssueRoughId && errors.factoryIssueRoughId ? (
-                    <div className="error-message">
-                      {errors.factoryIssueRoughId}
-                    </div>
                   ) : null}
                 </div>
+
                 <div className="bx--col-md-4">
+
                   <DropDownSelection
                     className={
                       touched.factoryIssueprocessName &&
-                      errors.factoryIssueprocessName
+                        errors.factoryIssueprocessName
                         ? "error"
                         : "bx--col dropdown-padding"
                     }
@@ -245,12 +265,11 @@ class CreateSubPacket extends Component {
                     // itemToString={(item) => (item ? item.text : "")}
                     id="process-name-factory"
                     items={[
-                      "Option 1",
-                      "Option 2",
-                      "Option 3",
-                      "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Vitae, aliquam. Blanditiis quia nemo enim voluptatibus quos ducimus porro molestiae nesciunt error cumque quaerat, tempore vero unde eum aperiam eligendi repellendus.",
-                      "Option 5",
-                      "Option 6",
+                      "Sarin",
+                      "Tiching",
+                      "4P",
+                      "Table",
+                      "Polish"
                     ]}
                     label="Select Process name"
                     light
@@ -264,7 +283,7 @@ class CreateSubPacket extends Component {
                     type="default"
                   />
                   {touched.factoryIssueprocessName &&
-                  errors.factoryIssueprocessName ? (
+                    errors.factoryIssueprocessName ? (
                     <div className="error-message">
                       {errors.factoryIssueprocessName}
                     </div>
@@ -272,11 +291,12 @@ class CreateSubPacket extends Component {
                 </div>
               </div>
               <div className="bx--row top-margin-model-input">
+
                 <div className="bx--col-md-4">
                   <DropDownSelection
                     className={
                       touched.factoryIssueAssignName &&
-                      errors.factoryIssueAssignName
+                        errors.factoryIssueAssignName
                         ? "error"
                         : "bx--col dropdown-padding"
                     }
@@ -305,7 +325,7 @@ class CreateSubPacket extends Component {
                     type="default"
                   />
                   {touched.factoryIssueAssignName &&
-                  errors.factoryIssueAssignName ? (
+                    errors.factoryIssueAssignName ? (
                     <div className="error-message">
                       {errors.factoryIssueAssignName}
                     </div>
@@ -326,7 +346,11 @@ class CreateSubPacket extends Component {
                     invalidText="Please fill"
                     labelText="Carat :"
                     light={true}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      if (Number(e.target.value) <= values?.roughName?.remainingCarat) {
+                        handleChange(e)
+                      }
+                    }}
                     onBlur={handleBlur}
                     // onClick={function noRefCheck() {}}
                     required
@@ -338,6 +362,7 @@ class CreateSubPacket extends Component {
                     </div>
                   ) : null}
                 </div>
+
               </div>
               <div className="bx--row top-margin-model-input">
                 <div className="bx--col-md-4">
@@ -355,7 +380,15 @@ class CreateSubPacket extends Component {
                     invalidText="Please fill"
                     labelText="Piece :"
                     light={true}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      setFieldValue("factoryIssuepcs", e.target.value)
+                      let size = (e.target.value || 0) / (values.factoryIssueCarat || 0)
+                      let yeild = (size || 0) / (values.factoryIssueCarat || 0)
+                      setFieldValue("factoryPaketsize", size)
+                      setFieldValue("factoryPaketYeild", yeild)
+
+                      // handleChange(e)
+                    }}
                     onBlur={handleBlur}
                     // onClick={function noRefCheck() {}}
                     required
@@ -418,7 +451,14 @@ class CreateSubPacket extends Component {
                     invalidText="Please fill"
                     labelText="Size :"
                     light={true}
-                    onChange={handleChange}
+                    disabled={true}
+
+                    // onChange={() => {
+
+                    //   setFieldValue("factoryPaketsize", (values.factoryIssuepcs || 0) / (values.factoryIssueCarat || 0))
+
+
+                    // }}
                     onBlur={handleBlur}
                     // onClick={function noRefCheck() {}}
                     // required
@@ -438,6 +478,7 @@ class CreateSubPacket extends Component {
                         : "bx--col"
                     }
                     name="factoryPaketYeild"
+
                     value={values.factoryPaketYeild}
                     id="factoryPaketYeild"
                     placeholder="enter Yeild here"
@@ -445,7 +486,10 @@ class CreateSubPacket extends Component {
                     invalidText="Please fill"
                     labelText="Yeild :"
                     light={true}
-                    onChange={handleChange}
+                    disabled={true}
+                    // onChange={() => {
+                    //   setFieldValue("factoryPaketYeild", (values.factoryPaketsize || 0) / (values.factoryIssueCarat || 0))
+                    // }}  
                     onBlur={handleBlur}
                     // onClick={function noRefCheck() {}}
                     // required
@@ -458,6 +502,8 @@ class CreateSubPacket extends Component {
                   ) : null}
                 </div>
               </div>
+
+
               <div className="bx--modal-footer modal-custome-footer">
                 <button
                   tabindex="0"
@@ -479,7 +525,7 @@ class CreateSubPacket extends Component {
             </Form>
           )}
         </Formik>
-      </div>
+      </div >
     );
   }
 }

@@ -1,13 +1,16 @@
-import React, { Component } from "react";
-import { Form } from "carbon-components-react";
-import { Formik } from "formik";
+import React, {Component} from "react";
+import {Form} from "carbon-components-react";
+import {Formik} from "formik";
 import * as Yup from "yup";
 // import TextField from "../Common/CommonComponents";
 // import { sumObjValuses } from "../../js/Helper";
 import ReturnRoughTable from "./ReturnRoughTable";
-import { DateSelection, DropDownSelection } from "../Common/CommonComponents";
-import { connect } from "react-redux";
-import { getRoughPrefrence } from "../../Actions/Rough";
+import {DateSelection, DropDownSelection} from "../Common/CommonComponents";
+import {connect} from "react-redux";
+import {getRoughPrefrence} from "../../Actions/Rough";
+import {returnOfficePacket} from "../../Actions/Office";
+import {getOfficeSubList} from "../../Actions/Office";
+import moment from "moment";
 // import { Tab } from "carbon-components-react";
 // import TabView from "../Common/Tabs";
 
@@ -24,23 +27,24 @@ class ReturnOfficeRough extends Component {
 
     this.state = {
       officeRetunrData: {
-        fiveCarat: "",
-        fivePrice: "",
-        chockiCarat: "",
-        chockiPrice: "",
-        singleCarat: "",
-        singlePrice: "",
-        nofourCarat: "",
-        nofourPrice: "",
-        laserCarat: "",
-        ghatCarat: "",
-        makeableCarat: "",
-        laserPrice: "",
-        ghatPrice: "",
-        makeablePrice: "",
-        outCarat: "",
-        outPrice: "",
+        fiveCarat: null,
+        fivePrice: null,
+        chockiCarat: null,
+        chockiPrice: null,
+        singleCarat: null,
+        singlePrice: null,
+        nofourCarat: null,
+        nofourPrice: null,
+        laserCarat: null,
+        ghatCarat: null,
+        makeableCarat: null,
+        laserPrice: null,
+        ghatPrice: null,
+        makeablePrice: null,
+        outCarat: null,
+        outPrice: null,
       },
+      sumOfSorting: 0,
       sumOfCarat: 0,
       sumOfAmount: 0,
       officeIdList: [],
@@ -48,64 +52,88 @@ class ReturnOfficeRough extends Component {
   }
 
   handelSubmit = (value) => {
+    console.log('Returnvalue', value, this.state)
     this.props.close();
+    let state = this.state
+
+    console.log('data', value.officePacketReturnDate)
+
+
+
+    let data = {
+      rough_id: value.officeReturnOfficeId.id,
+      office_id: value.officeReturnCaratId.id,
+      mackable: state.officeRetunrData.makeableCarat || 0,
+      // mackable:officeRetunrData.makeableCarat,
+      // total_sorting_carat:officeRetunrData.sumOfCarat-officeRetunrData.makeableCarat,
+      sortingData: state.officeRetunrData,
+      sumOfSortingCarat: state.sumOfSortingCarat,
+      createDate: moment(value.officePacketReturnDate, "DD-MM-YYYY").format("YYYY-MM-DD"),
+    }
+
+
+    this.props.returnOfficePacket(data).then((data) => {
+    }).catch((e) => {
+      console.log('e', e)
+    })
   };
 
   handelOnChange = (e) => {
-    // const {
-    //   fiveCarat,
-    //   fivePrice,
-    //   chockiCarat,
-    //   chockiPrice,
-    //   singleCarat,
-    //   singlePrice,
-    //   nofourCarat,
-    //   nofourPrice,
-    //   laserCarat,
-    //   ghatCarat,
-    //   makeableCarat,
-    //   laserPrice,
-    //   ghatPrice,
-    //   makeablePrice,
-    //   outCarat,
-    //   outPrice,
-    // } = this.state.officeRetunrData;
+    const {
+      fiveCarat,
+      fivePrice,
+      chockiCarat,
+      chockiPrice,
+      singleCarat,
+      singlePrice,
+      nofourCarat,
+      nofourPrice,
+      laserCarat,
+      ghatCarat,
+      makeableCarat,
+      laserPrice,
+      ghatPrice,
+      makeablePrice,
+      outCarat,
+      outPrice,
+    } = this.state.officeRetunrData;
 
     this.setState(
       {
         officeRetunrData: {
           ...this.state.officeRetunrData,
-          [e.target.name]: parseFloat(e.target.value),
+          [e.target.name]: Number(parseFloat(e.target.value)) || null,
         },
       },
       () => {
+        let sum = this.state.officeRetunrData.fiveCarat +
+          this.state.officeRetunrData.chockiCarat +
+          this.state.officeRetunrData.singleCarat +
+          this.state.officeRetunrData.nofourCarat +
+          this.state.officeRetunrData.laserCarat +
+          this.state.officeRetunrData.ghatCarat +
+          this.state.officeRetunrData.makeableCarat +
+          this.state.officeRetunrData.outCarat
         this.setState({
-          sumOfCarat:
-            this.state.officeRetunrData.fiveCarat +
-            this.state.officeRetunrData.chockiCarat +
-            this.state.officeRetunrData.singleCarat +
-            this.state.officeRetunrData.nofourCarat +
-            this.state.officeRetunrData.laserCarat +
-            this.state.officeRetunrData.ghatCarat +
-            this.state.officeRetunrData.makeableCarat +
-            this.state.officeRetunrData.outCarat,
+          sumOfCarat: sum,
+          sumOfSortingCarat: sum - this.state.officeRetunrData.makeableCarat,
           sumOfAmount:
             this.state.officeRetunrData.fivePrice *
-              this.state.officeRetunrData.fiveCarat +
+            this.state.officeRetunrData.fiveCarat +
             this.state.officeRetunrData.chockiPrice *
-              this.state.officeRetunrData.chockiCarat +
+            this.state.officeRetunrData.chockiCarat +
             this.state.officeRetunrData.singlePrice *
-              this.state.officeRetunrData.singleCarat +
+            this.state.officeRetunrData.singleCarat +
             this.state.officeRetunrData.nofourPrice *
-              this.state.officeRetunrData.nofourCarat +
+            this.state.officeRetunrData.nofourCarat +
             this.state.officeRetunrData.laserPrice *
-              this.state.officeRetunrData.laserCarat +
+            this.state.officeRetunrData.laserCarat +
             this.state.officeRetunrData.ghatPrice *
-              this.state.officeRetunrData.ghatCarat +
+            this.state.officeRetunrData.ghatCarat +
             this.state.officeRetunrData.makeablePrice *
-              this.state.officeRetunrData.makeableCarat +
+            this.state.officeRetunrData.makeableCarat +
             this.state.officeRetunrData.outPrice *
-              this.state.officeRetunrData.outCarat,
+            this.state.officeRetunrData.outCarat,
         });
       }
     );
@@ -113,9 +141,9 @@ class ReturnOfficeRough extends Component {
 
   handelChangeRough = (data) => {
     this.props
-      .getRoughPrefrence({ roughId: data === null ? 0 : data.id })
+      .getRoughPrefrence({roughId: data === null ? 0 : data.id})
       .then((res) => {
-        console.log("CreateOfficePacket -> handelChangeRough -> res", res);
+        console.log("CreateOfficePacket -> handelChangeRough -> res", data.id, res);
         this.setState({
           officeIdList: res.commonGet.officeDetails,
         });
@@ -125,10 +153,15 @@ class ReturnOfficeRough extends Component {
 
   handelData = () => {};
 
+  clearState = () => {
+    this.setState({})
+  }
+
   render() {
     let items = [];
+    //  console.log('this.props.caratList', this.props.caratList)
     this.props.caratList.map((value) =>
-      items.push({ id: value._id, label: value.carat.toString() })
+      items.push({id: value._id, label: value.carat.toString()})
     );
     let officeItem = [];
     this.state.officeIdList.map((value) =>
@@ -137,18 +170,20 @@ class ReturnOfficeRough extends Component {
         label: value.office_total_carat
           ? value.office_total_carat.toString()
           : "no Data",
+        copyCarat: value.copyCarat
       })
     );
     return (
-      <div style={{ marginBottom: "5%" }}>
+      <div style={{marginBottom: "5%"}}>
         <Formik
           initialValues={{
             officeReturnCaratId: "",
             officeReturnOfficeId: "",
             officePacketReturnDate: "",
+            copyCarat: "",
           }}
           validationSchema={validationSchema}
-          onSubmit={(values, { setSubmitting, resetForm }) => {
+          onSubmit={(values, {setSubmitting, resetForm}) => {
             // When button submits form and form is in the process of submitting, submit button is disabled
             setSubmitting(true);
             // console.log("AddRoughModal -> render -> values", values);
@@ -190,8 +225,10 @@ class ReturnOfficeRough extends Component {
                     label="Select Rough"
                     light
                     onChange={(select) => {
-                      setFieldValue("officeReturnCaratId", select.selectedItem);
+                      setFieldValue("officeReturnCaratId", select.selectedItem || "");
                       this.handelChangeRough(select.selectedItem);
+                      setFieldValue("officeReturnOfficeId", "");
+                      setFieldValue("copyCarat", "")
                       // this.props.roughOnChange(
                       //   select.selectedItem ? select.selectedItem.id : 0
                       // );
@@ -213,7 +250,7 @@ class ReturnOfficeRough extends Component {
                   <DropDownSelection
                     className={
                       touched.officeReturnOfficeId &&
-                      errors.officeReturnOfficeId
+                        errors.officeReturnOfficeId
                         ? "error"
                         : "bx--col dropdown-padding"
                     }
@@ -226,10 +263,15 @@ class ReturnOfficeRough extends Component {
                     label="Select Office Packet"
                     light
                     onChange={(select) => {
-                      setFieldValue(
-                        "officeReturnOfficeId",
-                        select.selectedItem
-                      );
+                      setFieldValue("officeReturnOfficeId", select.selectedItem || "");
+                      setFieldValue("copyCarat", select.selectedItem?.copyCarat || "")
+                      this.setState({availCarat: select.selectedItem?.copyCarat})
+                      select.selectedItem?.id && this.props
+                        .getOfficeSubList({officeID: select.selectedItem.id, checkStatus: true, })
+                        .then((res) => {
+                          setFieldValue("returned", res.returned)
+                        })
+                        .catch((e) => console.log(e));
                       // this.props.selectedId(select.selectedItem.id);
                       // this.handelSelectedId(
                       //   select.selectedItem ? select.selectedItem.id : 0
@@ -239,13 +281,13 @@ class ReturnOfficeRough extends Component {
                     type="default"
                   />
                   {touched.officeReturnOfficeId &&
-                  errors.officeReturnOfficeId ? (
+                    errors.officeReturnOfficeId ? (
                     <div className="error-message">
                       {errors.officeReturnOfficeId}
                     </div>
                   ) : null}
                 </div>
-                <div className="bx--col-md-3">
+                <div className="bx--col-md-2">
                   <DateSelection
                     dateFormat="d/m/Y"
                     datePickerType="single"
@@ -265,7 +307,7 @@ class ReturnOfficeRough extends Component {
                     labelText="Create packet Date"
                     className={
                       touched.officePacketReturnDate &&
-                      errors.officePacketReturnDate
+                        errors.officePacketReturnDate
                         ? "error"
                         : "bx--col"
                     }
@@ -275,11 +317,16 @@ class ReturnOfficeRough extends Component {
                     onBlur={handleBlur}
                   />
                   {touched.officePacketReturnDate &&
-                  errors.officePacketReturnDate ? (
+                    errors.officePacketReturnDate ? (
                     <div className="error-message">
                       {errors.officePacketReturnDate}
                     </div>
                   ) : null}
+                </div>
+                <div className="bx--col-md-2">
+                  <label className="bx--label"> AvailableRough: </label>
+                  <p>{`${(values.copyCarat || 0).toFixed(4)}`}</p>
+                  <label className="bx--label $code-01">{`${values.returned == false ? "All Rough Is Not Returned From Sawing/Chapka" : ""}`}</label>
                 </div>
               </div>
 
@@ -292,13 +339,13 @@ class ReturnOfficeRough extends Component {
               <div className="assign-headding-wrapper">
                 <h5 className="h5-form-label">
                   Total Sorting Carat :{" "}
-                  <span style={{ color: "#DA1E28" }}>
-                    {this.state.sumOfCarat}
+                  <span style={{color: "#DA1E28"}}>
+                    {this.state.sumOfCarat || 0}
                   </span>
                 </h5>
                 <h5 className="h5-form-label">
                   Total Amount :{" "}
-                  <span style={{ color: "#0D9F37" }}>
+                  <span style={{color: "#0D9F37"}}>
                     {this.state.sumOfAmount} /-
                   </span>
                 </h5>
@@ -314,9 +361,9 @@ class ReturnOfficeRough extends Component {
                 </button>
                 <button
                   tabindex="0"
-                  className="bx--btn bx--btn--primary"
+                  className={"bx--btn bx--btn--primary"}
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={(values.returned && values.officeReturnCaratId?.label && (values?.copyCarat == this.state.sumOfCarat)) ? isSubmitting : true}
                 >
                   Save
                 </button>
@@ -324,13 +371,13 @@ class ReturnOfficeRough extends Component {
             </Form>
           )}
         </Formik>
-      </div>
+      </div >
     );
   }
 }
 
-const mapStateToProps = (state) => ({ ...state.Test });
+const mapStateToProps = (state) => ({...state});
 
-export default connect(mapStateToProps, { getRoughPrefrence })(
+export default connect(mapStateToProps, {getRoughPrefrence, returnOfficePacket, getOfficeSubList})(
   ReturnOfficeRough
 );

@@ -1,6 +1,6 @@
-const Rough = require("../../models/Rough");
-const Office = require("../../Models/Office");
-const OfficePacket = require("../../Models/OfficePacket");
+const Rough = require("../../../Models/Rough");
+const Office = require("../../../Models/Office");
+const OfficePacket = require("../../../Models/OfficePacket");
 const moment = require("moment");
 const { v4: uuidv4 } = require("uuid");
 // const Unused = require("../../Models/Unused");
@@ -126,6 +126,7 @@ const create = async (req, res) => {
               chapka_diffrence:
                 body.difference ||
                 officeOnePacket.chapka_issueCarat - body.returnCarat,
+              //   `${(100 - (((officeOnePacket.chapka_issueCarat - body.returnCarat) / officeOnePacket.chapka_issueCarat) * 100))}%`,
               chapka_return_date:
                 body.returnDate || moment().format("YYYY-MM-DD"),
               return: true,
@@ -211,7 +212,27 @@ const officePacketView = async (req, res) => {
   const body = req.query["id"];
   const type = req.query["type"];
   const packetDetails = req.query["packetId"];
-  console.log("officeView -> body", body);
+  const officeID = req.query["officeID"]
+  const checkStatus = req.query["checkStatus"]
+  if (officeID && checkStatus) {
+    const packetdetail = await OfficePacket.find({ office_id: officeID });
+    const OfficeRough = await Office.find({ _id: officeID })
+    console.log("officeView -> body a", OfficeRough, officeID, packetDetails, body);
+    let flag = { msg: "All Packet Is Returned ", returned: true }
+    packetdetail.map((data) => {
+      if (data.packet_status.includes("Issue")) {
+        flag = { msg: "All Packet Is Not Returned Yet", returned: false }
+      }
+    })
+
+    res.json({
+      ...flag,
+      copyCarat: OfficeRough[0].copyCarat,
+      message: "Data asasas retrive Successfully",
+    });
+    //res.send()
+    return
+  }
   if (packetDetails) {
     const packetdetail = await OfficePacket.findOne({ _id: packetDetails });
     try {

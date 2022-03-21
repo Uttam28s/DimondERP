@@ -1,18 +1,22 @@
 import React, { Component } from "react";
 import { Form } from "carbon-components-react";
 import { Formik } from "formik";
+import moment from "moment";
+
 import * as Yup from "yup";
 import TextField, {
   DateSelection,
   DropDownSelection,
 } from "../Common/CommonComponents";
+import {connect} from "react-redux";
+import {returnFactorySubPacket, getFactorySubList} from "../../Actions/Factory";
 // import { Tab } from "carbon-components-react";
 // import TabView from "../Common/Tabs";
 
 const validationSchema = Yup.object().shape({
   factoryReturnPacketId: Yup.string().required("*Packet id is required"),
   factoryReturnAssignName: Yup.string().required("*Assigne Name is required"),
-  factoryReturnprocessName: Yup.string().required("*Process Name is required"),
+ // factoryReturnprocessName: Yup.string().required("*Process Name is required"),
   factoryReturncarat: Yup.string().required("*carat is required"),
   factoryReturnpiece: Yup.string().required("*Piece is required"),
   factoryPacketReturnDate: Yup.string().required("*Date is required"),
@@ -24,8 +28,23 @@ class ReturnSubPacket extends Component {
     this.state = {};
   }
 
-  handelSubmit = (e) => {
-    console.log(e);
+  handelSubmit = (values) => {
+    let data = {
+      process_carat_id: values.factoryReturnPacketId.process_id,
+      returnData: {
+        return_carat: values.factoryReturncarat,
+        return_peice: values.factoryReturnpiece,
+        return_date: moment(values.factoryPacketReturnDate, "DD-MM-YYYY").format("YYYY-MM-DD"),
+        return_size: values.factoryReturnSize,
+        return_yeild: values.factoryReturnYeild,
+        return_sarin_weight: values.factoryReturnProcessWeight
+      },
+      factoryId: values.factoryReturnPacketId.id
+
+
+    }
+    this.props.returnFactorySubPacket(data)
+
   };
 
   handelOnChange = (e) => {
@@ -35,6 +54,20 @@ class ReturnSubPacket extends Component {
     });
   };
 
+
+  getFactoryRoughList = (id) => {
+    this.props.getFactoryList({roughId: id}).then((result) => {
+      console.log('result', result)
+      this.setState({
+        subRoughList: result?.data?.map((data) => {
+          return {id: data._id, label: data.factory_total_carat.toString(), remainingCarat: data.copyCarat || data.factory_total_carat.toString()}
+        }) || [],
+      })
+    }).catch((err) => {});
+  }
+  clearState = () => {
+    this.setState({subRoughList: []});
+  }
   render() {
     return (
       <div style={{ marginBottom: "15%" }}>
@@ -48,21 +81,23 @@ class ReturnSubPacket extends Component {
             factoryPacketReturnDate: "",
             factoryReturnSize: "",
             factoryReturnYeild: "",
-            factoryReturnSarinWeight: "",
+            factoryReturnProcessWeight: "",
             factoryReturnWeightlose: "",
+        //    factoryReturnProcessID: ""
           }}
           validationSchema={validationSchema}
           onSubmit={(values, { setSubmitting, resetForm }) => {
             // When button submits form and form is in the process of submitting, submit button is disabled
             setSubmitting(true);
-            console.log("AddRoughModal -> render -> values", values);
+            console.log(" > render -> values", values);
+            this.handelSubmit(values)
             this.props.close();
             // Simulate submitting to database, shows us values submitted, resets form
-            // setTimeout(() => {
-            //   // alert(JSON.stringify(values, null, 2));
-            //   resetForm();
-            //   setSubmitting(false);
-            // }, 500);
+            setTimeout(() => {
+              // alert(JSON.stringify(values, null, 2));
+              resetForm();
+              setSubmitting(false);
+            }, 500);
           }}
         >
           {({
@@ -125,7 +160,89 @@ class ReturnSubPacket extends Component {
                     </div>
                   ) : null}
                 </div>
+
+
+
+
+
                 <div className="bx--col-md-4">
+
+
+                  <DropDownSelection
+                    className={
+                      touched.factoryIssueRoughId && errors.factoryIssueRoughId
+                        ? "error"
+                        : "bx--col dropdown-padding"
+                    }
+                    name="factoryIssueRoughId"
+                    selectedItem={values.factoryIssueRoughId}
+                    value={values.factoryIssueRoughId}
+                    // itemToString={(item) => (item ? item.text : "")}
+                    id="factory-rough-id"
+                    items={this.props.caratList || []}
+                    label="Select Rough id"
+                    light
+                    onChange={(select) => {
+                      setFieldValue("factoryIssueRoughId", select.selectedItem);
+                      setFieldValue("roughName", "")
+                      this.clearState()
+                      console.log('select.selectedItem', select.selectedItem)
+                      select.selectedItem?.id && this.getFactoryRoughList(select.selectedItem.id)
+                    }}
+                    titleText="Rough"
+                    type="default"
+                  />
+
+
+
+                </div>
+
+                <div className="bx--col-md-4">
+                  <DropDownSelection
+                    className={
+                      touched.roughName && errors.roughName
+                        ? "error"
+                        : "bx--col dropdown-padding"
+                    }
+                    name="roughName"
+                    selectedItem={values.roughName}
+                    value={values.roughName}
+                    // itemToString={(item) => (item ? item.text : "")}
+                    id="rough-name-office"
+                    items={this.state.subRoughList || []}
+                    label="Select Rough name"
+                    light
+                    onChange={(select) => {
+                      setFieldValue("roughName", select.selectedItem)
+                      select?.selectedItem?.id && this.props.getFactorySubList({factory_id: select.selectedItem.id}).then((res) => {
+                        console.log("🚀 ~ file: ReturnPacket.js ~ line 201 ~ ReturnSubPacket ~ select?.selectedItem?.id&&this.props.getFactorySubList ~ data", res)
+                        this.setState({
+                          subPacketData: res.data.map((val) => {
+                            if (val.occupy_by !== "false") {
+                              return {
+                                id: val._id.toString(),
+                                label: val.last_carat.toString(),
+                                processName: val.occupy_by,
+                                assign_name: val.all_process.filter((v) => v.process_name == val.occupy_by)[0].assign_name,
+                                process_id: val.all_process.filter((v) => v.process_name == val.occupy_by)[0].process_carat_id,
+                              }
+                            }
+                          }).filter((val) => val !== undefined)
+                        });
+                      })
+
+                    }
+                    }
+                    titleText="Rough Name"
+                    type="default"
+                  />
+                  {touched.roughName && errors.roughName ? (
+                    <div className="error-message">{errors.roughName}</div>
+                  ) : null}
+                </div>
+
+                <div className="bx--col-md-4">
+                  {console.log('val.last_carat.toString()', this.state.subPacketData)}
                   <DropDownSelection
                     className={
                       touched.factoryReturnPacketId &&
@@ -138,21 +255,22 @@ class ReturnSubPacket extends Component {
                     value={values.factoryReturnPacketId}
                     // itemToString={(item) => (item ? item.text : "")}
                     id="factory-retutn-packet-id"
-                    items={[
-                      "Option 1",
-                      "Option 2",
-                      "Option 3",
-                      "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Vitae, aliquam. Blanditiis quia nemo enim voluptatibus quos ducimus porro molestiae nesciunt error cumque quaerat, tempore vero unde eum aperiam eligendi repellendus.",
-                      "Option 5",
-                      "Option 6",
-                    ]}
+                    items={this.state.subPacketData || []}
                     label="Select Packet id"
                     light
                     onChange={(select) =>
+                    {
                       setFieldValue(
                         "factoryReturnPacketId",
-                        select.selectedItem
-                      )
+                        select.selectedItem)
+                      setFieldValue(
+                        "factoryReturnprocessName",
+                        select.selectedItem.processName);
+                      setFieldValue(
+                        "factoryReturnAssignName",
+                        select.selectedItem.assign_name);
+
+                    }
                     }
                     titleText="Packet id"
                     type="default"
@@ -187,12 +305,13 @@ class ReturnSubPacket extends Component {
                     ]}
                     label="Select Assign Name"
                     light
-                    onChange={(select) =>
-                      setFieldValue(
-                        "factoryReturnAssignName",
-                        select.selectedItem
-                      )
-                    }
+                    disabled={true}
+                    // onChange={(select) =>
+                    //   setFieldValue(
+                    //     "factoryReturnAssignName",
+                    //     select.selectedItem
+                    //   )
+                    // }
                     titleText="Assign Name"
                     type="default"
                   />
@@ -207,7 +326,7 @@ class ReturnSubPacket extends Component {
                 <div className="bx--col-md-4" style={{ marginTop: "4.5%" }}>
                   <h5 className="h5-form-label">
                     Total Weight lose :{" "}
-                    <span style={{ color: "#E7301C" }}>00.00(0%)</span>
+                    <span style={{color: "#E7301C"}}>{values.factoryReturncarat && ((values?.factoryReturncarat || values?.factoryReturnPacketId?.label) / values?.factoryReturnPacketId?.label) || 0}%</span>
                   </h5>
                 </div>
               </div>
@@ -228,7 +347,12 @@ class ReturnSubPacket extends Component {
                     labelText="Carat :"
                     placeholder="enter carat here"
                     light={true}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      if (Number(e.target.value) <= Number(values.factoryReturnPacketId?.label)) {
+                        handleChange(e)
+
+                      }
+                    }}
                     onBlur={handleBlur}
                     // onClick={function noRefCheck() {}}
                     required
@@ -255,7 +379,13 @@ class ReturnSubPacket extends Component {
                     invalidText="Please fill"
                     labelText="Piece :"
                     light={true}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      handleChange(e)
+                      let size = (e.target.value || 0) / (values.factoryReturncarat || 0)
+                      let yeild = (size || 0) / (values.factoryReturncarat || 0)
+                      setFieldValue("factoryReturnSize", size)
+                      setFieldValue("factoryReturnYeild", yeild)
+                    }}
                     onBlur={handleBlur}
                     // onClick={function noRefCheck() {}}
                     required
@@ -270,6 +400,7 @@ class ReturnSubPacket extends Component {
               </div>
               <div className="bx--row top-margin-model-input">
                 <div className="bx--col-md-4">
+                  {console.log('values.factoryReturnPacketId', values.factoryReturnPacketId)}
                   <DropDownSelection
                     className={
                       touched.factoryReturnprocessName &&
@@ -283,22 +414,16 @@ class ReturnSubPacket extends Component {
                     direction="top"
                     // itemToString={(item) => (item ? item.text : "")}
                     id="factory-return-process-name"
-                    items={[
-                      "Option 1",
-                      "Option 2",
-                      "Option 3",
-                      "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Vitae, aliquam. Blanditiis quia nemo enim voluptatibus quos ducimus porro molestiae nesciunt error cumque quaerat, tempore vero unde eum aperiam eligendi repellendus.",
-                      "Option 5",
-                      "Option 6",
-                    ]}
+                    items={[values?.factoryReturnPacketId?.processName || ""] || []}
+                    disabled={true}
                     label="Select Process name"
                     light
-                    onChange={(select) =>
-                      setFieldValue(
-                        "factoryReturnprocessName",
-                        select.selectedItem
-                      )
-                    }
+                    // onChange={(select) =>
+                    //   setFieldValue(
+                    //     "factoryReturnprocessName",
+                    //     select.selectedItem
+                    //   )
+                    // }
                     titleText="Process Name"
                     type="default"
                   />
@@ -319,11 +444,12 @@ class ReturnSubPacket extends Component {
                     name="factoryReturnSize"
                     value={values.factoryReturnSize}
                     id="factoryReturnSize"
-                    placeholder="enter size here"
+                    placeholder=" size "
                     // invalid={false}
                     invalidText="Please fill"
                     labelText="Size :"
                     light={true}
+
                     onChange={handleChange}
                     onBlur={handleBlur}
                     // onClick={function noRefCheck() {}}
@@ -339,32 +465,23 @@ class ReturnSubPacket extends Component {
               </div>
               <div className="bx--row top-margin-model-input">
                 <div className="bx--col-md-4">
-                  <DropDownSelection
+                  <TextField
                     className={
                       touched.factoryReturnYeild && errors.factoryReturnYeild
                         ? "error"
                         : "bx--col dropdown-padding"
                     }
                     name="factoryReturnYeild"
-                    selectedItem={values.factoryReturnYeild}
+                    placeholder=" Yeild "
+
                     value={values.factoryReturnYeild}
-                    direction="top"
-                    // itemToString={(item) => (item ? item.text : "")}
+                    invalidText="Please fill"
                     id="factoryReturnYeild"
-                    items={[
-                      "Option 1",
-                      "Option 2",
-                      "Option 3",
-                      "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Vitae, aliquam. Blanditiis quia nemo enim voluptatibus quos ducimus porro molestiae nesciunt error cumque quaerat, tempore vero unde eum aperiam eligendi repellendus.",
-                      "Option 5",
-                      "Option 6",
-                    ]}
                     label="yeild"
                     light
-                    onChange={(select) =>
-                      setFieldValue("factoryReturnYeild", select.selectedItem)
-                    }
-                    titleText="Yeild :"
+                    disabled={true}
+
+                    labelText="Yeild :"
                     type="default"
                   />
                   {touched.factoryReturnYeild && errors.factoryReturnYeild ? (
@@ -374,20 +491,22 @@ class ReturnSubPacket extends Component {
                   ) : null}
                 </div>
                 <div className="bx--col-md-4">
+                  {console.log("🚀 ~ file: ReturnPacket.js ~ line 483 ~ ReturnSubPacket ~ render ~ values.factoryReturnprocessName", values)}
                   <TextField
                     className={
-                      touched.factoryReturnSarinWeight &&
-                      errors.factoryReturnSarinWeight
+                      touched.factoryReturnProcessWeight &&
+                        errors.factoryReturnProcessWeight
                         ? "error"
                         : "bx--col"
                     }
-                    name="factoryReturnSarinWeight"
-                    value={values.factoryReturnSarinWeight}
-                    id="factoryReturnSarinWeight"
-                    placeholder="enter sarin weight here"
+                    name="factoryReturnProcessWeight"
+                    value={values.factoryReturnProcessWeight}
+                    id="factoryReturnProcessWeight"
+                    placeholder={`${values.factoryReturnprocessName} weight`}
                     // invalid={false}
                     invalidText="Please fill"
-                    labelText="Sarin Weight :"
+                    labelText={`${values.factoryReturnprocessName} Weight:`}
+                    disabled={true}
                     light={true}
                     onChange={handleChange}
                     onBlur={handleBlur}
@@ -395,10 +514,10 @@ class ReturnSubPacket extends Component {
                     required
                     type="number"
                   />
-                  {touched.factoryReturnSarinWeight &&
-                  errors.factoryReturnSarinWeight ? (
+                  {touched.factoryReturnProcessWeight &&
+                    errors.factoryReturnProcessWeight ? (
                     <div className="error-message">
-                      {errors.factoryReturnSarinWeight}
+                        {errors.factoryReturnProcessWeight}
                     </div>
                   ) : null}
                 </div>
@@ -429,4 +548,4 @@ class ReturnSubPacket extends Component {
   }
 }
 
-export default ReturnSubPacket;
+export default connect(null, {returnFactorySubPacket, getFactorySubList})(ReturnSubPacket);

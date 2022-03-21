@@ -14,6 +14,7 @@ const TextField = (props) => {
       value={props.value}
       name={props.name}
       id={props.id}
+      disabled={props.disabled || false}
       // invalid={false}
       // invalidText="Please fill"
       labelText={props.labelText}
@@ -75,6 +76,7 @@ export const DropDownSelection = (props) => {
       onChange={props.onChange}
       titleText={props.titleText}
       type="default"
+      disabled={props.disabled}
     />
     // <Dropdown
     //   ariaLabel="Dropdown"

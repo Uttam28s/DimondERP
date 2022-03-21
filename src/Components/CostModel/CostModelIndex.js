@@ -21,7 +21,7 @@ class CostModelIndex extends Component {
   // };
 
   closeModal = () => {
-    console.log("log in a close modal");
+    //console.log("log in a close modal");
     this.setState({
       model: false,
     });

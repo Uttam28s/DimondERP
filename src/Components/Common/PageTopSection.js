@@ -243,12 +243,13 @@ class PageTopSection extends Component {
                       <>
                         <TableRow {...getRowProps({ row })}>
                           {row.cells.map(
-                            (cell) => (
+                            (cell, i) => (
                               <TableCells
                                 handelOnEditClick={this.handelOnEditClick}
                                 handelOnDeleteClick={this.handelOnDeleteClick}
                                 handelViewButton={this.handelViewButton}
                                 header={cell}
+                                key={`cell${i}`}
                               />
                             )
                             // cell.info.header === "btn" ? (
@@ -297,10 +298,10 @@ class PageTopSection extends Component {
           )}
         />
         <div className="pagination-wrapper">
-          {console.log(
+          {/* {console.log(
             "this is  a log for a apagination ---->",
-            this.state.currentPage
-          )}
+            this.state.currentPage, this.props.totalData?.currentPage, this.props.totalData?.totalCount
+          )} */}
 
           <Pagination
             backwardText="Previous page"

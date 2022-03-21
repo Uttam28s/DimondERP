@@ -6,6 +6,7 @@ const controller = require("../Controllers");
 
 router.get("/getList", controller.commonController.getList);
 router.get("/getOfficeSrNo", controller.commonController.getOfficeSrno);
+router.get("/unused", controller.commonController.unusedList);
 // router.post('/register-verify', controller.AuthController.verifyRegister);
 // router.post('/login', controller.AuthController.login);
 // router.post('/social-login', controller.AuthController.socialLogin);

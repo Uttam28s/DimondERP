@@ -27,7 +27,7 @@ class SellerIndex extends Component {
   }
 
   closeModal = () => {
-    console.log("log in a close modal");
+    // console.log("log in a close modal");
     this.setState({
       model: false,
     });
@@ -107,7 +107,7 @@ class SellerIndex extends Component {
                         labelText="Connection Date"
                         className={
                           touched.sellerConnectionDate &&
-                          errors.sellerConnectionDate
+                            errors.sellerConnectionDate
                             ? "error"
                             : "bx--col"
                         }
@@ -117,7 +117,7 @@ class SellerIndex extends Component {
                         onBlur={handleBlur}
                       />
                       {touched.sellerConnectionDate &&
-                      errors.sellerConnectionDate ? (
+                        errors.sellerConnectionDate ? (
                         <div className="error-message">
                           {errors.sellerConnectionDate}
                         </div>

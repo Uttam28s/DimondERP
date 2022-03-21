@@ -1,19 +1,21 @@
 // import { rough } from "../js/actions";
-import { fetchUrl } from "../js/fetchUrl";
-import { Rough } from "../js/apiList";
-import { rough } from "../js/actions";
+import {fetchUrl} from "../js/fetchUrl";
+import {Rough} from "../js/apiList";
+import {rough} from "../js/actions";
 
 export const getRough = (id) => (dispatch) =>
   new Promise((resolve, reject) => {
-    // console.log("TCL: data", id);
+    console.log("TCL: data", id);
     fetchUrl(Rough.getRough.method, Rough.getRough.url, id)
       .then((res) => {
-        // console.log("res", res);
-        dispatch({ type: rough.roughGet, payload: res.docs });
+        console.log("resaaaaaaaa", res);
+        dispatch({type: rough.roughGet, payload: res.data});
         // dispatch({ type: listing.chequeTotal, payload: res });
+        console.log('res11111111111', res)
         resolve(res);
       })
       .catch((e) => {
+
         reject(e);
       });
   });
@@ -23,8 +25,7 @@ export const getRoughPrefrence = (id) => (dispatch) =>
     // console.log("TCL: data", id);
     fetchUrl(Rough.getRoughPrefrence.method, Rough.getRoughPrefrence.url, id)
       .then((res) => {
-        // console.log("res", res);
-        dispatch({ type: rough.roughPreference, payload: res.docs });
+        dispatch({type: rough.roughPreference, payload: res.commonGet});
         // dispatch({ type: listing.chequeTotal, payload: res });
         resolve(res);
       })
@@ -38,8 +39,8 @@ export const getSortingData = (id) => (dispatch) =>
     // console.log("TCL: data", id);
     fetchUrl(Rough.getSortingData.method, Rough.getSortingData.url, id)
       .then((res) => {
-        // console.log("res", res);
-        dispatch({ type: rough.sortingData, payload: res.docs });
+        console.log("resaaa11a", res);
+        dispatch({type: rough.sortingData, payload: res.docs});
         // dispatch({ type: listing.chequeTotal, payload: res });
         resolve(res);
       })

@@ -129,18 +129,18 @@ const Sidebar = (props) => {
               />
               <HeaderName prefix="Diamond ERP">[Platform]</HeaderName>
               <HeaderGlobalBar>
-                <HeaderGlobalAction aria-label="Search" onClick={() => {}}>
+                <HeaderGlobalAction aria-label="Search" onClick={() => { }}>
                   <Search20 />
                 </HeaderGlobalAction>
                 <HeaderGlobalAction
                   aria-label="Notifications"
-                  onClick={() => {}}
+                  onClick={() => { }}
                 >
                   <Notification20 />
                 </HeaderGlobalAction>
                 <HeaderGlobalAction
                   aria-label="App Switcher"
-                  onClick={() => {}}
+                  onClick={() => { }}
                 >
                   <AppSwitcher20 />
                 </HeaderGlobalAction>
@@ -176,50 +176,50 @@ const Sidebar = (props) => {
             <SideNav aria-label="Side navigation" expanded={isSideNavExpanded}>
               <SideNavItems>
                 <div>
-                  {NevigationArray.map((value) =>
+                  {NevigationArray.map((value, i) =>
                     value.dropdown ? (
                       <>
                         <div
                           className="sidebar_div_wrapper"
                           onClick={() => onCollapsClick(value.name)}
+                          key={i}
                         >
                           {value.iconName}
                           <p>{value.name}</p>
                           <ChevronDown32
-                            className={`collaps-arrow ${
-                              value.collaps ? "collaps-up-arrow" : ""
-                            }`}
+                            className={`collaps-arrow ${value.collaps ? "collaps-up-arrow" : ""
+                              }`}
+                            key={i}
                           />
                         </div>
                         {value.collaps === true
                           ? value.innerNevigation.map((data) => (
-                              <Link
-                                to={data.url + `/${value.name}`}
-                                // onClick={() => onLinkClick(value.name)}
-                              >
-                                <div
-                                  className={`sidebar_div_wrapper sub-menu-side-bar ${
-                                    props.match.path === data.url
-                                      ? "activate-menu"
-                                      : ""
+                            <Link
+                              to={data.url + `/${value.name}`}
+                              key={`${i}`}
+                            // onClick={() => onLinkClick(value.name)}
+                            >
+                              <div
+                                className={`sidebar_div_wrapper sub-menu-side-bar ${props.match.path === data.url
+                                  ? "activate-menu"
+                                  : ""
                                   }`}
-                                >
-                                  {/* <HeatMap32 /> */}
-                                  {data.iconName}
-                                  <p>{data.name}</p>
-                                </div>
-                              </Link>
-                            ))
+                              >
+                                {/* <HeatMap32 /> */}
+                                {data.iconName}
+                                <p>{data.name}</p>
+                              </div>
+                            </Link>
+                          ))
                           : ""}
                       </>
                     ) : (
-                      <Link to={value.url}>
+                      <Link to={value.url} key={`${value}-${i}`}>
                         <div
-                          className={`sidebar_div_wrapper ${
-                            props.match.path === value.url
-                              ? "activate-menu"
-                              : ""
-                          }`}
+                          className={`sidebar_div_wrapper ${props.match.path === value.url
+                            ? "activate-menu"
+                            : ""
+                            }`}
                         >
                           {value.iconName}
                           <p>{value.name}</p>

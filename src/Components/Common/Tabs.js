@@ -21,9 +21,10 @@ class TabView extends Component {
           {this.props.tabContent.map((value) => (
             <Tab
               // href="#"
+              key={value.id}
               id={value.id}
               label={value.lebal}
-              // onClick={function noRefCheck(){}}
+            // onClick={function noRefCheck(){}}
             >
               {value.tabContent}
             </Tab>

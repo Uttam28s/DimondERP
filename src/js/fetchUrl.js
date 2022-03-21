@@ -22,6 +22,7 @@ const ACTION_HANDLERS = {
     return axios.get(baseUrl + queryUrl, {
       // withCredentials: true,
       cancelToken: new axios.CancelToken((c) => {
+        console.log('{ url, c });', url, c)
         cancel.push({ url, c });
       }),
     });
@@ -105,8 +106,8 @@ export const fetchUrl = (
   const handler = ACTION_HANDLERS[type.toUpperCase()];
   return !fetchBaseResponse
     ? handler(url, data)
-        .then((res) => Promise.resolve(res.data, res))
-        .catch((error) => showErrorAsToast(error, type))
+      .then((res) => Promise.resolve(res.data, res))
+      .catch((error) => showErrorAsToast(error, type))
     : handler(url, data).catch((error) => showErrorAsToast(error, type));
 };
 

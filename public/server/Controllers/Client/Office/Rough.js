@@ -1,6 +1,6 @@
-const Rough = require("../../models/Rough");
-const Sorting = require("../../Models/Sorting");
-const Unused = require("../../Models/Unused");
+const Rough = require("../../../Models/Rough");
+const Sorting = require("../../../Models/Sorting");
+const Unused = require("../../../Models/Unused");
 const { v4: uuidv4 } = require("uuid");
 
 const create = async (req, res) => {
@@ -33,7 +33,6 @@ const create = async (req, res) => {
 
 const viewList = async (req, res) => {
   const body = req.query["id"];
-  // console.log("viewLissat -> body", body);
   if (body) {
     const data = await Rough.find({ _id: body });
     // console.log("viewList -> data", data);
@@ -48,10 +47,13 @@ const viewList = async (req, res) => {
       res.json({ message: error });
     }
   } else {
+
     const data = await Rough.find()
       .skip(parseInt(req.query["skip"]))
       .limit(parseInt(req.query["limit"]))
       .sort({ createdAt: -1 });
+    console.log("viewLissat -> body", data.length, req.query);
+
     const totalData = await Rough.find();
     try {
       // console.log("createRough -> body", body, "postsaved", postSaved);

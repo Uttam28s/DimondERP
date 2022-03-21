@@ -1,6 +1,6 @@
-import Test from "../Reducer/Home";
+import reducerState from "../Reducer/Home";
 // import { createLogger } from "redux-logger";
-import { createStore, combineReducers, compose, applyMiddleware } from "redux";
+import {createStore, combineReducers, compose, applyMiddleware} from "redux";
 import thunk from "redux-thunk";
 
 // Logger for watch actions when process is in development environment only
@@ -10,7 +10,7 @@ import thunk from "redux-thunk";
 
 // Created globale store
 export default createStore(
-  combineReducers({ Test }),
+  combineReducers({reducerState}),
   {}, // Set Default state or initial state if needed else set blank as it is.
   compose(
     applyMiddleware(thunk) // added middleware which need through out process or action.

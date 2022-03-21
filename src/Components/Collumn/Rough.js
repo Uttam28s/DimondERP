@@ -61,3 +61,89 @@ export const RoughColumn = [
     size: "150px",
   },
 ];
+
+
+
+
+export const OfficeSubRoughColumn = [
+  {
+    header: "PacketId",
+    key: "packetNo",
+    // size: "200px",
+  },
+  {
+    header: "Main Rough",
+    key: "carat"
+  },
+  {
+    header: "Assigned Name",
+    key: "office_assigne_name",
+    // size: "300px",
+  },
+  {
+    header: "Assigned Caret",
+    key: "office_total_carat",
+    // size: "50px",
+  },
+  {
+    header: "Assign Date",
+    key: "assign_date",
+  },
+  {
+    header: "Return Date",
+    key: "return_date"
+  },
+  {
+    header: "Makable Carat",
+    key: "mackable",
+    // size: "50px",
+  },
+  {
+    header: "Sorting Carat",
+    key: "office_return_sorting_carat",
+    // size: "155px",
+  }
+
+]
+
+
+const FactorySubRough = [
+  {
+    header: "PacketId",
+    key: "packetNo",
+    // size: "200px",
+  },
+  {
+    header: "Main Rough",
+    key: "carat"
+  },
+  {
+    header: "Assigned Name",
+    key: "office_assigne_name",
+    // size: "300px",
+  },
+  {
+    header: "Assigned Caret",
+    key: "office_total_carat",
+    // size: "50px",
+  },
+  {
+    header: "Assign Date",
+    key: "assign_date",
+  },
+  {
+    header: "Return Date",
+    key: "return_date"
+  }
+  // {
+  //     header: "Makable Carat",
+  //     key: "mackable",
+  //     // size: "50px",
+  // },
+  // {
+  //     header: "Sorting Carat",
+  //     key: "office_return_sorting_carat",
+  //     // size: "155px",
+  // }
+
+]

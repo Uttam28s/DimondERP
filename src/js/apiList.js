@@ -1,4 +1,4 @@
-const apiList = {
+export const apiList = {
   income: { method: "POST", url: "income/add" },
 };
 
@@ -17,6 +17,7 @@ export const Office = {
   getOfficeSr: { method: "GET", url: "/common/getOfficeSrNo" },
   createOfficePacket: { method: "POST", url: "/office/create/packet" },
   returnOfficePacket: { method: "POST", url: "/office/return" },
+  unusedList: {method: "GET", url: "/common/unused"}
   // getRough: { method: "GET", url: "/rough/view" },
   // getRoughPrefrence: { method: "GET", url: "/common/getList" },
   // getSortingData: { method: "GET", url: "/rough/sorting/view" },
@@ -25,4 +26,13 @@ export const Office = {
 
 // export const addQueryID = (url, id) => `${url}/${id}`;
 
-export default apiList;
+export const Factory = {
+  assignFactory: {method: "POST", url: "/factory/create"},
+  getFactoryList: {method: "GET", url: "/factory/view"},
+  getSubFactory: {method: "GET", url: "/factory/subpacket/view"},
+  getFactorySr: {method: "GET", url: "/common/getfactorySrNo"},
+  createFactoryPacket: {method: "POST", url: "/factory/create/packet"},
+  returnFactoryPacket: {method: "POST", url: "/factory/return"},
+  returnFactorySubPacket: {method: "POST", url: "/factory/subpacket/return"},
+  unusedList: {method: "GET", url: "/common/unused"}
+}
