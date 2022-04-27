@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {Form, Toggle} from "carbon-components-react";
+import {Form} from "carbon-components-react";
 import {Formik} from "formik";
 import * as Yup from "yup";
 import TextField, {
@@ -10,6 +10,7 @@ import {connect} from "react-redux";
 import {getRoughPrefrence} from "../../Actions/Rough";
 import {getpacketSrNo} from "../../Actions/Office";
 import moment from "moment";
+import {toFixed4} from "../Common/helperFun";
 // import { Tab } from "carbon-components-react";
 // import TabView from "../Common/Tabs";
 
@@ -39,19 +40,25 @@ class CreateOfficePacket extends Component {
   }
 
   handelSubmit = (value) => {
+    const {preSelectedData} = this.props
+
     const data = {
       office_id: value.officeIssueOfficeList.id,
       packet_status: value.officeIssueprocessName,
       return: false,
       manager_name: value.officeIssueassigneName,
-      issueCarat: value.officeIssuecarat,
+      issueCarat: toFixed4(value.officeIssuecarat) - (preSelectedData.issueCarat || 0),
       assign_date: moment(value.officePaketcreateDate, "DD-MM-YYYY").format(
         "YYYY-MM-DD"
       ),
     };
     console.log("CreateOfficePacket -> handelSubmit -> data", data);
     this.props.close();
+    if (preSelectedData) {
+      this.props.editOfficeSubPacket()
+    } else {
     this.props.handleCreateSubpacket(data);
+    }
   };
 
   handelChangeRough = (data) => {

@@ -6,7 +6,7 @@ import TextField, {
   DateSelection,
   DropDownSelection,
 } from "../Common/CommonComponents";
-import {getFactoryList, getFactorySubList} from "../../Actions/Factory";
+import {getFactoryList, getFactorySubList, createFactoryPacket} from "../../Actions/Factory";
 import {
   connect
 } from "react-redux";
@@ -27,12 +27,10 @@ const validationSchema = Yup.object().shape({
 class AssignSubPacket extends Component {
   constructor(props) {
     super(props);
-
     this.state = {};
   }
 
-  handelSubmit = (values) => {
-    console.log("🚀 ~ file: AssignFactoryPacket.js ~ line 33 ~ AssignSubPacket ~ values", values)
+  handelSubmit = async (values) => {
     let data = {
       factory_id: values.factorySubPacketAssignRoughId.id,
       process_name: values.factoryAssignprocessName,
@@ -47,18 +45,12 @@ class AssignSubPacket extends Component {
       assign_date: moment(values.factoryPaketcreateDate, "DD-MM-YYYY").format("YYYY-MM-DD"),
       status: "update"
     }
-    this.props.createFactoryPacket(data).then((result) => {
-
+    await this.props.createFactoryPacket(data).then((result) => {
     }).catch((err) => {
-
     });
-
-    console.log("🚀 ~ file: AssignFactoryPacket.js ~ line 33 ~ AssignSubPacket ~ values", data)
-
   };
 
   handelOnChange = (e) => {
-    console.log("AddRoughModal -> handelOnChange -> e", e.target);
     this.setState({
       [e.target.name]: e.target.value,
     });
@@ -98,15 +90,14 @@ class AssignSubPacket extends Component {
           onSubmit={(values, { setSubmitting, resetForm }) => {
             // When button submits form and form is in the process of submitting, submit button is disabled
             setSubmitting(true);
-            console.log("AddRoughModal -> render -> values", values);
             this.handelSubmit(values)
             this.props.close();
             // Simulate submitting to database, shows us values submitted, resets form
-            // setTimeout(() => {
-            //   // alert(JSON.stringify(values, null, 2));
-            //   resetForm();
-            //   setSubmitting(false);
-            // }, 500);
+            setTimeout(() => {
+              // alert(JSON.stringify(values, null, 2));
+              resetForm();
+              setSubmitting(false);
+            }, 500);
           }}
         >
           {({
@@ -140,29 +131,25 @@ class AssignSubPacket extends Component {
                   <DateSelection
                     dateFormat="d/m/Y"
                     datePickerType="single"
-                    onChange={(date) => {
-                      const basicDate = new Date(date);
-                      const formateDate =
-                        basicDate.getDate() +
-                        "/" +
-                        (basicDate.getMonth() + 1) +
-                        "/" +
-                        basicDate.getFullYear();
-                      setFieldValue("factoryPaketcreateDate", formateDate);
-                    }}
                     id="factory-packet-Assign-date"
                     placeholder="dd/mm/yyyy"
                     labelText="Create packet Date"
+                    dateid="factory-assign-packet-id"
+                    name="factoryPaketcreateDate"
+                    value={values.factoryPaketcreateDate}
+                    onBlur={handleBlur}
+                    onChange={(date) => {
+                      const basicDate = new Date(date);
+                      const formateDate = basicDate.getDate() + "/" +
+                        (basicDate.getMonth() + 1) + "/" + basicDate.getFullYear();
+                      setFieldValue("factoryPaketcreateDate", formateDate);
+                    }}
                     className={
                       touched.factoryPaketcreateDate &&
                         errors.factoryPaketcreateDate
                         ? "error"
                         : "bx--col"
                     }
-                    dateid="factory-assign-packet-id"
-                    name="factoryPaketcreateDate"
-                    value={values.factoryPaketcreateDate}
-                    onBlur={handleBlur}
                   />
                   {touched.factoryPaketcreateDate &&
                     errors.factoryPaketcreateDate ? (
@@ -173,27 +160,26 @@ class AssignSubPacket extends Component {
                 </div>
                 <div className="bx--col-md-4">
                   <DropDownSelection
+                    name="factoryAssignRoughId"
+                    selectedItem={values.factoryAssignRoughId}
+                    value={values.factoryAssignRoughId}
+                    titleText="Rough Id"
+                    type="default"
+                    id="factory-assign-rough-id"
+                    items={this.props.caratList}
+                    label="Select Rough id"
+                    light
+                    // itemToString={(item) => (item ? item.text : "")}
+                    onChange={(select) => {
+                      setFieldValue("factoryAssignRoughId", select.selectedItem);
+                      select.selectedItem?.id && this.getFactoryRoughList(select.selectedItem.id)
+                    }}
                     className={
                       touched.factoryAssignRoughId &&
                         errors.factoryAssignRoughId
                         ? "error"
                         : "bx--col dropdown-padding"
                     }
-                    name="factoryAssignRoughId"
-                    selectedItem={values.factoryAssignRoughId}
-                    value={values.factoryAssignRoughId}
-                    // itemToString={(item) => (item ? item.text : "")}
-                    id="factory-assign-rough-id"
-                    items={this.props.caratList}
-                    label="Select Rough id"
-                    light
-                    onChange={(select) => {
-                      setFieldValue("factoryAssignRoughId", select.selectedItem);
-                      select.selectedItem?.id && this.getFactoryRoughList(select.selectedItem.id)
-                    }
-                    }
-                    titleText="Rough Id"
-                    type="default"
                   />
                   {touched.factoryAssignRoughId &&
                     errors.factoryAssignRoughId ? (
@@ -204,12 +190,6 @@ class AssignSubPacket extends Component {
                 </div>
                 <div className="bx--col-md-4">
                   <DropDownSelection
-                    className={
-                      touched.factoryAssignPacketId &&
-                        errors.factoryAssignPacketId
-                        ? "error"
-                        : "bx--col dropdown-padding"
-                    }
                     name="factoryAssignPacketId"
                     selectedItem={values.factoryAssignPacketId}
                     value={values.factoryAssignPacketId}
@@ -218,17 +198,14 @@ class AssignSubPacket extends Component {
                     items={this.state.subRoughList || []}
                     label="Select Packet id"
                     light
+                    titleText="Packet id"
+                    type="default"
                     onChange={(select) =>
                     {
-                      console.log("🚀 ~ file: AssignFactoryPacket.js ~ line 197 ~ AssignSubPacket ~ render ~ select", select?.selectedItem?.id)
-
-
                       setFieldValue(
                         "factoryAssignPacketId",
                         select.selectedItem
                       )
-
-
                       select?.selectedItem?.id && this.props.getFactorySubList({factory_id: select.selectedItem.id}).then((res) => {
                         this.setState({
                           subPacketData: res.data.map((val) => {
@@ -246,8 +223,12 @@ class AssignSubPacket extends Component {
                         });
                       })
                     }}
-                    titleText="Packet id"
-                    type="default"
+                    className={
+                      touched.factoryAssignPacketId &&
+                        errors.factoryAssignPacketId
+                        ? "error"
+                        : "bx--col dropdown-padding"
+                    }
                   />
                   {touched.factoryAssignPacketId &&
                     errors.factoryAssignPacketId ? (
@@ -279,7 +260,8 @@ class AssignSubPacket extends Component {
                     light
                     onChange={(select) => {
                       setFieldValue("factorySubPacketAssignRoughId", select.selectedItem);
-                      //  select.selectedItem?.id && this.getFactoryRoughList(select.selectedItem.id)
+                      setFieldValue("factoryAssignCarat", select.selectedItem?.label)
+
                     }
                     }
                     titleText="Sub Packet"
@@ -385,12 +367,14 @@ class AssignSubPacket extends Component {
                     // invalid={false}
                     invalidText="Please fill"
                     labelText="Carat :"
+                    disabled={true}
                     light={true}
-                    onChange={(e) => {
-                      if (Number(e.target.value) <= values.factorySubPacketAssignRoughId.label) {
-                        handleChange(e)
-                      }
-                    }}
+                    // onChange={(e) => {
+                    //   if (Number(e.target.value) <= values.factorySubPacketAssignRoughId.label) {
+                    //     handleChange(e)
+                    //   }
+                    // }}
+                    disabled={true}
                     onBlur={handleBlur}
                     // onClick={function noRefCheck() {}}
                     required
@@ -560,4 +544,4 @@ class AssignSubPacket extends Component {
   }
 }
 
-export default connect(null, {getFactoryList, getFactorySubList})(AssignSubPacket);
+export default connect(null, {getFactoryList, getFactorySubList, createFactoryPacket})(AssignSubPacket);

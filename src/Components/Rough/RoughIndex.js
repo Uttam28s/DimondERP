@@ -20,6 +20,7 @@ import {assignOffice, getUnusedList} from "../../Actions/Office";
 import {assignFactory} from "../../Actions/Factory";
 import OfficeSubRough from "./SubRough/OfficeSubRough";
 import FactorySubRough from "./SubRough/FactorySubRough";
+import {removeMainRough} from "../../Actions/Delete"
 
 class RoughIndex extends Component {
   constructor(props) {
@@ -46,7 +47,8 @@ class RoughIndex extends Component {
       sortingData: [],
       singleOfiiceData: "",
       subRoughModel: false,
-      subOfficeAndFactoryData: []
+      subOfficeAndFactoryData: [],
+      editArray: []
     };
   }
 
@@ -57,35 +59,44 @@ class RoughIndex extends Component {
     //   skip: this.state.skip,
     //   limit: this.state.limit,
     // };
-    var roughList;
-    if (this.props.roughList.length) {roughList = this.props.roughList}
-    else {
-      await this.props.getRough(this.state.pageinationRef).then((res) => {roughList = res.data})
-    }
+    // var roughList;
+    // if (this.props.roughList.length) {roughList = this.props.roughList}
+    // else {
+    this.getListOfRough()
+  };
+
+
+
+
+  getListOfRough = async () => {
+    await this.props.getRough(this.state.pageinationRef).then((res) => {
     this.setState({
-      tableData: roughList,
-          pageinationRef: {
-            ...this.state.pageinationRef,
-            totalCount: roughList.length,
-          },
+      tableData: res.data,
+      pageinationRef: {
+        ...this.state.pageinationRef,
+        totalCount: res.count
+      },
+    }) 
     })
+
     var caratList
     if (this.props.roughPreference.length) {caratList = this.props.roughPreference.caratList}
     else {
       await this.props.getRoughPrefrence().then((res) => {caratList = res.commonGet.caratList})
     }
     console.log("🚀 ~ file: RoughIndex.js ~ line 73 ~ RoughIndex ~ componentDidMount= ~ caratList", this.props.roughPreference, caratList)
-      this.setState({
-        caratList: caratList,
-      });
-  };
+    this.setState({
+      caratList: caratList,
+    });
+
+  }
 
   handelModelTabChange = (e) => {
-    const value = {
-      ...this.state.subPacketpageinationRef,
-      // id: this.state.officeSubId._id,
-      type: e === 0 ? "chapka" : "sawing",
-    };
+    // const value = {
+    //   ...this.state.subPacketpageinationRef,
+    //   // id: this.state.officeSubId._id,
+    //   type: e === 0 ? "chapka" : "sawing",
+    // };
     //  console.log("OfficeIndex -> handelModelTabChange -> value", value, e);
     // this.props
     //   .getOfficeSubList(value)
@@ -114,7 +125,10 @@ class RoughIndex extends Component {
     //console.log("log in a close modal");
     this.setState({
       model: false,
-      subRoughModel: false
+      subRoughModel: false,
+      preSelectedData: "",
+      editArray: []
+
     });
   };
 
@@ -230,16 +244,57 @@ class RoughIndex extends Component {
       .catch((e) => console.log(e));
   }
 
+
+
+  edit = (data) => {
+    console.log("🚀 ~ file: RoughIndex.js ~ line 243 ~ RoughIndex ~ data", data)
+
+
+    let editArray = data && data.brokername ? ["Add Rough", "Sorting Rough"] : ["Assign Rough"]
+
+    this.setState({
+      subRoughModel: false,
+      model: true,
+      preSelectedData: data,
+      editArray: editArray
+    });
+
+
+  }
+
+  remove = (data) => {
+    console.log("🚀 ~ file: RoughIndex.js ~ line 248 ~ RoughIndex ~ data", data)
+    this.props.removeMainRough({id: data._id}).then((result) => {
+      console.log("🚀 ~ file: RoughIndex.js ~ line 245 ~ RoughIndex ~ removeMainRough ~ result", result)
+      this.getListOfRough()
+
+    }).catch((err) => {
+
+    });
+    //this.setState({open: true});
+  }
+
+
+  closeBox = (e) => {
+    if (e) {
+
+    }
+    this.setState({open: false});
+  }
+
+
+
   render() {
-    const {subRoughModel} = this.state;
-    const tabArray = [
+    const {subRoughModel, editArray} = this.state;
+    const mainRoughTabArray = [
       {
         id: "1",
         lebal: "Add Rough",
-        tabContent: (this.state.model &&
+        tabContent: (this.state.model && 
           <AddRoughModal
             close={this.closeModal}
             handelAddRough={this.handelAddRough}
+          preSelectedData={this.state.preSelectedData}
           />
         ),
       },
@@ -271,6 +326,8 @@ class RoughIndex extends Component {
             getOfficeSubList={
               this.props.getOfficeSubList
             }
+            preSelectedData={this.state.preSelectedData}
+
           />
         ),
       },
@@ -287,6 +344,8 @@ class RoughIndex extends Component {
             column={OfficeSubRoughColumn}
             pageSize={this.onPageChange}
             totalData={this.state.subPacketpageinationRef}
+            edit={this.edit}
+            remove={this.remove}
           />)
       },
       {
@@ -299,13 +358,14 @@ class RoughIndex extends Component {
             column={OfficeSubRoughColumn}
             pageSize={this.onPageChange}
             totalData={this.state.subPacketpageinationRef}
+            edit={this.edit}
+            remove={this.remove}
           />)
       }
     ]
 
 
 
-    {console.log("log in render1", this.state)}
 
 
     return (
@@ -318,15 +378,21 @@ class RoughIndex extends Component {
         column={RoughColumn}
         pageSize={this.onPageChange}
         totalData={this.state.pageinationRef}
+        edit={this.edit}
+        remove={this.remove}
       >
         <Model
           modalName="Rough Details"
           open={this.state.model}
           close={this.closeModal}
           handelModelTabChange={this.handelModelTabChange}
-
-          tabContent={subRoughModel ? subRoughTab : tabArray}
+          tabContent={editArray.length ?
+            mainRoughTabArray.filter((data) => editArray.includes(data.lebal)) :
+            (subRoughModel ? subRoughTab : mainRoughTabArray)
+          }
         />
+        {console.log('{this.state.open', this.state.open)}
+
       </Sidebar>
     );
   }
@@ -341,6 +407,7 @@ const mapStateToProps = (state) => {
 };
 
 export default connect(mapStateToProps, {
+  removeMainRough,
   getRough,
   addRough,
   getRoughPrefrence,

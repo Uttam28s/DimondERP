@@ -161,6 +161,9 @@ const Sidebar = (props) => {
                           handelAddData={props.addButtonFunction}
                           rowData={props.rowData}
                           column={props.column}
+                            colour={props.colour}
+                            edit={props.edit}
+                            remove={props.remove}
                           tabview={props.tabview}
                           pageSize={props.pageSize}
                           totalData={props.totalData}
@@ -205,7 +208,6 @@ const Sidebar = (props) => {
                                   : ""
                                   }`}
                               >
-                                {/* <HeatMap32 /> */}
                                 {data.iconName}
                                 <p>{data.name}</p>
                               </div>

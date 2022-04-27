@@ -36,3 +36,25 @@ export const Factory = {
   returnFactorySubPacket: {method: "POST", url: "/factory/subpacket/return"},
   unusedList: {method: "GET", url: "/common/unused"}
 }
+
+
+export const Remove = {
+  removeMainRough: {method: "Post", url: "/delete/mainrough"},
+  removeOfficeRough: {method: "Post", url: "/delete/officerough"},
+  removeFactoryRough: {method: "Post", url: "/delete/factoryrough"},
+  removeOfficeSubRough: {method: "Post", url: "/delete/officerough/subpacket"},
+  removeFactorySubRough: {method: "Post", url: "/delete/factoryrough/subpacket"},
+  // removeMainRough: {method: "Post", url: "/delete/mainrough"}
+}
+
+export const Edit = {
+
+  editMainRough: {method: "Post", url: "/edit/mainrough"},
+  editOfficeAndFactory: {method: "Post", url: "/edit/mainrough/office/factory"},
+  editOfficeSubPacket: {method: "Post", url: "/edit/office/officesubpacket"},
+  editOfficeReturnRough: {method: "Post", url: "/edit/office/returnrough"},
+  // editMainRough: {
+  //   method: "Post", url: "/edit/"
+  // },
+
+}

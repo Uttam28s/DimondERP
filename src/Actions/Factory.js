@@ -64,7 +64,7 @@ export const getFactorypacketSrNo = (id) => (dispatch) =>
 
 
 
-export const createFactoryPacket = (data) => (dispatch) => {
+export const createFactoryPacket = (data) => (dispatch) => 
     new Promise((resolve, reject) => {
         console.log("TCL: data", data);
         fetchUrl(
@@ -79,10 +79,10 @@ export const createFactoryPacket = (data) => (dispatch) => {
                 reject(e);
             });
     });
-};
 
 
-export const returnFactoryPacket = (data) => (dispatch) => {
+
+export const returnFactoryPacket = (data) => (dispatch) => 
     new Promise((resolve, reject) => {
         // console.log("returnFactoryPacket", data);
         fetchUrl(
@@ -97,11 +97,11 @@ export const returnFactoryPacket = (data) => (dispatch) => {
                 reject(e);
             });
     });
-};
 
 
 
-export const returnFactorySubPacket = (data) => {
+
+export const returnFactorySubPacket = (data) => 
     new Promise((resolve, reject) => {
         console.log("returnFactorySubPacket", data);
         fetchUrl(
@@ -116,4 +116,3 @@ export const returnFactorySubPacket = (data) => {
                 reject(e);
             });
     });
-}

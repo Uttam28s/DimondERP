@@ -11,6 +11,7 @@ import {getRoughPrefrence} from "../../Actions/Rough";
 import {returnOfficePacket} from "../../Actions/Office";
 import {getOfficeSubList} from "../../Actions/Office";
 import moment from "moment";
+import {toFixed4} from "../Common/helperFun";
 // import { Tab } from "carbon-components-react";
 // import TabView from "../Common/Tabs";
 
@@ -325,7 +326,7 @@ class ReturnOfficeRough extends Component {
                 </div>
                 <div className="bx--col-md-2">
                   <label className="bx--label"> AvailableRough: </label>
-                  <p>{`${(values.copyCarat || 0).toFixed(4)}`}</p>
+                  <p>{`${toFixed4(values.copyCarat || 0)}`}</p>
                   <label className="bx--label $code-01">{`${values.returned == false ? "All Rough Is Not Returned From Sawing/Chapka" : ""}`}</label>
                 </div>
               </div>

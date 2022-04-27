@@ -6,10 +6,7 @@ import TextField, {
   DateSelection,
   DropDownSelection,
 } from "../Common/CommonComponents";
-import {result} from "lodash";
-import {date} from "joi";
 import moment from "moment";
-import {endsWith} from "lodash";
 // import { Tab } from "carbon-components-react";
 // import TabView from "../Common/Tabs";
 
@@ -64,7 +61,12 @@ class CreateSubPacket extends Component {
       console.log('result', result)
       this.setState({
         subRoughList: result?.data?.map((data) => {
-          return {id: data._id, label: data.factory_total_carat.toString(), remainingCarat: data.copyCarat == 0 ? "0" : (data.copyCarat || data.factory_total_carat.toString())}
+          return {
+            id: data._id,
+            label: data.factory_total_carat.toString(),
+            remainingCarat: data.copyCarat == 0 ?
+              "0" : (data.copyCarat || data.factory_total_carat.toString())
+          }
         }) || [],
       })
     }).catch((err) => {});
@@ -78,7 +80,7 @@ class CreateSubPacket extends Component {
 
 
   render() {
-    const {items, subRoughList} = this.state
+   // const {items, subRoughList} = this.state
     return (
       <div style={{ marginBottom: "15%" }}>
         <Formik
@@ -94,10 +96,9 @@ class CreateSubPacket extends Component {
             factoryPaketYeild: "",
           }}
           validationSchema={validationSchema}
-          onSubmit={(values, { setSubmitting, resetForm }) => {
+          onSubmit={async (values, {setSubmitting, resetForm}) => {
             // When button submits form and form is in the process of submitting, submit button is disabled
             setSubmitting(true);
-            this.props.close();
             let data = {
               factory_id: values.roughName.id,
               process_name: values.factoryIssueprocessName,
@@ -113,11 +114,14 @@ class CreateSubPacket extends Component {
             }
             console.log("🚀 ~ file: CreateSubPacket.js ~ line 110 ~ CreateSubPacket ~ render ~ data", Number(values.roughName.label), values.factoryIssueCarat, data)
 
-            // this.props.createFactoryPacket(data).then((result) => {
+            await this.props.createFactoryPacket(data).then((result) => {
+              console.log("🚀 ~ file: CreateSubPacket.js ~ line 116 ~ CreateSubPacket ~ awaitthis.props.createFactoryPacket ~ result", result)
+              this.props.close();
 
-            // }).catch((err) => {
+            }).catch((err) => {
 
-            // });
+            });
+
             // Simulate submitting to database, shows us values submitted, resets form
             // setTimeout(() => {
             //   // alert(JSON.stringify(values, null, 2));

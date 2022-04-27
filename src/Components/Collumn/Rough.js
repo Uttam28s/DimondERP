@@ -102,7 +102,12 @@ export const OfficeSubRoughColumn = [
     header: "Sorting Carat",
     key: "office_return_sorting_carat",
     // size: "155px",
-  }
+  },
+  {
+    header: "Action",
+    key: "btn",
+    size: "150px",
+  },
 
 ]
 

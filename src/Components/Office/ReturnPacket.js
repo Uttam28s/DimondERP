@@ -11,6 +11,7 @@ import {getRoughPrefrence} from "../../Actions/Rough";
 import {getpacketSrNo, getOfficeSubList} from "../../Actions/Office";
 import moment from "moment";
 import {ThisSideUp16} from "@carbon/icons-react";
+import {toFixed4} from "../Common/helperFun";
 // import { Tab } from "carbon-components-react";
 // import TabView from "../Common/Tabs";
 
@@ -323,7 +324,7 @@ class ReturnOfficePacket extends Component {
                 <p style={{display: "grid"}} className={"bx--col-md-3"}>
                   Wight lose
                   <span style={{color: "#DA1E28"}}>
-                    {((((this.state?.packetCarat || 0) - (values?.officeReturncarat || 0)) / (this.state.packetCarat || 1)) * 100).toFixed(4) || 0}%
+                    {toFixed4((((this.state?.packetCarat || 0) - (values?.officeReturncarat || 0)) / (this.state.packetCarat || 1)) * 100) || 0}%
                   </span>
                 </p>
               </div>

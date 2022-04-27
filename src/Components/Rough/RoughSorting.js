@@ -12,6 +12,7 @@ import {getRough} from "../../Actions/Rough";
 import {getOfficeList} from "../../Actions/Office";
 import {getOfficeSubList} from "../../Actions/Office";
 import {getUnusedList} from "../../Actions/Office";
+import {toFixed4} from "../Common/helperFun";
 // import { sumObjValuses } from "../../js/Helper";
 // import { Tab } from "carbon-components-react";
 // import TabView from "../Common/Tabs";
@@ -51,7 +52,7 @@ class RoughSorting extends Component {
   }
 
   componentDidMount = async () => {
-    const {reducerState} = this.props
+  //  const {reducerState} = this.props
     // if (this.props.sortingData.length > 0) {
     // this.setState({
     //   sortingData: {
@@ -116,8 +117,8 @@ class RoughSorting extends Component {
         crystal_price: crystalPrice || 0,
         crystal_total: parseInt(crystalCarat * crystalPrice),
       },
-      total_sorting_carat: Number(this.state.sumOfCarat),
-      total_sorting_amount: Number(this.state.sumOfAmount),
+      total_sorting_carat: toFixed4(this.state.sumOfCarat),
+      total_sorting_amount: toFixed4(this.state.sumOfAmount),
     };
     // console.log("RoughSorting -> handelSubmit -> data", data);
     this.props.handelAddSorting(data);
@@ -128,7 +129,7 @@ class RoughSorting extends Component {
       {
         sortingData: {
           ...this.state.sortingData,
-          [ e.target.name ]: Number(parseFloat(e.target.value)) || null,
+          [e.target.name]: toFixed4(parseFloat(e.target.value)) || null,
         },
       },
       () => {
@@ -153,7 +154,7 @@ class RoughSorting extends Component {
         this.setState({
           sumOfCarat: totalCarat,
           sumOfAmount: chockiTotal + markisTotal + crystalTotal + golTotal + outTotal,
-          remainingCarat: (Number(this.state.availableCarat) - Number(totalCarat).toFixed(4)) || 0,
+          remainingCarat: toFixed4(Number(this.state.availableCarat) - Number(totalCarat)) || 0,
         })
       }
     );

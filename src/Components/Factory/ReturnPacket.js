@@ -68,6 +68,15 @@ class ReturnSubPacket extends Component {
   clearState = () => {
     this.setState({subRoughList: []});
   }
+
+
+  setFormData = (array, func, value) => {
+    array.map((data, i) => {
+      return func(data, value ? value[i] : "")
+    })
+  }
+
+
   render() {
     return (
       <div style={{ marginBottom: "15%" }}>
@@ -184,7 +193,10 @@ class ReturnSubPacket extends Component {
                     light
                     onChange={(select) => {
                       setFieldValue("factoryIssueRoughId", select.selectedItem);
-                      setFieldValue("roughName", "")
+                      // setFieldValue("roughName", "")
+                      // setFieldValue("factoryReturnPacketId", "")
+                      // setFieldValue("factoryReturnProcessWeight", "")
+                      this.setFormData(["roughName", "factoryReturnPacketId", "factoryReturnProcessWeight"], setFieldValue)
                       this.clearState()
                       console.log('select.selectedItem', select.selectedItem)
                       select.selectedItem?.id && this.getFactoryRoughList(select.selectedItem.id)
@@ -213,7 +225,9 @@ class ReturnSubPacket extends Component {
                     label="Select Rough name"
                     light
                     onChange={(select) => {
+                      setFieldValue("factoryReturnPacketId", "")
                       setFieldValue("roughName", select.selectedItem)
+                      this.setState({subPacketData: []})
                       select?.selectedItem?.id && this.props.getFactorySubList({factory_id: select.selectedItem.id}).then((res) => {
                         console.log("🚀 ~ file: ReturnPacket.js ~ line 201 ~ ReturnSubPacket ~ select?.selectedItem?.id&&this.props.getFactorySubList ~ data", res)
                         this.setState({
@@ -225,6 +239,7 @@ class ReturnSubPacket extends Component {
                                 processName: val.occupy_by,
                                 assign_name: val.all_process.filter((v) => v.process_name == val.occupy_by)[0].assign_name,
                                 process_id: val.all_process.filter((v) => v.process_name == val.occupy_by)[0].process_carat_id,
+                                last_carat: val.last_carat
                               }
                             }
                           }).filter((val) => val !== undefined)
@@ -260,15 +275,21 @@ class ReturnSubPacket extends Component {
                     light
                     onChange={(select) =>
                     {
-                      setFieldValue(
-                        "factoryReturnPacketId",
-                        select.selectedItem)
-                      setFieldValue(
-                        "factoryReturnprocessName",
-                        select.selectedItem.processName);
-                      setFieldValue(
+
+
+                      this.setFormData(
+                        ["factoryReturnPacketId",
+                          "factoryReturnprocessName",
                         "factoryReturnAssignName",
-                        select.selectedItem.assign_name);
+                          "factoryReturnProcessWeight"
+                        ],
+                        setFieldValue,
+                        [
+                          select.selectedItem,
+                          select.selectedItem?.processName,
+                          select.selectedItem?.assign_name,
+                          select.selectedItem?.last_carat
+                        ])
 
                     }
                     }
@@ -322,11 +343,10 @@ class ReturnSubPacket extends Component {
                     </div>
                   ) : null}
                 </div>
-                {/* <div className="bx--col-md-3"></div> */}
                 <div className="bx--col-md-4" style={{ marginTop: "4.5%" }}>
                   <h5 className="h5-form-label">
                     Total Weight lose :{" "}
-                    <span style={{color: "#E7301C"}}>{values.factoryReturncarat && ((values?.factoryReturncarat || values?.factoryReturnPacketId?.label) / values?.factoryReturnPacketId?.label) || 0}%</span>
+                    <span style={{color: "#E7301C"}}>{(values.factoryReturncarat && ((values?.factoryReturncarat || values?.factoryReturnPacketId?.label) / values?.factoryReturnPacketId?.label)) || 0}%</span>
                   </h5>
                 </div>
               </div>
@@ -354,7 +374,6 @@ class ReturnSubPacket extends Component {
                       }
                     }}
                     onBlur={handleBlur}
-                    // onClick={function noRefCheck() {}}
                     required
                     type="number"
                   />
@@ -449,6 +468,7 @@ class ReturnSubPacket extends Component {
                     invalidText="Please fill"
                     labelText="Size :"
                     light={true}
+                    disabled={true}
 
                     onChange={handleChange}
                     onBlur={handleBlur}

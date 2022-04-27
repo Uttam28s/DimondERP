@@ -47,3 +47,66 @@
 .top-side-icon {
   margin: 1.2% 1.6%;
 }
+.sucess-row {
+  background-color: #63a163 !important;
+
+  td {
+    background-color: #63a163 !important;
+  }
+}
+
+.failed-row {
+  background-color: #d7bdbd !important;
+
+  td {
+    background-color: #d7bdbd !important;
+  }
+}
+
+.delete-row {
+  background-color: #000000 !important;
+  color: aliceblue !important;
+
+  td {
+    background-color: #000000 !important;
+    color: aliceblue !important;
+  }
+}
+
+.content-tippy {
+  padding: 2%;
+  color: #91242a;
+  line-height: 1.8;
+}
+
+.button-box {
+  display: flex;
+  padding: 2%;
+  gap: 2%;
+  margin: 4%;
+  justify-content: space-around;
+
+  span {
+    border: solid 1px;
+    border-radius: 6px;
+    padding: 3%;
+    width: 33%;
+    color: aliceblue;
+    cursor: pointer;
+    opacity: 0.8;
+
+    :hover {
+      opacity: 1;
+    }
+
+  }
+
+}
+
+.green {
+  background-color: #0f62fe;
+}
+
+.red {
+  background-color: #000;
+}

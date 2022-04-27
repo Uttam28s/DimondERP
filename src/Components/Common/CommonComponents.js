@@ -34,7 +34,7 @@ export default TextField;
 export const DateSelection = (props) => {
   return (
     <DatePicker
-      dateFormat="y-m-d"
+      dateFormat={props.dateFormat}
       datePickerType={props.datePickerType}
       light
       id={props.dateid}

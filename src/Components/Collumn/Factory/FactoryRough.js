@@ -5,48 +5,57 @@ export const Factoryrough = [
     // size: "20px",
   },
   {
-    header: "Assignee Name",
-    key: "name",
-    // size: "200px",
+    header: "",
+    key: "isSelected"
   },
+  {
+    header: "Main Rough",
+    key: "main_carat",
+    // size: "50px",
+  },
+
   {
     header: "Total Carat",
-    key: "protocol",
+    key: "factory_total_carat",
     // size: "50px",
   },
   {
-    header: "Piece",
-    key: "port",
-    // size: "50px",
+    header: "Remaining carat",
+    key: "copyCarat"
   },
   {
-    header: "Remaining Carat",
-    key: "rule",
-    // size: "155px",
-  },
+    header: "Assignee Name",
+    key: "factory_assigne_name",
+    // size: "200px",
+  },    
+
   {
     header: "Issue Date",
-    key: "attached_groups",
+    key: "assign_date",
     // size: "300px",
   },
   {
     header: "Return Date",
-    key: "status",
+    key: "return_date",
     // size: "100px",
   },
-  {
-    header: "Packet",
-    key: "name",
-    // size: "200px",
-  },
-  // {
-  //   header: "Weight Lose",
-  //   key: "protocol",
-  //   // size: "50px",
-  // },
   {
     header: "Action",
     key: "btn",
     size: "150px",
   },
+  // {
+  //   header: "Occupy By",
+  //   key: "occupy",
+  //   // size: "200px",
+  // },
+  // {
+  //   header: "Weight Lose",
+  //   key: "protocol",
+  //   // size: "50px",
+  // },
+  // {
+  //   header: "Last Process Carat",
+  //   key: "lastCarat",
+  // },
 ];

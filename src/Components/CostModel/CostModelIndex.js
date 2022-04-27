@@ -11,6 +11,12 @@ class CostModelIndex extends Component {
 
     this.state = {
       model: false,
+      pageinationRef: {
+        totalCount: 0,
+        limit: 10,
+        skip: 0,
+        currentPage: 1,
+      },
     };
   }
 
@@ -49,6 +55,7 @@ class CostModelIndex extends Component {
         addButtonFunction={this.handelAddDataModal}
         rowData={TableData}
         column={CostModal}
+        totalData={this.state.pageinationRef}
       >
         {/* {console.log("log in render")} */}
         {/* <h1>Hello Fuck</h1> */}
@@ -59,7 +66,7 @@ class CostModelIndex extends Component {
           tabContent={tabArray}
         />
       </Sidebar>
-    );
+    ); 
   }
 }
 

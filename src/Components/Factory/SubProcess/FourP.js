@@ -1,8 +1,8 @@
 import React from "react";
 import PageTopSection from "../../Common/PageTopSection";
-import { connect } from "react-redux";
+import {connect} from "react-redux";
 
-export const FactorySubRough = (props) => {
+export const FourP = (props) => {
     return (
         <div>
             <PageTopSection
@@ -11,8 +11,10 @@ export const FactorySubRough = (props) => {
                 column={props.column}
                 pageSize={props.pageSize}
                 totalData={props.totalData}
+                colour={true}
                 edit={props.edit}
                 remove={props.remove}
+
             />
         </div>
     );
@@ -22,4 +24,4 @@ const mapStateToProps = (state) => ({});
 
 const mapDispatchToProps = {};
 
-export default connect(mapStateToProps, mapDispatchToProps)(FactorySubRough);
+export default connect(mapStateToProps, mapDispatchToProps)(FourP);

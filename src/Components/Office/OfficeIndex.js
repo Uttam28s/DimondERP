@@ -21,6 +21,7 @@ import {
   OfficeSubPackets,
 } from "../Collumn/Office/OfficeSubpackets";
 import {getRoughPrefrence} from "../../Actions/Rough";
+import {removeOfficeRough, removeOfficeSubRough} from "../../Actions/Delete"
 
 class OfficeIndex extends Component {
   constructor(props) {
@@ -56,6 +57,20 @@ class OfficeIndex extends Component {
     //   skip: this.state.skip,
     //   limit: this.state.limit,
     // };
+
+
+    // this.props.getRoughPrefrence().then((res) => {
+    //   console.log("RoughIndex -> componentDidMount -> res", res);
+    //   this.setState({
+    //     caratList: res.commonGet.caratList,
+    //   });
+    // });
+    this.getOfficeAndRough()
+  };
+
+
+
+  getOfficeAndRough = async () => {
     this.props
       .getOfficeList(this.state.pageinationRef)
       .then((res) => {
@@ -77,14 +92,10 @@ class OfficeIndex extends Component {
         });
       })
       .catch((e) => console.log(e));
+  }
 
-    // this.props.getRoughPrefrence().then((res) => {
-    //   console.log("RoughIndex -> componentDidMount -> res", res);
-    //   this.setState({
-    //     caratList: res.commonGet.caratList,
-    //   });
-    // });
-  };
+
+
 
   closeModal = () => {
     // console.log("log in a close modal");
@@ -181,6 +192,26 @@ class OfficeIndex extends Component {
     //   .catch((e) => console.log(e));
   };
 
+  remove = (data) => {
+    console.log("🚀 ~ file: OfficeIndex.js ~ line 195 ~ OfficeIndex ~ id", data)
+    if (data && data.type && ["sawing", "chapka"].includes(data.type)) {
+      this.props.removeOfficeSubRough({id: data._id}).then((result) => {
+        console.log("🚀 ~ file: OfficeIndex.js ~ line 199 ~ OfficeIndex ~ this.props.removeOfficeSubRough ~ result", result)
+      }).catch((err) => {
+      });
+    } else {
+      this.props.removeOfficeRough({id: data._id}).then((result) => {
+        console.log("🚀 ~ file: OfficeIndex.js ~ line 197 ~ OfficeIndex ~ this.removeOfficeRough ~ result", result)
+        this.getOfficeAndRough()
+      }).catch((err) => {
+      });
+    }
+  }
+
+
+
+
+
   onPageChange = (page) => {
     // console.log("RoughIndex -> onPageChange -> page", page);
     this.setState({
@@ -198,6 +229,7 @@ class OfficeIndex extends Component {
     this.props
       .getOfficeList(pageData)
       .then((res) => {
+        console.log('first', res.count)
         this.setState({
           tableData: res.data,
           pageinationRef: {
@@ -259,6 +291,8 @@ class OfficeIndex extends Component {
             column={OfficeSubPackets}
             pageSize={this.onPageChange}
             totalData={this.state.subPacketpageinationRef}
+            edit={this.edit}
+            remove={this.remove}
           // data={this.state.singleOfiiceData}
           />
         ),
@@ -273,6 +307,8 @@ class OfficeIndex extends Component {
             column={OfficeSawingSubPackets}
             pageSize={this.onPageChange}
             totalData={this.state.subPacketpageinationRef}
+            edit={this.edit}
+            remove={this.remove}
           />
         ),
       },
@@ -281,7 +317,7 @@ class OfficeIndex extends Component {
       <Sidebar
         title="Office"
         button="Create Packet"
-        cureentTab={2}
+     //   cureentTab={2}
         onClick={this.onModelPopup}
         addButtonFunction={this.handelAddDataModal}
         rowData={this.state.tableData}
@@ -289,6 +325,10 @@ class OfficeIndex extends Component {
         // tabview={true}
         pageSize={this.onPageChange}
         totalData={this.state.pageinationRef}
+        edit={this.edit}
+        remove={this.remove}
+        //colour={true}
+
       >
         <Model
           modalName="Office Packet Details"
@@ -306,7 +346,7 @@ class OfficeIndex extends Component {
 
 const mapStateToProps = (state) => ({...state});
 export default connect(null, {
-  getOfficeList,
+  getOfficeList, removeOfficeRough, removeOfficeSubRough,
   getOfficeSubList,
   getRoughPrefrence,
   getpacketSrNo,

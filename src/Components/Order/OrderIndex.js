@@ -14,6 +14,18 @@ class OrderIndex extends Component {
 
     this.state = {
       model: false,
+      pageinationRef: {
+        totalCount: 0,
+        limit: 10,
+        skip: 0,
+        currentPage: 1,
+      },
+      subPacketpageinationRef: {
+        totalCount: 0,
+        limit: 10,
+        skip: 0,
+        currentPage: 1,
+      },
     };
   }
 
@@ -46,6 +58,10 @@ class OrderIndex extends Component {
         addButtonFunction={this.handelAddDataModal}
         rowData={TableData}
         column={OrderSummary}
+        totalData={this.state.pageinationRef}
+        edit={this.edit}
+        remove={this.remove}
+
       >
         <Model
           modalName="Order Details"

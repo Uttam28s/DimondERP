@@ -24,6 +24,8 @@ import {
 } from "carbon-components-react";
 import { Add24 } from "@carbon/icons-react";
 import TableCells from "./TableCell";
+import {Tooltip} from 'react-tippy';
+import 'react-tippy/dist/tippy.css'
 // import {
 //   Add20,
 //   ListDropdown24,
@@ -40,6 +42,7 @@ class PageTopSection extends Component {
       dataPerPage: 10,
       currentPageData: [],
       cureentTab: 0,
+      open: false
       // page:1
     };
   }
@@ -76,43 +79,40 @@ class PageTopSection extends Component {
   };
 
   handelOnEditClick = (id) => {
-    // console.log("PageTopSection -> handelViewButton -> id", id);
     const split = id.split(":");
-    // console.log("PageTopSection -> handelViewButton -> split", split);
     const singleData = this.state.rowData.find((data) => data.id === split[0]);
-    console.log("edit button press", singleData);
+    this.props.edit(singleData)
   };
 
   handelOnDeleteClick = (id) => {
-    // console.log("PageTopSection -> handelViewButton -> id", id);
     const split = id.split(":");
-    // console.log("PageTopSection -> handelViewButton -> split", split);
     const singleData = this.state.rowData.find((data) => data.id === split[0]);
-    console.log("delete button press", singleData);
+    this.setState({open: split[0]});
   };
 
+
+  closeBox = (id) => {
+    if (id) {
+      const split = id.split(":");
+      const singleData = this.state.rowData.find((data) => data.id === split[0]);
+      this.props.remove(singleData)
+    }
+    this.setState({open: false});
+  }
+
   handelViewButton = (id) => {
-    console.log("PageTopSection -> handelViewButton -> id", id);
     const split = id.split(":");
-    // console.log("PageTopSection -> handelViewButton -> split", split);
     const singleData = this.state.rowData.find((data) => data.id === split[0]);
-    console.log("View button press", singleData);
     this.props.onClick(singleData);
   };
 
   itemRangeText = (min, max, total) => {
-    console.log("min", min, "max", max, "ottal", total);
-    // this.setState({
-    //   currentPage: min,
-    // });
   };
 
   itemText = (min, max) => {
-    console.log("itemText ->", "min", min, "max", max);
   };
 
   onChange = (e) => {
-    console.log("PageTopSection -> onChansadasdage -> e", e);
     this.setState({
       currentPage: e.page,
     });
@@ -120,17 +120,9 @@ class PageTopSection extends Component {
   };
 
   pageRangeText = (current, total) => {
-    console.log(
-      "pageRangeText->itemText ->",
-      "current",
-      current,
-      "total",
-      total
-    );
   };
 
   pageText = (page) => {
-    console.log("PageTopSection -> pageText -> page", page);
   };
 
   render() {
@@ -139,8 +131,6 @@ class PageTopSection extends Component {
         <DataTable
           rows={this.state.rowData}
           headers={this.state.headerData}
-          // size="short"
-          // isSortable
           overflowMenuOnHover={false}
           render={({
             rows,
@@ -154,26 +144,6 @@ class PageTopSection extends Component {
           }) => (
             <TableContainer title={this.props.title}>
               <TableToolbar>
-                {/* <TableBatchAction {...getBatchActionProps()}>
-            <TableBatchAction
-              tabIndex={getBatchActionProps().shouldShowBatchActions ? 0 : -1}
-              renderIcon={Delete}
-              onClick={()=>console.log('clicked')}>
-              Delete
-            </TableBatchAction>
-            <TableBatchAction
-              tabIndex={getBatchActionProps().shouldShowBatchActions ? 0 : -1}
-              renderIcon={Save}
-              onClick={()=>console.log('clicked')}>
-              Save
-            </TableBatchAction>
-            <TableBatchAction
-              tabIndex={getBatchActionProps().shouldShowBatchActions ? 0 : -1}
-              renderIcon={Download}
-              onClick={()=>console.log('clicked')}>
-              Download
-            </TableBatchAction>
-          </TableBatchAction> */}
 
                 <TableToolbarContent className="tollbar-content">
                   <TableToolbarSearch
@@ -202,13 +172,9 @@ class PageTopSection extends Component {
                       Action 3
                     </TableToolbarAction>
                   </TableToolbarMenu>
-                  {this.props.noButton ? (
-                    ""
-                  ) : (
+                  {this.props.noButton ? ("") : (
                     <Button
-                      tabIndex={
-                        getBatchActionProps().shouldShowBatchActions ? -1 : 0
-                      }
+                      tabIndex={getBatchActionProps().shouldShowBatchActions ? -1 : 0}
                       onClick={this.props.handelAddData}
                       size="small"
                       kind="primary"
@@ -223,12 +189,10 @@ class PageTopSection extends Component {
                 </TableToolbarContent>
               </TableToolbar>
               <div className="table-wrapper">
-                <Table>
+                <Table useZebraStyles >
                   <TableHead>
                     <TableRow>
-                      {/* <TableSelectAll {...getSelectionProps()} /> */}
                       {headers.map((header) => (
-                        // console.log("PageTopSection -> header", header)
                         <TableHeader
                           {...getHeaderProps({ header })}
                           style={{ width: `${header.size}` }}
@@ -241,7 +205,13 @@ class PageTopSection extends Component {
                   <TableBody>
                     {rows.map((row) => (
                       <>
-                        <TableRow {...getRowProps({ row })}>
+                        <TableRow {...getRowProps({row})}
+                          className={this.props.colour ?
+                            `${row.cells.filter(data =>
+                              data.id.includes("return_date"))[0]?.value ?
+                              "sucess-row" : "failed-row"}` :
+                            this.state.open == row.id ? "delete-row" : ""
+                          } >
                           {row.cells.map(
                             (cell, i) => (
                               <TableCells
@@ -288,6 +258,34 @@ class PageTopSection extends Component {
                             //   <TableCell key={cell.id}>{cell.value}</TableCell>
                             // )
                           )}
+                          <Tooltip
+                            html={(
+                              <div>
+                                <strong className="content-tippy">
+                                  Are Sure to Remove this Rough?
+                                </strong>
+                                <div className="button-box">
+                                  <span className="green" onClick={() => {this.closeBox(row.id)}}>
+                                    <strong>Yes </strong>
+                                  </span>
+                                  <span className="red" onClick={() => {this.closeBox()}}>
+                                    <strong >No </strong>
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+                            animation="perspective"
+                            placement="top"
+                            trigger="click"
+                            open={this.state.open == row.id}
+                            theme="light"
+                            interactive
+                            // interactive={true}
+                            // inertia={true}
+                            arrow={false}
+                            duration={[350, 200]}
+                          >
+                          </Tooltip>
                         </TableRow>
                       </>
                     ))}
@@ -298,20 +296,15 @@ class PageTopSection extends Component {
           )}
         />
         <div className="pagination-wrapper">
-          {/* {console.log(
-            "this is  a log for a apagination ---->",
-            this.state.currentPage, this.props.totalData?.currentPage, this.props.totalData?.totalCount
-          )} */}
-
           <Pagination
             backwardText="Previous page"
             forwardText="Next page"
             itemsPerPageText="Items per page:"
-            page={this.props.totalData.currentPage}
+            page={this.props.totalData?.currentPage || 0}
             pageNumberText="Page Number"
             pageSize={10}
             pageSizes={[10]}
-            totalItems={this.props.totalData.totalCount}
+            totalItems={this.props.totalData?.totalCount}
             onChange={this.onChange}
           />
         </div>

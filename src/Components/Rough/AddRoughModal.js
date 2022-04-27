@@ -6,6 +6,7 @@ import TextField, { DateSelection } from "../Common/CommonComponents";
 // import { connect } from "react-redux";
 // import { addRough } from "../../Actions/Rough";
 import moment from "moment";
+import {toFixed4} from "../Common/helperFun";
 // import { dateConversion } from "../Common/Helper";
 // import { Tab } from "carbon-components-react";
 // import TabView from "../Common/Tabs";
@@ -22,13 +23,24 @@ class AddRoughModal extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {};
+    this.state = {
+      preSelectedData: ""
+    };
+  }
+
+
+  componentDidMount = () => {
+    console.log('preSelectedData', this.props.preSelectedData)
+    if (this.props.preSelectedData) {
+      this.setState({preSelectedData: this.props.preSelectedData});
+    }
   }
 
   handelSubmit = (e) => {
+    const {preSelectedData} = this.props
     console.log("AddRoughModal -> render -> values", e.purchaseDate);
     const data = {
-      carat: e.carat,
+      carat: toFixed4(e.carat) - (toFixed4(preSelectedData.carat) || 0),
       days: e.paymentDays,
       date: moment(e.purchaseDate, "DD-MM-YYYY").format("YYYY-MM-DD"),
       sellername: e.sallerName,
@@ -44,7 +56,8 @@ class AddRoughModal extends Component {
       "AddRoughModal -> handelSubmit -> data",
       moment(e.purchaseDate, "DD-MM-YYYY").format("YYYY-MM-DD")
     );
-    this.props.handelAddRough(data);
+    preSelectedData && this.props.editMainRough(data)
+    !preSelectedData && this.props.handelAddRough(data);
   };
 
   handelOnChange = (e) => {
@@ -55,16 +68,18 @@ class AddRoughModal extends Component {
   };
 
   render() {
+    const {preSelectedData} = this.props
+    console.log("🚀 ~ file: AddRoughModal.js ~ line 69 ~ AddRoughModal ~ render ~ preSelectedData", preSelectedData)
     return (
       <div style={{ marginBottom: "15%" }}>
         <Formik
           initialValues={{
-            sallerName: "",
-            brokerName: "",
-            carat: "",
-            rate: "",
-            purchaseDate: "",
-            paymentDays: "",
+            brokerName: preSelectedData?.brokername || "",
+            carat: preSelectedData?.carat || "",
+            rate: preSelectedData?.rate || "",
+            purchaseDate: (preSelectedData?.date && moment(preSelectedData?.date).format("DD/MM/YYYY")) || "",
+            paymentDays: preSelectedData?.days || "",
+            sallerName: preSelectedData?.sellername || ""
           }}
           validationSchema={validationSchema}
           onSubmit={(values, { setSubmitting, resetForm }) => {
@@ -81,6 +96,7 @@ class AddRoughModal extends Component {
             }, 500);
           }}
         >
+
           {({
             values,
             errors,
@@ -198,14 +214,14 @@ class AddRoughModal extends Component {
                 <p style={{ display: "grid" }}>
                   Total Amount :{" "}
                   <span style={{ color: "#0D9F37" }}>
-                    {(values.carat * values.rate).toFixed(2)}/-
+                    {toFixed4(values.carat * values.rate)}/-
                   </span>
                 </p>
               </div>
               <div className="bx--row top-margin-model-input">
                 <div className="bx--col-md-3">
                   <DateSelection
-                    dateFormat="d/m/y"
+                    dateFormat="d/m/Y"
                     datePickerType="single"
                     onChange={(date) => {
                       const basicDate = new Date(date);

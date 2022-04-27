@@ -11,6 +11,8 @@ export const SawingList = (props) => {
         column={props.column}
         pageSize={props.pageSize}
         totalData={props.totalData}
+        edit={props.edit}
+        remove={props.remove}
       />
     </div>
   );
