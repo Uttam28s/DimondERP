@@ -14,6 +14,9 @@ import {ThisSideUp16} from "@carbon/icons-react";
 import {toFixed4} from "../Common/helperFun";
 // import { Tab } from "carbon-components-react";
 // import TabView from "../Common/Tabs";
+import ReactDataSheet from 'react-datasheet';
+import {Button} from "carbon-components-react";
+import "react-datasheet/lib/react-datasheet.css";
 
 const validationSchema = Yup.object().shape({
   officeReturnpacketId: Yup.string().required("*Packet Id is required"),
@@ -37,8 +40,20 @@ class ReturnOfficePacket extends Component {
       packetCarat: "",
       packetType: "",
       officeSelected: "",
-      toggle: false
+      toggle: false,
+      preSelectedData: "",
+      preDefinedData: "",
     };
+  }
+
+  componentDidMount = () => {
+    console.log('preSelectedData', this.props.preSelectedData,this.props.preDefinedData)
+    if (this.props.preSelectedData) {
+      this.setState({ preSelectedData: this.props.preSelectedData });
+    }
+    else if (this.props.preDefinedData){
+      this.setState({ preDefinedData: this.props.preDefinedData });
+    }
   }
 
   handelSubmit = (value) => {
@@ -54,7 +69,7 @@ class ReturnOfficePacket extends Component {
       ),
     };
     console.log("CreateOfficePacket -> handelSubmit -> data", data);
-    this.props.close();
+    // this.props.close();
     this.props.handleCreateSubpacket(data);
   };
 
@@ -94,7 +109,7 @@ class ReturnOfficePacket extends Component {
     this.props
       .getOfficeSubList({packetId: data === null ? 0 : data.id})
       .then((res) => {
-        //   console.log("ReturnOfficePacket -> handlePacketDetails -> res", res.packetdetail.packet_name);
+          // console.log("ReturnOfficePacket -> handlePacketDetails -> res", res.packetdetail.packet_name);
         this.setState({
           packetCarat:
             res.packetdetail.chapka_issueCarat ||
@@ -111,6 +126,8 @@ class ReturnOfficePacket extends Component {
   }
 
   render() {
+    const {preSelectedData, preDefinedData} = this.props
+
     let items = [];
     this.props.caratList.map((value) =>
       items.push({id: value._id, label: value.carat.toString()})
@@ -129,17 +146,19 @@ class ReturnOfficePacket extends Component {
       srnoList.push({id: value._id, label: value.srno.toString()})
     );
     return (
-      <div style={{marginBottom: "15%"}}>
+      <div style={{marginBottom: "1%"}}>
         <Formik
           initialValues={{
-            officeReturnpacketId: "",
+            officeStartInputValue: "",
+            officeEndInputValue: "",
+            officeReturnpacketId: preSelectedData?.srno || "",
             // roughName: "",
-            officeReturncarat: this.state.packetCarat,
+            officeReturncarat: (preSelectedData?.chapka_return_carat || preSelectedData?.sawing_return_carat) || this.state.packetCarat,
             // officeReturnpiece: "",
-            officeReturnprocessName: this.state.packetType,
-            officeReturnDate: "",
-            officeReturnRoughList: "",
-            officeReturnOfficeList: "",
+            officeReturnprocessName: preSelectedData?.type || this.state.packetType,
+            officeReturnDate: ((preSelectedData?.chapka_return_date || preSelectedData?.sawing_return_date) && moment(preSelectedData?.chapka_return_date || preSelectedData?.sawing_return_date).format("DD/MM/YYYY")) || "",
+            officeReturnRoughList: preDefinedData?.carat || "",
+            officeReturnOfficeList: preDefinedData?.office_total_carat || "" ,
             weightLoss: "",
             carat: ""
           }}
@@ -167,12 +186,10 @@ class ReturnOfficePacket extends Component {
             setFieldValue,
             isSubmitting,
           }) => (
+            <div className={this.props.modelSheet === true ? "modelComponent" : ""}>
             <Form onSubmit={handleSubmit}>
-              {/* <h5 className="h5-form-label">
-                Packet Id : <span style={{ color: "#0F61FD" }}>#PID001</span>
-              </h5> */}
               <div className="bx--row">
-                <div className="bx--col-md-3">
+                <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
                   <DropDownSelection
                     className={
                       touched.officeReturnRoughList &&
@@ -181,12 +198,13 @@ class ReturnOfficePacket extends Component {
                         : "bx--col dropdown-padding"
                     }
                     name="officeReturnRoughList"
-                    selectedItem={values.officeReturnRoughList}
+                    selectedItem={ preDefinedData?.carat ? { label: preDefinedData?.carat} : values.officeReturnRoughList}
                     value={values.officeReturnRoughList}
                     // itemToString={(item) => (item ? item.text : "")}
                     id="office-rough-list-issue"
                     items={items}
                     label="Select Rough"
+                    disabled={preDefinedData?.carat ? true : false}
                     light
                     onChange={(select) => {
                       this.clearField(setFieldValue, ["officeReturnOfficeList", "officeReturnpacketId", "officeReturncarat"])
@@ -210,7 +228,8 @@ class ReturnOfficePacket extends Component {
                     </div>
                   ) : null}
                 </div>
-                <div className="bx--col-md-3">
+
+                <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
                   <DropDownSelection
                     className={
                       touched.officeReturnOfficeList &&
@@ -220,13 +239,15 @@ class ReturnOfficePacket extends Component {
                     }
                     name="officeReturnOfficeList"
                     selectedItem={
-                      values.officeReturnOfficeList || this.state.officeSelected
+                      // values.officeReturnOfficeList || this.state.officeSelected
+                      preDefinedData?.office_total_carat ? { label: preDefinedData?.office_total_carat } : values.officeReturnOfficeList
                     }
                     value={values.officeReturnOfficeList}
                     // itemToString={(item) => (item ? item.text : "")}
                     id="order-buyer-name"
                     items={officeItem}
                     label="Select Office Packet"
+                    disabled={preDefinedData?.office_total_carat ? true : false}
                     light
                     onChange={(select) => {
                       setFieldValue("officeReturnOfficeList", select.selectedItem || "");
@@ -247,9 +268,8 @@ class ReturnOfficePacket extends Component {
                     </div>
                   ) : null}
                 </div>
-              </div>
-              <div className="bx--row top-margin-model-input">
-                <div className="bx--col-md-3">
+              
+                <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
                   <DropDownSelection
                     className={
                       touched.officeReturnpacketId &&
@@ -258,12 +278,13 @@ class ReturnOfficePacket extends Component {
                         : "bx--col dropdown-padding"
                     }
                     name="officeReturnpacketId"
-                    selectedItem={values.officeReturnpacketId}
+                    selectedItem={ preSelectedData?.srno ? {label:preSelectedData?.srno} : values.officeReturnpacketId}
                     value={values.officeReturnpacketId}
                     // itemToString={(item) => (item ? item.text : "")}
                     id="return-packet-id"
                     items={srnoList}
                     label="Select Packet id"
+                    disabled={preSelectedData?.srno ? true : false}
                     light
                     onChange={(select) => {
                       setFieldValue("officeReturnpacketId", select.selectedItem || "");
@@ -273,6 +294,7 @@ class ReturnOfficePacket extends Component {
                     titleText="Packet id"
                     type="default"
                   />
+                  {console.log(values.officeReturnpacketId,"values.officeReturnpacketId")}
                   {touched.officeReturnpacketId &&
                     errors.officeReturnpacketId ? (
                     <div className="error-message">
@@ -280,7 +302,46 @@ class ReturnOfficePacket extends Component {
                     </div>
                   ) : null}
                 </div>
-                <div className="bx--col-md-3">
+
+                <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
+                  <DropDownSelection
+                    className={
+                      touched.officeReturnprocessName &&
+                        errors.officeReturnprocessName
+                        ? "error"
+                        : "bx--col dropdown-padding"
+                    }
+                    name="officeReturnprocessName"
+                    selectedItem={
+                      (preSelectedData?.type ? preSelectedData?.type : (values.officeReturnprocessName || this.state.packetType))
+                    }
+                    value={values.officeReturnprocessName}
+                    direction="top"
+                    // itemToString={(item) => (item ? item.text : "")}
+                    id="return-process-name-office"
+                    items={[this.state.packetType]}
+                    disabled={true}
+                    label="Select Process name"
+                    light
+                    onChange={(select) =>
+                      setFieldValue(
+                        "officeReturnprocessName",
+                        select.selectedItem
+                      )
+                    }
+                    titleText="Process Name"
+                    type="default"
+                  />
+                  {console.log(this.state.packetType,"packetType--====>")}
+                  {touched.officeReturnprocessName &&
+                    errors.officeReturnprocessName ? (
+                    <div className="error-message">
+                      {errors.officeReturnprocessName}
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
                   <TextField
                     className={
                       touched.officeReturncarat && errors.officeReturncarat
@@ -292,7 +353,7 @@ class ReturnOfficePacket extends Component {
                     id="return-office-packet-carat"
                     // invalid={false}
                     invalidText="Please fill"
-                    labelText="Carat :"
+                    labelText="Return Carat :"
                     placeholder="enter carat here"
                     light={true}
                     onChange={(e) => {
@@ -313,23 +374,89 @@ class ReturnOfficePacket extends Component {
                   ) : null}
                 </div>
 
-              </div>
-              <div className="bx--row top-margin-model-input">
-                <p style={{display: "grid"}} className={"bx--col-md-3"}>
-                  Packet Carat
-                  <span style={{color: "#DA1E28"}}>
-                    {this.state.packetCarat || 0}
-                  </span>
-                </p>
-                <p style={{display: "grid"}} className={"bx--col-md-3"}>
-                  Wight lose
-                  <span style={{color: "#DA1E28"}}>
-                    {toFixed4((((this.state?.packetCarat || 0) - (values?.officeReturncarat || 0)) / (this.state.packetCarat || 1)) * 100) || 0}%
-                  </span>
-                </p>
-              </div>
-              <div className="bx--row top-margin-model-input">
-                <div className="bx--col-md-3">
+                {this.props.modelSheet &&
+                  <>
+                    <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
+                      <TextField
+                        className={
+                          touched.officeStartInputValue && errors.officeStartInputValue
+                            ? "error"
+                            : "bx--col"
+                        }
+                        name="officeStartInputValue"
+                        value={values.officeStartInputValue}
+                        id="office-packet-officeStartInputValue"
+                        // invalid={false}
+                        invalidText="Please fill"
+                        labelText="From :"
+                        placeholder="enter number here"
+                        light={true}
+                        onChange={(e) => {
+                          if (Number(e.target.value) >= 1) {
+                            setFieldValue("officeStartInputValue", parseInt(e.target.value))
+                            // this.setState({toggle: !this.state.toggle})
+                          }
+                        }}
+                        onBlur={handleBlur}
+                        // onClick={function noRefCheck() { }}
+                        type="number"
+                      />
+                      {touched.officeStartInputValue && errors.officeStartInputValue ? (
+                        <div className="error-message">
+                          {errors.officeStartInputValue}
+                        </div>
+                      ) : null}
+                    {console.log(values.officeStartInputValue,"from value")}
+                    </div>
+
+                    <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
+                      <TextField
+                        className={
+                          touched.officeEndInputValue && errors.officeEndInputValue
+                            ? "error"
+                            : "bx--col"
+                        }
+                        name="officeEndInputValue"
+                        value={values.officeEndInputValue}
+                        id="office-packet-officeEndInputValue"
+                        // invalid={false}
+                        invalidText="Please fill"
+                        labelText="To :"
+                        placeholder="enter number here"
+                        light={true}
+                        onChange={(e) => {
+                          if (Number(e.target.value) >= 0) {
+                            setFieldValue("officeEndInputValue", parseInt(e.target.value))
+                            // this.setState({toggle: !this.state.toggle})
+                          }
+                        }}
+                        onBlur={handleBlur}
+                        // onClick={function noRefCheck() { }}
+                        type="number"
+                      />
+                      {touched.officeEndInputValue && errors.officeEndInputValue ? (
+                        <div className="error-message">
+                          {errors.officeEndInputValue}
+                        </div>
+                      ) : null}
+                      {console.log(values.officeEndInputValue,"To value")}
+                    </div>
+
+                    <div className="bx--col-md-2">
+                      <Button
+                        size="small"
+                        style={{ marginTop:"24px"}}
+                        // onClick={this.props.openSheet}
+                        onClick={() => {this.props.openSheet(values.officeStartInputValue,values.officeEndInputValue)}}
+                        disabled={values.officeEndInputValue <= values.officeStartInputValue  ? true : false}
+                      >
+                        Manage DataSheet
+                      </Button>
+                    </div>
+                  </>
+                }
+
+                <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
                   <DateSelection
                     dateFormat="d/m/Y"
                     datePickerType="single"
@@ -345,7 +472,7 @@ class ReturnOfficePacket extends Component {
                     }}
                     id="retutn-office-packet-create-date"
                     placeholder="dd/mm/yyyy"
-                    labelText="Create packet Date"
+                    labelText="Return rough Date"
                     className={
                       touched.officeReturnDate && errors.officeReturnDate
                         ? "error"
@@ -362,62 +489,57 @@ class ReturnOfficePacket extends Component {
                     </div>
                   ) : null}
                 </div>
-                <div className="bx--col-md-3">
-                  <DropDownSelection
-                    className={
-                      touched.officeReturnprocessName &&
-                        errors.officeReturnprocessName
-                        ? "error"
-                        : "bx--col dropdown-padding"
-                    }
-                    name="officeReturnprocessName"
-                    selectedItem={
-                      values.officeReturnprocessName || this.state.packetType
-                    }
-                    value={values.officeReturnprocessName}
-                    direction="top"
-                    // itemToString={(item) => (item ? item.text : "")}
-                    id="return-process-name-office"
-                    items={[this.state.packetType]}
-                    disabled={true}
-                    label="Select Process name"
-                    light
-                    onChange={(select) =>
-                      setFieldValue(
-                        "officeReturnprocessName",
-                        select.selectedItem
-                      )
-                    }
-                    titleText="Process Name"
-                    type="default"
-                  />
-                  {touched.officeReturnprocessName &&
-                    errors.officeReturnprocessName ? (
-                    <div className="error-message">
-                      {errors.officeReturnprocessName}
-                    </div>
-                  ) : null}
+             
+                <p style={{display: "grid"}} className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
+                  Packet Carat
+                  <span style={{color: "#DA1E28"}}>
+                    {( (preSelectedData?.chapka_issueCarat || preSelectedData?.sawing_issueCarat) || 0) || (this.state.packetCarat || 0)}
+                    {/* {this.state.packetCarat || 0} */}
+                  </span>
+                </p>
+                <p style={{display: "grid"}} className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
+                  Wight lose
+                  <span style={{color: "#DA1E28"}}>
+                    {/* {toFixed4(((( (preSelectedData.chapka_issueCarat || 0) || (this.state?.packetCarat || 0) ) - (values?.officeReturncarat || 0)) / ( (preSelectedData.chapka_issueCarat || 1) || (this.state.packetCarat || 1) )) * 100) || 0}% */}
+                    {toFixed4((( (this.state?.packetCarat || 0)  - (values?.officeReturncarat || 0)) / (this.state.packetCarat || 1) ) * 100) || 0}%
+                  </span>
+                </p>
+               
+                <div className={this.props.modelSheet ? "dataSheetStyle" : ""}>
+                  <div className='sheet-Container' style={{ marginLeft:"16px",marginBottom:"5%"}}>
+                    {this.props.modelSheet &&
+                      <ReactDataSheet
+                        // data={this.props.isActive === true ? this.props.update_grid : this.props.data}
+                        data={this.props.data}
+                        valueRenderer={this.props.valueRenderer}
+                        onContextMenu={this.props.onContextMenu}
+                        onCellsChanged={this.props.onCellsChanged}
+                      />
+                    } 
+                  </div>
+                </div>
+
+                <div className="bx--modal-footer modal-custome-footer">
+                  <button
+                    tabindex="0"
+                    className="bx--btn bx--btn--secondary"
+                    type="button"
+                    onClick={this.props.close}
+                  >
+                    Close
+                  </button>
+                  <button
+                    tabindex="0"
+                    className="bx--btn bx--btn--primary"
+                    type="submit"
+                    disabled={isSubmitting}
+                  >
+                    Save
+                  </button>
                 </div>
               </div>
-              <div className="bx--modal-footer modal-custome-footer">
-                <button
-                  tabindex="0"
-                  className="bx--btn bx--btn--secondary"
-                  type="button"
-                  onClick={this.props.close}
-                >
-                  Close
-                </button>
-                <button
-                  tabindex="0"
-                  className="bx--btn bx--btn--primary"
-                  type="submit"
-                  disabled={isSubmitting}
-                >
-                  Save
-                </button>
-              </div>
             </Form>
+            </div>
           )}
         </Formik>
       </div>

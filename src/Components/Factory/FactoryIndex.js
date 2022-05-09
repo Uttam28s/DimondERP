@@ -79,6 +79,10 @@ class FactoryIndex extends Component {
     });
   };
 
+  handelManageDataModal = () => {
+
+    this.props.history.push("/factorysheet")
+  }
 
   onPageChange = (page) => {
     console.log("RoughIndex -> onPageChange -> page", page);
@@ -170,11 +174,25 @@ class FactoryIndex extends Component {
   };
 
 
+  // edit = (data) => {
+  //   console.log("🚀 ~ file: FactoryIndex.js ~ line 176 ~ FactoryIndex ~ data", data)
+
+  // }
+
   edit = (data) => {
-    console.log("🚀 ~ file: FactoryIndex.js ~ line 176 ~ FactoryIndex ~ data", data)
+    console.log("🚀 ~ file: RoughIndex.js ~ line 243 ~ RoughIndex ~ data", data)
+
+
+    // let editArray = data && data.brokername ? ["Add Rough", "Sorting Rough"] : ["Assign Rough"]
+
+    this.setState({
+      // subRoughModel: false,
+      model: true,
+      // preSelectedData: data,
+      // editArray: editArray
+    });
 
   }
-
 
   remove = async (data) => {
     console.log("🚀 ~ file: FactoryIndex.js ~ line 182 ~ FactoryIndex ~ remove= ~ data", data)
@@ -327,7 +345,8 @@ class FactoryIndex extends Component {
         title="Factory"
         button="Create Packet"
         onClick={this.onModelPopup}
-        addButtonFunction={this.handelAddDataModal}
+        // addButtonFunction={this.handelAddDataModal}
+        manageButtonFunction={this.handelManageDataModal}
         rowData={this.state.tableData || []}
         column={Factoryrough}
        // tabview={true}

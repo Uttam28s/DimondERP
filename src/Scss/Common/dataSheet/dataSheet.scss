@@ -1,0 +1,116 @@
+.dataSheetStyle{
+  
+    .sheet-container {
+        /* display: block; */
+        padding: 5px;
+        -webkit-box-shadow: 0 0 6px #ccc;
+        box-shadow: 0 0 6px #ccc;
+        margin: auto;
+        /* width: 730px; */
+        height: auto;
+        width: auto;
+        margin-top: 20px;
+        /* margin-left: 10px; */
+    }
+
+    table.data-grid {
+        // margin: auto;
+        width: 100%;
+    }
+
+    span.value-viewer{
+        text-align: center;
+        margin-bottom: 3px;
+    }
+
+    .bx--modal-container {
+        width: 100%;
+        height: 100%;
+        margin-left: 15%;
+        margin-bottom: auto;
+        max-height: 800px;
+        // background-color: white;
+    }
+
+    //cell................................
+    .data-grid-container .data-grid .cell {
+        // padding: 5px 5px !important;
+        // padding-bottom: 3px;
+        padding: 4px !important;
+        height: auto !important;
+    }      
+
+    .data-grid-container .data-grid .cell .data-editor{
+        margin: auto auto 0px auto;
+        padding: 10px;
+        text-align: center;
+        border: none;
+        font-size: 14px;
+        // width: 128px;
+    }
+
+    .data-grid-container .data-grid .cell.selected{
+        font-size: 14px;
+        box-shadow: none;
+        border: none;
+        // border: 1px double #2185D0;
+        // border: 2pt solid #2185E4;
+        outline-offset: -2px;
+        // outline: 2pt solid #2185D0;
+        outline: 2pt solid #3c78d8
+    } 
+
+    //dropdown.............................
+    .css-1pahdxg-control{
+        height: 20px;
+        min-height: auto;
+        border: unset;
+        box-shadow: unset;
+        // border-radius: unset;
+        background-color: #f4f4f4;
+    }
+
+    .css-yk16xz-control{
+        height: 20px;
+        min-height: auto;
+        border: unset;
+        // border-radius: unset;
+        background-color: #f4f4f4;
+    }
+
+    .css-g1d714-ValueContainer{
+        // padding: 0 6px;
+        position: unset;
+        margin-top: -9px;
+    }
+
+    .css-tlfecz-indicatorContainer{
+        // padding: 3px;
+        padding-top: 0;
+    }
+
+    .css-1gtu0rj-indicatorContainer{
+        // padding: 3px;
+        padding-top: 0;
+    }
+
+    .css-1okebmr-indicatorSeparator{
+        margin-top: 3px;
+        margin-bottom: 12px;
+        background-color: #8A8A8A;
+    }
+
+    .css-b8ldur-Input{
+        margin: 0
+    }
+    
+    .css-6q0nyr-Svg{
+        color: #5c5c5c;
+    }
+
+    //This style use of (manageModel-secondary button)
+    // .top-margin-model-input {
+    //     margin-top: 1%;
+    // }
+
+}

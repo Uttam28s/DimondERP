@@ -6,13 +6,17 @@ export const FactorySubRough = (props) => {
     return (
         <div>
             <PageTopSection
-                noButton
+                // noButton
                 rowData={props.rowData}
                 column={props.column}
                 pageSize={props.pageSize}
                 totalData={props.totalData}
                 edit={props.edit}
                 remove={props.remove}
+
+                button="Close Sub Packet"
+                title="Sub Office"
+                subClose={props.subClose}
             />
         </div>
     );

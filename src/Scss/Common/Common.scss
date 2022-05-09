@@ -162,3 +162,48 @@ main-content,
     display: inline-block;
   }
 }
+
+.bx--col-md-4{
+  margin-bottom: 3%;
+}
+
+.modelComponent{
+
+  .bx--content {
+      margin-left: 15%;
+      background-color: whitesmoke;
+  }
+
+  .bx--grid{
+    padding-left: 1rem;
+  }
+
+  .bx--form{
+    max-height: 668px;
+    height: 100%;
+    overflow: auto;
+    width: 102%;
+    background-color: #f5f5f5;
+  }
+
+  .bx--col-md-2{
+    margin-bottom: 2%;
+  }
+
+  .bx--date-picker{
+    display: block;
+  }
+
+  @media (min-width: 66rem){
+      .bx--offset-lg-3 {
+          margin-left: 0% !important;
+      }
+  }
+
+  @media (min-width: 66rem) {
+    .sidebar-content {
+      margin-left: 0% !important;
+    }
+  }
+  
+}

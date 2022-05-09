@@ -12,6 +12,9 @@ import {connect} from "react-redux";
 import {returnFactorySubPacket, getFactorySubList} from "../../Actions/Factory";
 // import { Tab } from "carbon-components-react";
 // import TabView from "../Common/Tabs";
+import ReactDataSheet from 'react-datasheet';
+import {Button} from "carbon-components-react";
+import "react-datasheet/lib/react-datasheet.css";
 
 const validationSchema = Yup.object().shape({
   factoryReturnPacketId: Yup.string().required("*Packet id is required"),
@@ -25,7 +28,24 @@ class ReturnSubPacket extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {};
+    this.state = {
+      preDefinedData: "",
+      preSelectedData: "",
+      returndata: ""
+    };
+  }
+
+  componentDidMount = () => {
+    console.log('preSelectedData', this.props.preSelectedData, this.props.preDefinedData)
+    if (this.props.preSelectedData) {
+      this.setState({ preSelectedData: this.props.preSelectedData });
+    }
+    else if(this.props.preDefinedData){
+      this.setState({ preDefinedData: this.props.preDefinedData });
+    }
+    else if(this.props.returndata){
+      this.setState({ returndata: this.props.returndata });
+    }
   }
 
   handelSubmit = (values) => {
@@ -78,21 +98,36 @@ class ReturnSubPacket extends Component {
 
 
   render() {
+    const {preSelectedData, preDefinedData, returndata} = this.props
+
+    console.log("preSelectedData ==> editReturnPacket...",this.props.preSelectedData,this.props.preDefinedData)
+
+    // const returnData = returndata?.[preSelectedData?.process_name].find((data) => data.process_name === preSelectedData?.process_name)
+    // const selectReturnData = returnData?.returndata
+    // console.log(selectReturnData,"selectReturnData ==> editReturnPacket...")
+
+    const selectReturnData = preDefinedData?.data.find((data) => data.assign_carat === preSelectedData?.assign_carat)  
+    console.log(selectReturnData,"selectReturnData ==> editReturnPacket...")
+
     return (
-      <div style={{ marginBottom: "15%" }}>
+      <div style={{ marginBottom: "1%" }}>
         <Formik
           initialValues={{
-            factoryReturnPacketId: "",
-            factoryReturnAssignName: "",
-            factoryReturnprocessName: "",
-            factoryReturncarat: "",
-            factoryReturnpiece: "",
-            factoryPacketReturnDate: "",
-            factoryReturnSize: "",
-            factoryReturnYeild: "",
-            factoryReturnProcessWeight: "",
+            factoryIssueRoughId: selectReturnData?.main_carat || "",
+            factoryRough: selectReturnData?.factory_carat || "", 
+            factoryReturnPacketId: preSelectedData?.returndata?.return_carat || "",
+            factoryReturnAssignName: preSelectedData?.assign_name || "",
+            factoryReturnprocessName: preSelectedData?.process_name || "",
+            factoryReturncarat: preSelectedData?.return_carat || "",
+            factoryReturnpiece: preSelectedData?.returndata?.return_peice || "",
+            factoryPacketReturnDate: (preSelectedData?.return_date && moment(preSelectedData?.return_date).format("DD/MM/YYYY")) || "",
+            factoryReturnSize: preSelectedData?.returndata?.return_size || "",
+            factoryReturnYeild: preSelectedData?.returndata?.return_yeild || "",
+            factoryReturnProcessWeight: preSelectedData?.returndata?.return_sarin_weight || "",
             factoryReturnWeightlose: "",
-        //    factoryReturnProcessID: ""
+            // factoryReturnProcessID: "",
+            factoryStartInputValue: "",
+            factoryEndInputValue: ""
           }}
           validationSchema={validationSchema}
           onSubmit={(values, { setSubmitting, resetForm }) => {
@@ -120,63 +155,8 @@ class ReturnSubPacket extends Component {
             isSubmitting,
           }) => (
             <Form onSubmit={handleSubmit}>
-              <div className="assign-headding-wrapper">
-                <h5 className="h5-form-label">
-                  Assign Date :{" "}
-                  <span style={{ color: "#0F61FD" }}>20/03/2020</span>
-                </h5>
-                <h5 className="h5-form-label">
-                  Total Carat : <span style={{ color: "#0F61FD" }}>650.00</span>
-                </h5>
-                <h5 className="h5-form-label">
-                  Remaining Carat :{" "}
-                  <span style={{ color: "#E7301C" }}>#AID001</span>
-                </h5>
-              </div>
               <div className="bx--row">
-                <div className="bx--col-md-4">
-                  <DateSelection
-                    dateFormat="d/m/Y"
-                    datePickerType="single"
-                    onChange={(date) => {
-                      const basicDate = new Date(date);
-                      const formateDate =
-                        basicDate.getDate() +
-                        "/" +
-                        (basicDate.getMonth() + 1) +
-                        "/" +
-                        basicDate.getFullYear();
-                      setFieldValue("factoryPacketReturnDate", formateDate);
-                    }}
-                    id="factory-packet-return-date"
-                    placeholder="dd/mm/yyyy"
-                    labelText="Create packet Date"
-                    className={
-                      touched.factoryPacketReturnDate &&
-                      errors.factoryPacketReturnDate
-                        ? "error"
-                        : "bx--col"
-                    }
-                    dateid="factory-return-packet-id"
-                    name="factoryPacketReturnDate"
-                    value={values.factoryPacketReturnDate}
-                    onBlur={handleBlur}
-                  />
-                  {touched.factoryPacketReturnDate &&
-                  errors.factoryPacketReturnDate ? (
-                    <div className="error-message">
-                      {errors.factoryPacketReturnDate}
-                    </div>
-                  ) : null}
-                </div>
-
-
-
-
-
-                <div className="bx--col-md-4">
-
-
+                <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
                   <DropDownSelection
                     className={
                       touched.factoryIssueRoughId && errors.factoryIssueRoughId
@@ -184,49 +164,46 @@ class ReturnSubPacket extends Component {
                         : "bx--col dropdown-padding"
                     }
                     name="factoryIssueRoughId"
-                    selectedItem={values.factoryIssueRoughId}
+                    selectedItem={selectReturnData?.main_carat ? {label: selectReturnData?.main_carat} : values.factoryIssueRoughId}
                     value={values.factoryIssueRoughId}
                     // itemToString={(item) => (item ? item.text : "")}
-                    id="factory-rough-id"
+                    id="factory-main-rough"
                     items={this.props.caratList || []}
-                    label="Select Rough id"
+                    label="Select main Rough"
                     light
                     onChange={(select) => {
                       setFieldValue("factoryIssueRoughId", select.selectedItem);
-                      // setFieldValue("roughName", "")
+                      // setFieldValue("factoryRough", "")
                       // setFieldValue("factoryReturnPacketId", "")
                       // setFieldValue("factoryReturnProcessWeight", "")
-                      this.setFormData(["roughName", "factoryReturnPacketId", "factoryReturnProcessWeight"], setFieldValue)
+                      this.setFormData(["factoryRough", "factoryReturnPacketId", "factoryReturnProcessWeight"], setFieldValue)
                       this.clearState()
                       console.log('select.selectedItem', select.selectedItem)
                       select.selectedItem?.id && this.getFactoryRoughList(select.selectedItem.id)
                     }}
-                    titleText="Rough"
+                    titleText="Main Rough"
                     type="default"
                   />
-
-
-
                 </div>
 
-                <div className="bx--col-md-4">
+                <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
                   <DropDownSelection
                     className={
-                      touched.roughName && errors.roughName
+                      touched.factoryRough && errors.factoryRough
                         ? "error"
                         : "bx--col dropdown-padding"
                     }
-                    name="roughName"
-                    selectedItem={values.roughName}
-                    value={values.roughName}
+                    name="factory Rough"
+                    selectedItem={ selectReturnData?.factory_carat ? {label: selectReturnData?.factory_carat} : values.factoryRough}
+                    value={values.factoryRough}
                     // itemToString={(item) => (item ? item.text : "")}
-                    id="rough-name-office"
+                    id="factory-rough"
                     items={this.state.subRoughList || []}
-                    label="Select Rough name"
+                    label="Select factory Rough"
                     light
                     onChange={(select) => {
                       setFieldValue("factoryReturnPacketId", "")
-                      setFieldValue("roughName", select.selectedItem)
+                      setFieldValue("factoryRough", select.selectedItem)
                       this.setState({subPacketData: []})
                       select?.selectedItem?.id && this.props.getFactorySubList({factory_id: select.selectedItem.id}).then((res) => {
                         console.log("🚀 ~ file: ReturnPacket.js ~ line 201 ~ ReturnSubPacket ~ select?.selectedItem?.id&&this.props.getFactorySubList ~ data", res)
@@ -251,12 +228,12 @@ class ReturnSubPacket extends Component {
                     titleText="Rough Name"
                     type="default"
                   />
-                  {touched.roughName && errors.roughName ? (
-                    <div className="error-message">{errors.roughName}</div>
+                  {touched.factoryRough && errors.factoryRough ? (
+                    <div className="error-message">{errors.factoryRough}</div>
                   ) : null}
                 </div>
 
-                <div className="bx--col-md-4">
+                <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
                   {console.log('val.last_carat.toString()', this.state.subPacketData)}
                   <DropDownSelection
                     className={
@@ -266,7 +243,7 @@ class ReturnSubPacket extends Component {
                         : "bx--col dropdown-padding"
                     }
                     name="factoryReturnPacketId"
-                    selectedItem={values.factoryReturnPacketId}
+                    selectedItem={ preSelectedData?.assign_carat ? {label: preSelectedData?.assign_carat} : values.factoryReturnPacketId }
                     value={values.factoryReturnPacketId}
                     // itemToString={(item) => (item ? item.text : "")}
                     id="factory-retutn-packet-id"
@@ -303,7 +280,8 @@ class ReturnSubPacket extends Component {
                     </div>
                   ) : null}
                 </div>
-                <div className="bx--col-md-4">
+
+                <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
                   <DropDownSelection
                     className={
                       touched.factoryReturnAssignName &&
@@ -312,7 +290,7 @@ class ReturnSubPacket extends Component {
                         : "bx--col dropdown-padding"
                     }
                     name="factoryReturnAssignName"
-                    selectedItem={values.factoryReturnAssignName}
+                    selectedItem={ preSelectedData?.assign_name ? preSelectedData?.assign_name : values.factoryReturnAssignName}
                     value={values.factoryReturnAssignName}
                     // itemToString={(item) => (item ? item.text : "")}
                     id="factory-retutn-assign-name"
@@ -343,16 +321,44 @@ class ReturnSubPacket extends Component {
                     </div>
                   ) : null}
                 </div>
-                <div className="bx--col-md-4" style={{ marginTop: "4.5%" }}>
-                  <h5 className="h5-form-label">
-                    Total Weight lose :{" "}
-                    <span style={{color: "#E7301C"}}>{(values.factoryReturncarat && ((values?.factoryReturncarat || values?.factoryReturnPacketId?.label) / values?.factoryReturnPacketId?.label)) || 0}%</span>
-                  </h5>
-                </div>
-              </div>
 
-              <div className="bx--row top-margin-model-input">
-                <div className="bx--col-md-4">
+                <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
+                  <DateSelection
+                    dateFormat="d/m/Y"
+                    datePickerType="single"
+                    onChange={(date) => {
+                      const basicDate = new Date(date);
+                      const formateDate =
+                        basicDate.getDate() +
+                        "/" +
+                        (basicDate.getMonth() + 1) +
+                        "/" +
+                        basicDate.getFullYear();
+                      setFieldValue("factoryPacketReturnDate", formateDate);
+                    }}
+                    id="factory-packet-return-date"
+                    placeholder="dd/mm/yyyy"
+                    labelText="Return packet Date"
+                    className={
+                      touched.factoryPacketReturnDate &&
+                      errors.factoryPacketReturnDate
+                        ? "error"
+                        : "bx--col"
+                    }
+                    dateid="factory-return-packet-id"
+                    name="factoryPacketReturnDate"
+                    value={values.factoryPacketReturnDate}
+                    onBlur={handleBlur}
+                  />
+                  {touched.factoryPacketReturnDate &&
+                  errors.factoryPacketReturnDate ? (
+                    <div className="error-message">
+                      {errors.factoryPacketReturnDate}
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
                   <TextField
                     className={
                       touched.factoryReturncarat && errors.factoryReturncarat
@@ -368,7 +374,7 @@ class ReturnSubPacket extends Component {
                     placeholder="enter carat here"
                     light={true}
                     onChange={(e) => {
-                      if (Number(e.target.value) <= Number(values.factoryReturnPacketId?.label)) {
+                      if (Number(e.target.value) <= Number(values.factoryReturnPacketId?.label || preSelectedData?.assign_carat)) {
                         handleChange(e)
 
                       }
@@ -383,7 +389,8 @@ class ReturnSubPacket extends Component {
                     </div>
                   ) : null}
                 </div>
-                <div className="bx--col-md-4">
+
+                <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
                   <TextField
                     className={
                       touched.factoryReturnpiece && errors.factoryReturnpiece
@@ -416,9 +423,20 @@ class ReturnSubPacket extends Component {
                     </div>
                   ) : null}
                 </div>
-              </div>
-              <div className="bx--row top-margin-model-input">
-                <div className="bx--col-md-4">
+
+                <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"} style={{ marginTop: "2%"}}>
+                  <h5 className="h5-form-label">
+                    Total Weight lose :{" "}
+                    {/* <span style={{color: "#E7301C"}}>
+                      {(values.factoryReturncarat && ((values?.factoryReturncarat || values?.factoryReturnPacketId?.label) / values?.factoryReturnPacketId?.label)) || 0}%
+                    </span> */}
+                    <span style={{color: "#E7301C"}}>
+                      {(preSelectedData?.return_carat || values.factoryReturncarat && ( ( (preSelectedData?.return_carat || values.factoryReturncarat) || selectReturnData?.return_carat ) / selectReturnData?.return_carat ) ) || 0}%
+                    </span>
+                  </h5>
+                </div>
+              
+                <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
                   {console.log('values.factoryReturnPacketId', values.factoryReturnPacketId)}
                   <DropDownSelection
                     className={
@@ -428,7 +446,7 @@ class ReturnSubPacket extends Component {
                         : "bx--col dropdown-padding"
                     }
                     name="factoryReturnprocessName"
-                    selectedItem={values.factoryReturnprocessName}
+                    selectedItem={ preSelectedData?.process_name ? preSelectedData?.process_name : values.factoryReturnprocessName}
                     value={values.factoryReturnprocessName}
                     direction="top"
                     // itemToString={(item) => (item ? item.text : "")}
@@ -453,7 +471,8 @@ class ReturnSubPacket extends Component {
                     </div>
                   ) : null}
                 </div>
-                <div className="bx--col-md-4">
+
+                <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
                   <TextField
                     className={
                       touched.factoryReturnSize && errors.factoryReturnSize
@@ -482,9 +501,8 @@ class ReturnSubPacket extends Component {
                     </div>
                   ) : null}
                 </div>
-              </div>
-              <div className="bx--row top-margin-model-input">
-                <div className="bx--col-md-4">
+              
+                <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
                   <TextField
                     className={
                       touched.factoryReturnYeild && errors.factoryReturnYeild
@@ -510,7 +528,8 @@ class ReturnSubPacket extends Component {
                     </div>
                   ) : null}
                 </div>
-                <div className="bx--col-md-4">
+
+                <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
                   {console.log("🚀 ~ file: ReturnPacket.js ~ line 483 ~ ReturnSubPacket ~ render ~ values.factoryReturnprocessName", values)}
                   <TextField
                     className={
@@ -541,24 +560,123 @@ class ReturnSubPacket extends Component {
                     </div>
                   ) : null}
                 </div>
-              </div>
-              <div className="bx--modal-footer modal-custome-footer">
-                <button
-                  tabindex="0"
-                  className="bx--btn bx--btn--secondary"
-                  type="button"
-                  onClick={this.props.close}
-                >
-                  Close
-                </button>
-                <button
-                  tabindex="0"
-                  className="bx--btn bx--btn--primary"
-                  type="submit"
-                  disabled={isSubmitting}
-                >
-                  Save
-                </button>
+
+                {this.props.modelSheet &&
+                  <>
+                    <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-3"}>
+                      <TextField
+                        className={
+                          touched.factoryStartInputValue && errors.factoryStartInputValue
+                            ? "error"
+                            : "bx--col"
+                        }
+                        name="factoryStartInputValue"
+                        value={values.factoryStartInputValue}
+                        id="fectory-factoryStartInputValue"
+                        // invalid={false}
+                        invalidText="Please fill"
+                        labelText="From :"
+                        placeholder="enter number here"
+                        light={true}
+                        onChange={(e) => {
+                          if (Number(e.target.value) >= 1) {
+                            setFieldValue("factoryStartInputValue", parseInt(e.target.value))
+                            // this.setState({toggle: !this.state.toggle})
+                          }
+                        }}
+                        onBlur={handleBlur}
+                        // onClick={function noRefCheck() { }}
+                        // required
+                        type="number"
+                      />
+                      {touched.factoryStartInputValue && errors.factoryStartInputValue ? (
+                        <div className="error-message">
+                          {errors.factoryStartInputValue}
+                        </div>
+                      ) : null}
+                    {console.log(values.factoryStartInputValue,"from value")}
+                    </div>
+                    <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-3"}>
+                      <TextField
+                        className={
+                          touched.factoryEndInputValue && errors.factoryEndInputValue
+                            ? "error"
+                            : "bx--col"
+                        }
+                        name="factoryEndInputValue"
+                        value={values.factoryEndInputValue}
+                        id="fectory-factoryEndInputValue"
+                        // invalid={false}
+                        invalidText="Please fill"
+                        labelText="To :"
+                        placeholder="enter number here"
+                        light={true}
+                        onChange={(e) => {
+                          if (Number(e.target.value) >= 0) {
+                            setFieldValue("factoryEndInputValue", parseInt(e.target.value))
+                            // this.setState({toggle: !this.state.toggle})
+                          }
+                        }}
+                        onBlur={handleBlur}
+                        // onClick={function noRefCheck() { }}
+                        // required
+                        type="number"
+                      />
+                      {touched.factoryEndInputValue && errors.factoryEndInputValue ? (
+                        <div className="error-message">
+                          {errors.factoryEndInputValue}
+                        </div>
+                      ) : null}
+                      {console.log(typeof(values.factoryEndInputValue),values.factoryEndInputValue,"To value")}
+                    </div>
+                    <div className="bx--col-md-2">
+                      <Button
+                        size="small"
+                        style={{ marginTop:"24px"}}
+                        // onClick={this.props.openSheet}
+                        onClick={() => {this.props.openSheet(values.factoryStartInputValue,values.factoryEndInputValue)}}
+                        disabled={values.factoryEndInputValue <= values.factoryStartInputValue  ? true : false}
+                      >
+                        Manage DataSheet
+                      </Button>
+                    </div>
+                  </>
+                }
+
+                <div className={this.props.modelSheet ? "dataSheetStyle" : ""}>    
+                  <div className='sheet-Container' style={{ marginLeft:"16px",marginBottom:"5%"}}>
+                    {console.log(this.props.data,"row data in model - createOfficePacket")}
+
+                    {this.props.modelSheet &&
+                      <ReactDataSheet
+                        // data={this.props.isActive === true ? this.props.update_grid : this.props.data}
+                        data={this.props.data}
+                        valueRenderer={this.props.valueRenderer}
+                        onContextMenu={this.props.onContextMenu}
+                        onCellsChanged={this.props.onCellsChanged}
+                      />
+                    } 
+                  </div>
+                </div>
+
+                <div className="bx--modal-footer modal-custome-footer">
+                  <button
+                    tabindex="0"
+                    className="bx--btn bx--btn--secondary"
+                    type="button"
+                    onClick={this.props.close}
+                  >
+                    Close
+                  </button>
+                  <button
+                    tabindex="0"
+                    className="bx--btn bx--btn--primary"
+                    type="submit"
+                    disabled={isSubmitting}
+                  >
+                    Save
+                  </button>
+                </div>
               </div>
             </Form>
           )}

@@ -183,7 +183,7 @@ class RoughIndex extends Component {
     console.log("RoughIndex -> handelAdewrwejrhwegyudSorting -> data", data);
     this.props
       .addSortingData(data)
-      .then((res) => this.closeModal())
+      .then((res) => console.log("this is add sorting", res))
       .catch((e) => console.log(e));
   };
 

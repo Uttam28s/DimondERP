@@ -18,7 +18,7 @@ class TabView extends Component {
           onSelectionChange={this.props.handelModelTabChange}
           selectionMode="automatic"
         >
-          {this.props.tabContent.map((value) => (
+          {this.props.tabContent&&this.props.tabContent.map((value) => (
             <Tab
               // href="#"
               key={value.id}

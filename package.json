@@ -107,6 +107,7 @@
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "react": "^16.9.0",
+    "react-datasheet": "^1.4.9",
     "react-dom": "^16.9.0",
     "react-loading": "^2.0.3",
     "react-paginate": "^6.5.0",

@@ -59,18 +59,49 @@ class AssignRough extends Component {
   }
 
   handelSubmit = (e) => {
+    console.log(e.workPlace,"e.workPlace...")
+
+    const data = {
+      rough_id: e.sortinRoughId.id,
+      assign_date: moment(e.assignRoughDate, "DD-MM-YYYY").format("YYYY-MM-DD"),
+    };
+    const officeData = {
+      ...data,
+      office_assigne_name: e.assignName,
+      office_total_carat: toFixed4(e.carat),
+      office: true
+    }
+    const factoryData = {
+      ...data,
+      factory_assigne_name: e.assignName,
+      factory_total_carat: toFixed4(e.carat),
+      factory: true
+
+    }
+
+    if (this.props.preSelectedData) {
+      let data = e.workPlace.toLocaleLowerCase() === "office" ? {...officeData} : {...factoryData}
+      data = {...data, difference: toFixed4(e.carat) - this.props.preSelectedData[`${e.workPlace.toLocaleLowerCase()}_total_carat`]}
+      this.props.editOfficeAndFactory(data)
+    } else {
+      e.workPlace === "office" && this.props.handelAssignOffice(officeData);
+      e.workPlace === "factory" && this.props.handelAssignFactory(factoryData);
+    }
+    this.props.close();
+    
   };
 
   handleChange = (e) => {
   };
 
   getRoughData = async (select, workName) => {
+    console.log(select,"select ==> AssignRough.js")
     await this.props.getUnusedList(select.id).then((data) => {
       const {preSelectedData} = this.props
       console.log("🚀 ~ file: AssignRough.js ~ line 40 ~ AssignRough ~ awaitthis.props.getUnusedList ~ data", data)
       let carat = workName.toLowerCase() == "office" ? (Number(data?.data?.copyCarat == undefined ? select.label : data?.data.copyCarat)) : Number(data.data?.mackable) || 0
-      carat = carat - (preSelectedData[`${workName}_total_carat`] || 0)
-      if (this.props.getDate)
+      carat = carat - (preSelectedData?.[`${workName}_total_carat`] || 0)
+      // if (this.props.getDate)
       this.setState({
         availableCaret: carat,
         remainingCarat: carat
@@ -98,37 +129,55 @@ class AssignRough extends Component {
           onSubmit={(values, { setSubmitting, resetForm }) => {
             // When button submits form and form is in the process of submitting, submit button is disabled
             setSubmitting(true);
-            const data = {
-              rough_id: values.sortinRoughId.id,
-              assign_date: moment(values.assignRoughDate, "DD-MM-YYYY").format("YYYY-MM-DD"),
-            };
-            const officeData = {
-              ...data,
-              office_assigne_name: values.assignName,
-              office_total_carat: toFixed4(values.carat),
-              office: true
-            }
-            const factoryData = {
-              ...data,
-              factory_assigne_name: values.assignName,
-              factory_total_carat: toFixed4(values.carat),
-              factory: true
 
-            }
+            this.handelSubmit(values);
 
-            if (this.props.preSelectedData) {
-              let data = values.workPlace.toLocaleLowerCase() === "office" ? {...officeData} : {...factoryData}
-              data = {...data, difference: toFixed4(values.carat) - this.props.preSelectedData[`${values.workPlace.toLocaleLowerCase()}_total_carat`]}
-              this.props.editOfficeAndFactory(data)
-            } else {
-            values.workPlace === "Office" && this.props.handelAssignOffice(officeData);
-              values.workPlace === "Factory" && this.props.handelAssignFactory(factoryData);
-            }
-            this.props.close();
+            // const data = {
+            //   rough_id: values.sortinRoughId.id,
+            //   assign_date: moment(values.assignRoughDate, "DD-MM-YYYY").format("YYYY-MM-DD"),
+            // };
+            // const officeData = {
+            //   ...data,
+            //   office_assigne_name: values.assignName,
+            //   office_total_carat: toFixed4(values.carat),
+            //   office: true
+            // }
+            // const factoryData = {
+            //   ...data,
+            //   factory_assigne_name: values.assignName,
+            //   factory_total_carat: toFixed4(values.carat),
+            //   factory: true
+
+            // }
+
+            // if (this.props.preSelectedData) {
+            //   let data = values.workPlace.toLocaleLowerCase() === "office" ? {...officeData} : {...factoryData}
+            //   data = {...data, difference: toFixed4(values.carat) - this.props.preSelectedData[`${values.workPlace.toLocaleLowerCase()}_total_carat`]}
+            //   this.props.editOfficeAndFactory(data)
+            // } else {
+            // values.workPlace === "office" && this.props.handelAssignOffice(officeData);
+            //   values.workPlace === "factory" && this.props.handelAssignFactory(factoryData);
+            // }
+            // this.props.close();
+
             setTimeout(() => {
               resetForm();
               setSubmitting(false);
             }, 500);
+
+
+
+
+            // setSubmitting(true);
+           
+            // this.handelSubmit(values);
+            
+            // setTimeout(() => {
+            //   resetForm();
+            //   setSubmitting(false);
+            // }, 500);
+
+
           }}
         >
           {({
@@ -234,7 +283,7 @@ class AssignRough extends Component {
                     value={values.workPlace}
                     // itemToString={(item) => (item ? item.text : "")}
                     id="rough-workplace"
-                    items={["Office", "Factory"]}
+                    items={["office", "factory"]}
                     label="Select work place"
                     light
                     onChange={

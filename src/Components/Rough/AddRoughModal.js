@@ -40,7 +40,7 @@ class AddRoughModal extends Component {
     const {preSelectedData} = this.props
     console.log("AddRoughModal -> render -> values", e.purchaseDate);
     const data = {
-      carat: toFixed4(e.carat) - (toFixed4(preSelectedData.carat) || 0),
+      carat: (e.carat) - ((preSelectedData?.carat) || 0),
       days: e.paymentDays,
       date: moment(e.purchaseDate, "DD-MM-YYYY").format("YYYY-MM-DD"),
       sellername: e.sallerName,

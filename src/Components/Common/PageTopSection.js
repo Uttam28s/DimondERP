@@ -24,8 +24,10 @@ import {
 } from "carbon-components-react";
 import { Add24 } from "@carbon/icons-react";
 import TableCells from "./TableCell";
-import {Tooltip} from 'react-tippy';
-import 'react-tippy/dist/tippy.css'
+import TabView from "./Tabs";
+import { Tooltip } from "react-tippy";
+import "react-tippy/dist/tippy.css";
+import { withRouter } from "react-router";
 // import {
 //   Add20,
 //   ListDropdown24,
@@ -42,17 +44,15 @@ class PageTopSection extends Component {
       dataPerPage: 10,
       currentPageData: [],
       cureentTab: 0,
-      open: false
+      open: false,
       // page:1
     };
   }
-
   // componentDidMount = () => {
   //   this.setState({
   //     currentPage: 1,
   //   });
   // };
-
   componentDidUpdate = (prevProps, prevState) => {
     // console.log(
     //   "PageTopSection -> componentDidUpdate -> prevState.currentPage",
@@ -70,64 +70,75 @@ class PageTopSection extends Component {
     //   console.log("this ia a s array data", this.props.rowData);
     // }
   };
-
   handelTab = (e) => {
     console.log("this is a log to check the tab on Change -> ", e);
     this.setState({
       cureentTab: e,
     });
   };
-
   handelOnEditClick = (id) => {
     const split = id.split(":");
     const singleData = this.state.rowData.find((data) => data.id === split[0]);
-    this.props.edit(singleData)
+    this.props.edit(singleData);
+    console.log("Press the Edit button",singleData)
   };
-
   handelOnDeleteClick = (id) => {
     const split = id.split(":");
     const singleData = this.state.rowData.find((data) => data.id === split[0]);
-    this.setState({open: split[0]});
+    this.setState({ open: split[0] });
   };
-
-
   closeBox = (id) => {
     if (id) {
       const split = id.split(":");
-      const singleData = this.state.rowData.find((data) => data.id === split[0]);
-      this.props.remove(singleData)
+      const singleData = this.state.rowData.find(
+        (data) => data.id === split[0]
+      );
+      this.props.remove(singleData);
     }
-    this.setState({open: false});
-  }
-
+    this.setState({ open: false });
+  };
   handelViewButton = (id) => {
     const split = id.split(":");
     const singleData = this.state.rowData.find((data) => data.id === split[0]);
-    this.props.onClick(singleData);
+    console.log("Press the View button",singleData)
+    // this.props.onClick(singleData);
+    if (singleData.office_assigne_name) {
+      this.props.history.push({
+        pathname: `/office/subpacket/${singleData._id}`,
+        state: singleData,
+      });
+    } else if (singleData.factory_assigne_name) {
+      this.props.history.push({
+        pathname: `/factory/subpacket/${singleData._id}`,
+        state: singleData,
+      });
+    } else {
+      this.props.history.push({
+        pathname: `/rough/subpacket/${singleData._id}`,
+        state: singleData,
+      });
+    }
   };
-
-  itemRangeText = (min, max, total) => {
-  };
-
-  itemText = (min, max) => {
-  };
-
+  itemRangeText = (min, max, total) => {};
+  itemText = (min, max) => {};
   onChange = (e) => {
     this.setState({
       currentPage: e.page,
     });
     this.props.pageSize(e.page);
   };
-
-  pageRangeText = (current, total) => {
-  };
-
-  pageText = (page) => {
-  };
-
+  pageRangeText = (current, total) => {};
+  pageText = (page) => {};
   render() {
-    return (
+    return this.props.tabContent ? (
+      <TabView
+        tabContent={this.props.tabContent}
+        handelModelTabChange={this.props.handelModelTabChange}
+        tabSelected={this.props.tabSelected}
+      />
+    ) : (
       <div className="pagetop-wrapper">
+        {console.log("this.propsthis.propsthis.props", this.props)}
         <DataTable
           rows={this.state.rowData}
           headers={this.state.headerData}
@@ -144,8 +155,10 @@ class PageTopSection extends Component {
           }) => (
             <TableContainer title={this.props.title}>
               <TableToolbar>
-
-                <TableToolbarContent className="tollbar-content">
+                <TableToolbarContent
+                  className={`tollbar-content ${!this.state.rowData.length &&
+                    "no-record-blur"}`}
+                >
                   <TableToolbarSearch
                     tabIndex={
                       getBatchActionProps().shouldShowBatchActions ? -1 : 0
@@ -172,130 +185,201 @@ class PageTopSection extends Component {
                       Action 3
                     </TableToolbarAction>
                   </TableToolbarMenu>
-                  {this.props.noButton ? ("") : (
-                    <Button
-                      tabIndex={getBatchActionProps().shouldShowBatchActions ? -1 : 0}
-                      onClick={this.props.handelAddData}
-                      size="small"
-                      kind="primary"
-                      className="add-data-button"
-                    >
-                      {this.state.cureentTab === 2
-                        ? "Return Packet"
-                        : this.props.button}
-                      <Add24 />
-                    </Button>
-                  )}
+
+                  {this.props.handleManageData ? 
+                    (
+                      <Button
+                        tabIndex={
+                          getBatchActionProps().shouldShowBatchActions ? -1 : 0
+                        }
+                        onClick={this.props.handleManageData}
+                        size="small"
+                        kind="primary"
+                        className="add-data-button"
+                        style={{ marginRight:"1px", width:"14%"}}
+                      >
+                        {this.state.cureentTab === 2
+                          ? "Return Packet"
+                          : "CreatePacket & MangeData"}
+                      </Button>
+                    ) 
+                    : ("")
+                  }
+                  
+                  {this.props.noButton ? (
+                    ""
+                  ) : (
+                  this.props.subClose ? (
+                      <Button
+                        tabIndex={
+                          getBatchActionProps().shouldShowBatchActions ? -1 : 0
+                        }
+                        onClick={this.props.subClose}
+                        size="small"
+                        kind="secondary"
+                        className="add-data-button"
+                        // className="bx--btn bx--btn--secondary"
+                      >
+                        {this.state.cureentTab === 2
+                          ? "Return Packet"
+                          : this.props.button}
+                      </Button>
+
+                      ) : this.props.handelAddData ? ( 
+
+                      <Button
+                        tabIndex={
+                          getBatchActionProps().shouldShowBatchActions ? -1 : 0
+                        }
+                        onClick={this.props.handelAddData}
+                        size="small"
+                        kind="primary"
+                        className="add-data-button"
+                      >
+                        {this.state.cureentTab === 2
+                          ? "Return Packet"
+                          : this.props.button}
+                        <Add24 />
+                      </Button>
+
+                      ) : ("")
+                    )
+                  }
                 </TableToolbarContent>
               </TableToolbar>
-              <div className="table-wrapper">
-                <Table useZebraStyles >
-                  <TableHead>
-                    <TableRow>
-                      {headers.map((header) => (
-                        <TableHeader
-                          {...getHeaderProps({ header })}
-                          style={{ width: `${header.size}` }}
-                        >
-                          {header.header}
-                        </TableHeader>
-                      ))}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {rows.map((row) => (
-                      <>
-                        <TableRow {...getRowProps({row})}
-                          className={this.props.colour ?
-                            `${row.cells.filter(data =>
-                              data.id.includes("return_date"))[0]?.value ?
-                              "sucess-row" : "failed-row"}` :
-                            this.state.open == row.id ? "delete-row" : ""
-                          } >
-                          {row.cells.map(
-                            (cell, i) => (
-                              <TableCells
-                                handelOnEditClick={this.handelOnEditClick}
-                                handelOnDeleteClick={this.handelOnDeleteClick}
-                                handelViewButton={this.handelViewButton}
-                                header={cell}
-                                key={`cell${i}`}
-                              />
-                            )
-                            // cell.info.header === "btn" ? (
-                            //   <TableCell key={cell.id}>
-                            //     <div className="action-wrapper">
-                            //       {/* {console.log(
-                            //         "this is a information of row",
-                            //         row,
-                            //         "sdaasdasdasdas",
-                            //         cell
-                            //       )} */}
-                            //       <Edit20
-                            //         className="edit-in-table"
-                            //         onClick={() =>
-                            //           this.handelOnEditClick(cell.id)
-                            //         }
-                            //       />
-                            //       <div className="devider"></div>
-                            //       <Delete20
-                            //         className="delete-in-table"
-                            //         onClick={() =>
-                            //           this.handelOnDeleteClick(cell.id)
-                            //         }
-                            //       />
-                            //     </div>
-                            //   </TableCell>
-                            // ) : cell.info.header === "id" ? (
-                            //   <TableCell key={cell.id}>
-                            //     <View20
-                            //       className="view-in-table"
-                            //       onClick={() => this.handelViewButton(cell.id)}
-                            //     />
-                            //   </TableCell>
-                            // ) : (
-                            //   // console.log("PageTopSection -> cell", cell)
-                            //   <TableCell key={cell.id}>{cell.value}</TableCell>
-                            // )
-                          )}
-                          <Tooltip
-                            html={(
-                              <div>
-                                <strong className="content-tippy">
-                                  Are Sure to Remove this Rough?
-                                </strong>
-                                <div className="button-box">
-                                  <span className="green" onClick={() => {this.closeBox(row.id)}}>
-                                    <strong>Yes </strong>
-                                  </span>
-                                  <span className="red" onClick={() => {this.closeBox()}}>
-                                    <strong >No </strong>
-                                  </span>
-                                </div>
-                              </div>
-                            )}
-                            animation="perspective"
-                            placement="top"
-                            trigger="click"
-                            open={this.state.open == row.id}
-                            theme="light"
-                            interactive
-                            // interactive={true}
-                            // inertia={true}
-                            arrow={false}
-                            duration={[350, 200]}
+              {rows.length ? (
+                <div className="table-wrapper">
+                  <Table useZebraStyles>
+                    <TableHead>
+                      <TableRow>
+                        {headers.map((header) => (
+                          <TableHeader
+                            {...getHeaderProps({ header })}
+                            style={{ width: `${header.size}` }}
                           >
-                          </Tooltip>
-                        </TableRow>
-                      </>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                            {header.header}
+                          </TableHeader>
+                        ))}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {rows.map((row) => (
+                        <>
+                          <TableRow
+                            {...getRowProps({ row })}
+                            className={
+                              this.props.colour
+                                ? `${
+                                    row.cells.filter((data) =>
+                                      data.id.includes("return_date")
+                                    )[0]?.value
+                                      ? "sucess-row"
+                                      : "failed-row"
+                                  }`
+                                : this.state.open == row.id
+                                ? "delete-row"
+                                : ""
+                            }
+                          >
+                            {row.cells.map(
+                              (cell, i) => (
+                                <TableCells
+                                  handelOnEditClick={this.handelOnEditClick}
+                                  handelOnDeleteClick={this.handelOnDeleteClick}
+                                  handelViewButton={this.handelViewButton}
+                                  header={cell}
+                                  key={`cell${i}`}
+                                />
+                              )
+                              // cell.info.header === "btn" ? (
+                              //   <TableCell key={cell.id}>
+                              //     <div className="action-wrapper">
+                              //       {/* {console.log(
+                              //         "this is a information of row",
+                              //         row,
+                              //         "sdaasdasdasdas",
+                              //         cell
+                              //       )} */}
+                              //       <Edit20
+                              //         className="edit-in-table"
+                              //         onClick={() =>
+                              //           this.handelOnEditClick(cell.id)
+                              //         }
+                              //       />
+                              //       <div className="devider"></div>
+                              //       <Delete20
+                              //         className="delete-in-table"
+                              //         onClick={() =>
+                              //           this.handelOnDeleteClick(cell.id)
+                              //         }
+                              //       />
+                              //     </div>
+                              //   </TableCell>
+                              // ) : cell.info.header === "id" ? (
+                              //   <TableCell key={cell.id}>
+                              //     <View20
+                              //       className="view-in-table"
+                              //       onClick={() => this.handelViewButton(cell.id)}
+                              //     />
+                              //   </TableCell>
+                              // ) : (
+                              //   // console.log("PageTopSection -> cell", cell)
+                              //   <TableCell key={cell.id}>{cell.value}</TableCell>
+                              // )
+                            )}
+                            <Tooltip
+                              html={
+                                <div>
+                                  <strong className="content-tippy">
+                                    Are Sure to Remove this Rough?
+                                  </strong>
+                                  <div className="button-box">
+                                    <span
+                                      className="green"
+                                      onClick={() => {
+                                        this.closeBox(row.id);
+                                      }}
+                                    >
+                                      <strong>Yes </strong>
+                                    </span>
+                                    <span
+                                      className="red"
+                                      onClick={() => {
+                                        this.closeBox();
+                                      }}
+                                    >
+                                      <strong>No </strong>
+                                    </span>
+                                  </div>
+                                </div>
+                              }
+                              animation="perspective"
+                              placement="top"
+                              trigger="click"
+                              open={this.state.open == row.id}
+                              theme="light"
+                              interactive
+                              // interactive={true}
+                              // inertia={true}
+                              arrow={false}
+                              duration={[350, 200]}
+                            ></Tooltip>
+                          </TableRow>
+                        </>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <p className="no-record">No Record Found</p>
+              )}
             </TableContainer>
           )}
         />
-        <div className="pagination-wrapper">
+        <div
+          className={`pagination-wrapper ${!this.state.rowData.length &&
+            "no-record-blur"}`}
+        >
           <Pagination
             backwardText="Previous page"
             forwardText="Next page"
@@ -312,5 +396,4 @@ class PageTopSection extends Component {
     );
   }
 }
-
-export default PageTopSection;
+export default withRouter(PageTopSection);

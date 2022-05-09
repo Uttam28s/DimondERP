@@ -49,6 +49,7 @@ class OfficeIndex extends Component {
       roughList: [],
       officeIdList: [],
       srno: 0,
+      editArray: []
     };
   }
 
@@ -74,6 +75,16 @@ class OfficeIndex extends Component {
     this.props
       .getOfficeList(this.state.pageinationRef)
       .then((res) => {
+
+        for(let date of res.data){
+          if(date.return_date){
+            const format_date = date => date.toISOString().slice(0, 10);
+            const new_date = format_date(new Date(date.return_date))
+            const modify_date = new_date.split("-").reverse().join("-"); 
+            date.return_date = modify_date
+          } 
+        }
+
         this.setState({
           tableData: res.data,
           pageinationRef: {
@@ -103,6 +114,8 @@ class OfficeIndex extends Component {
       model: false,
       subPacketModel: false,
       tabSelected: 0,
+      preSelectedData: "",
+      editArray: []
     });
   };
 
@@ -110,6 +123,11 @@ class OfficeIndex extends Component {
     this.setState({
       model: true,
     });
+  };
+
+  handelManageDataModal = () => {
+
+    this.props.history.push("/officesheet")
   };
 
   onModelPopup = (data) => {
@@ -138,6 +156,19 @@ class OfficeIndex extends Component {
       officeSubId: data,
     });
   };
+
+  edit = (data) => {
+    console.log("🚀 ~ file: OfficeIndex.js ~ line 158 ~ OfficeIndex ~ data", data)
+
+    let editArray = data && ["Return Rough"]
+
+    this.setState({
+      // subRoughModel: false,
+      model: true,
+      preSelectedData: data,
+      editArray: editArray
+    });
+  }
 
   handelModelTabChange = (e) => {
     const value = {
@@ -208,10 +239,6 @@ class OfficeIndex extends Component {
     }
   }
 
-
-
-
-
   onPageChange = (page) => {
     // console.log("RoughIndex -> onPageChange -> page", page);
     this.setState({
@@ -230,6 +257,16 @@ class OfficeIndex extends Component {
       .getOfficeList(pageData)
       .then((res) => {
         console.log('first', res.count)
+
+        for(let date of res.data){
+          if(date.return_date){
+            const format_date = date => date.toISOString().slice(0, 10);
+            const new_date = format_date(new Date(date.return_date))
+            const modify_date = new_date.split("-").reverse().join("-"); 
+            date.return_date = modify_date
+          } 
+        }
+
         this.setState({
           tableData: res.data,
           pageinationRef: {
@@ -243,6 +280,8 @@ class OfficeIndex extends Component {
   };
 
   render() {
+    const {model, editArray} = this.state;
+    
     const tabArray = [
       {
         id: "1",
@@ -252,6 +291,7 @@ class OfficeIndex extends Component {
             close={this.closeModal}
             caratList={this.state.roughList}
             handleCreateSubpacket={this.handleCreateSubpacket}
+            // preSelectedData={this.state.preSelectedData}
           // data={this.state.singleOfiiceData}
           />
         ),
@@ -264,6 +304,7 @@ class OfficeIndex extends Component {
             close={this.closeModal}
             caratList={this.state.roughList}
             handleCreateSubpacket={this.handleCreateSubpacket}
+            // preSelectedData={this.state.preSelectedData}
           />
         ),
       },
@@ -275,6 +316,7 @@ class OfficeIndex extends Component {
             close={this.closeModal}
             caratList={this.state.roughList}
             handelReturnOffice={this.handelReturnOffice}
+            preSelectedData={this.state.preSelectedData}
           />
         ),
       },
@@ -293,7 +335,8 @@ class OfficeIndex extends Component {
             totalData={this.state.subPacketpageinationRef}
             edit={this.edit}
             remove={this.remove}
-          // data={this.state.singleOfiiceData}
+
+            // data={this.state.singleOfiiceData}
           />
         ),
       },
@@ -317,9 +360,10 @@ class OfficeIndex extends Component {
       <Sidebar
         title="Office"
         button="Create Packet"
-     //   cureentTab={2}
-        onClick={this.onModelPopup}
-        addButtonFunction={this.handelAddDataModal}
+        // cureentTab={2}
+        // onClick={this.onModelPopup}
+        // addButtonFunction={this.handelAddDataModal}
+        manageButtonFunction={this.handelManageDataModal}
         rowData={this.state.tableData}
         column={OfficeRough}
         // tabview={true}
@@ -334,9 +378,14 @@ class OfficeIndex extends Component {
           modalName="Office Packet Details"
           open={this.state.model}
           close={this.closeModal}
-          handelModelTabChange={this.handelModelTabChange}
-          tabContent={this.state.subPacketModel === true ? subPacket : tabArray}
-          tabSelected={this.state.tabSelected}
+          // handelModelTabChange={this.handelModelTabChange}
+          // tabContent={this.state.subPacketModel === true ? subPacket : tabArray}
+          // tabContent={this.state.model && tabArray}
+          tabContent={editArray.length ?
+            tabArray.filter((data) => editArray.includes(data.lebal)) :
+            (model && tabArray)
+          }
+          // tabSelected={this.state.tabSelected}
         // data={this.state.singleOfiiceData}
         />
       </Sidebar>

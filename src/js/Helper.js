@@ -130,4 +130,4 @@ export const convertTypeToNumber = (id, type) => {
   }
 };
 
-export const baseUrl = "http://localhost:3003/api";
+export const baseUrl = "https://diamond-server2.herokuapp.com/api";

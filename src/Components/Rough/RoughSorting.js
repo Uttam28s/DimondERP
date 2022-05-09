@@ -117,8 +117,8 @@ class RoughSorting extends Component {
         crystal_price: crystalPrice || 0,
         crystal_total: parseInt(crystalCarat * crystalPrice),
       },
-      total_sorting_carat: toFixed4(this.state.sumOfCarat),
-      total_sorting_amount: toFixed4(this.state.sumOfAmount),
+      total_sorting_carat: (this.state.sumOfCarat),
+      total_sorting_amount: (this.state.sumOfAmount),
     };
     // console.log("RoughSorting -> handelSubmit -> data", data);
     this.props.handelAddSorting(data);

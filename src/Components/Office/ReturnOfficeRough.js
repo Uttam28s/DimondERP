@@ -14,6 +14,11 @@ import moment from "moment";
 import {toFixed4} from "../Common/helperFun";
 // import { Tab } from "carbon-components-react";
 // import TabView from "../Common/Tabs";
+import ReactDataSheet from 'react-datasheet';
+import {Button} from "carbon-components-react";
+import "react-datasheet/lib/react-datasheet.css";
+import TextField from "../Common/CommonComponents";
+import { withRouter } from "react-router";
 
 const validationSchema = Yup.object().shape({
   officeReturnCaratId: Yup.string().required("*Select Rough"),
@@ -49,12 +54,19 @@ class ReturnOfficeRough extends Component {
       sumOfCarat: 0,
       sumOfAmount: 0,
       officeIdList: [],
+      preSelectedData: "",
     };
+  }
+
+  componentDidMount = () => {
+    if (this.props.preSelectedData) {
+      this.setState({ preSelectedData: this.props.preSelectedData });
+    }
   }
 
   handelSubmit = (value) => {
     console.log('Returnvalue', value, this.state)
-    this.props.close();
+    // this.props.close();
     let state = this.state
 
     console.log('data', value.officePacketReturnDate)
@@ -73,10 +85,12 @@ class ReturnOfficeRough extends Component {
     }
 
 
-    this.props.returnOfficePacket(data).then((data) => {
-    }).catch((e) => {
-      console.log('e', e)
-    })
+    // this.props.returnOfficePacket(data).then((data) => {
+    // }).catch((e) => {
+    //   console.log('e', e)
+    // })
+
+    this.props.handelReturnOffice(data)
   };
 
   handelOnChange = (e) => {
@@ -159,6 +173,8 @@ class ReturnOfficeRough extends Component {
   }
 
   render() {
+    const {preSelectedData} = this.props
+
     let items = [];
     //  console.log('this.props.caratList', this.props.caratList)
     this.props.caratList.map((value) =>
@@ -175,10 +191,12 @@ class ReturnOfficeRough extends Component {
       })
     );
     return (
-      <div style={{marginBottom: "5%"}}>
+      <div style={{marginBottom: "1%"}}>
         <Formik
           initialValues={{
-            officeReturnCaratId: "",
+            officeStartInputValue: "",
+            officeEndInputValue: "",
+            officeReturnCaratId: preSelectedData?.carat || "",
             officeReturnOfficeId: "",
             officePacketReturnDate: "",
             copyCarat: "",
@@ -208,6 +226,7 @@ class ReturnOfficeRough extends Component {
             setFieldValue,
             isSubmitting,
           }) => (
+            <div className={this.props.modelSheet === true ? "modelComponent" : ""}>
             <Form onSubmit={handleSubmit}>
               <div className="bx--row">
                 <div className="bx--col-md-2">
@@ -218,12 +237,13 @@ class ReturnOfficeRough extends Component {
                         : "bx--col dropdown-padding"
                     }
                     name="officeReturnCaratId"
-                    selectedItem={values.officeReturnCaratId}
+                    selectedItem={ preSelectedData?.carat ? { label: preSelectedData?.carat } : values.officeReturnCaratId}
                     value={values.officeReturnCaratId}
                     // itemToString={(item) => (item ? item.text : "")}
                     id="office-rough-list-issue"
                     items={items}
                     label="Select Rough"
+                    disabled={preSelectedData?.carat ? true : false}
                     light
                     onChange={(select) => {
                       setFieldValue("officeReturnCaratId", select.selectedItem || "");
@@ -241,12 +261,14 @@ class ReturnOfficeRough extends Component {
                     titleText="Rough"
                     type="default"
                   />
+                  {console.log(values.officeReturnCaratId,"values.officeReturnCaratId ==> ReturnOfficeRough.js")}
                   {touched.officeReturnCaratId && errors.officeReturnCaratId ? (
                     <div className="error-message">
                       {errors.officeReturnCaratId}
                     </div>
                   ) : null}
                 </div>
+
                 <div className="bx--col-md-2">
                   <DropDownSelection
                     className={
@@ -281,6 +303,7 @@ class ReturnOfficeRough extends Component {
                     titleText="Office Packet"
                     type="default"
                   />
+                  {console.log(values.officeReturnOfficeId,"values.officeReturnOfficeId ==> ReturnOfficeRough.js")}
                   {touched.officeReturnOfficeId &&
                     errors.officeReturnOfficeId ? (
                     <div className="error-message">
@@ -288,6 +311,7 @@ class ReturnOfficeRough extends Component {
                     </div>
                   ) : null}
                 </div>
+
                 <div className="bx--col-md-2">
                   <DateSelection
                     dateFormat="d/m/Y"
@@ -324,11 +348,109 @@ class ReturnOfficeRough extends Component {
                     </div>
                   ) : null}
                 </div>
-                <div className="bx--col-md-2">
-                  <label className="bx--label"> AvailableRough: </label>
+
+                <div className="bx--col-md-1">
+                  <label className="bx--label" style={{ fontSize:"14px" }}> AvailableRough: </label>
                   <p>{`${toFixed4(values.copyCarat || 0)}`}</p>
-                  <label className="bx--label $code-01">{`${values.returned == false ? "All Rough Is Not Returned From Sawing/Chapka" : ""}`}</label>
+                  <label className="bx--label $code-01" style={{color:"red"}} >{`${values.returned == false ? "All Rough Is Not Returned From Sawing/Chapka" : ""}`}</label>
+                  {console.log(values.returned,"values.returned")}
                 </div>
+
+                <div style={{marginTop:"1%", marginBottom:"1%"}} className="bx--col-md-1">
+                  {values.officeReturnOfficeId && values.returned == false &&
+                    <Button
+                      size="small"
+                      style={{ marginTop: "10px" }}
+                      onClick={() => {this.props.history.push({ pathname: `/office/subpacket/${values.officeReturnOfficeId?.id}` })}}
+                    >
+                      View Sub-Packet
+                    </Button>
+                  }
+                </div>
+
+                {this.props.modelSheet &&
+                  <>
+                    <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-3"}>
+                      <TextField
+                        className={
+                          touched.officeStartInputValue && errors.officeStartInputValue
+                            ? "error"
+                            : "bx--col"
+                        }
+                        name="officeStartInputValue"
+                        value={values.officeStartInputValue}
+                        id="office-packet-officeStartInputValue"
+                        // invalid={false}
+                        invalidText="Please fill"
+                        labelText="From :"
+                        placeholder="enter number here"
+                        light={true}
+                        onChange={(e) => {
+                          if (Number(e.target.value) >= 1) {
+                            setFieldValue("officeStartInputValue", parseInt(e.target.value))
+                            // this.setState({toggle: !this.state.toggle})
+                          }
+                        }}
+                        onBlur={handleBlur}
+                        // onClick={function noRefCheck() { }}
+                        type="number"
+                      />
+                      {touched.officeStartInputValue && errors.officeStartInputValue ? (
+                        <div className="error-message">
+                          {errors.officeStartInputValue}
+                        </div>
+                      ) : null}
+                      {console.log(values.officeStartInputValue,"from value")}
+                    </div>
+                    
+                    <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-3"}>
+                      <TextField
+                        className={
+                          touched.officeEndInputValue && errors.officeEndInputValue
+                            ? "error"
+                            : "bx--col"
+                        }
+                        name="officeEndInputValue"
+                        value={values.officeEndInputValue}
+                        id="office-packet-officeEndInputValue"
+                        // invalid={false}
+                        invalidText="Please fill"
+                        labelText="To :"
+                        placeholder="enter number here"
+                        light={true}
+                        onChange={(e) => {
+                          if (Number(e.target.value) >= 0) {
+                            setFieldValue("officeEndInputValue", parseInt(e.target.value))
+                            // this.setState({toggle: !this.state.toggle})
+                          }
+                        }}
+                        onBlur={handleBlur}
+                        // onClick={function noRefCheck() { }}
+                        type="number"
+                      />
+                      {touched.officeEndInputValue && errors.officeEndInputValue ? (
+                        <div className="error-message">
+                          {errors.officeEndInputValue}
+                        </div>  
+                      ) : null}
+                      {console.log(values.officeEndInputValue,"To value")}
+                    </div>
+                    {console.log(typeof(values.officeEndInputValue),"values.officeEndInputValue")}
+                    {console.log(typeof(values.officeStartInputValue),"values.officeStartInputValue")}
+
+                    <div style={{marginTop:"1%", marginBottom:"1%"}} className="bx--col-md-2">
+                      <Button
+                        size="small"
+                        style={{ marginTop: "10px" }}
+                        // onClick={this.props.openSheet}
+                        onClick={() => {this.props.openSheet(values.officeStartInputValue,values.officeEndInputValue)}}
+                        disabled={ values.officeEndInputValue <= values.officeStartInputValue ? true : false}
+                      >
+                        Manage DataSheet
+                      </Button>
+                    </div>
+                  </>
+                } 
               </div>
 
               <div>
@@ -337,6 +459,7 @@ class ReturnOfficeRough extends Component {
                   value={this.state.officeRetunrData}
                 />
               </div>
+
               <div className="assign-headding-wrapper">
                 <h5 className="h5-form-label">
                   Total Sorting Carat :{" "}
@@ -351,6 +474,21 @@ class ReturnOfficeRough extends Component {
                   </span>
                 </h5>
               </div>
+
+              <div className={this.props.modelSheet ? "dataSheetStyle" : ""}>
+                <div className='sheet-Container' style={{marginBottom:"5%"}}>
+                  {this.props.modelSheet &&
+                    <ReactDataSheet
+                      // data={this.props.isActive === true ? this.props.update_grid : this.props.data}
+                      data={this.props.data}
+                      valueRenderer={this.props.valueRenderer}
+                      onContextMenu={this.props.onContextMenu}
+                      onCellsChanged={this.props.onCellsChanged}
+                    />
+                  } 
+                </div>
+              </div>
+
               <div className="bx--modal-footer modal-custome-footer">
                 <button
                   tabindex="0"
@@ -370,6 +508,7 @@ class ReturnOfficeRough extends Component {
                 </button>
               </div>
             </Form>
+            </div>
           )}
         </Formik>
       </div >
@@ -380,5 +519,5 @@ class ReturnOfficeRough extends Component {
 const mapStateToProps = (state) => ({...state});
 
 export default connect(mapStateToProps, {getRoughPrefrence, returnOfficePacket, getOfficeSubList})(
-  ReturnOfficeRough
+  withRouter(ReturnOfficeRough)
 );

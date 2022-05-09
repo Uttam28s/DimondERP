@@ -6,6 +6,11 @@ const routes = {
   rough: "/rough",
   office: "/office",
   factory: "/factory",
+  roughsubpacket: "/rough/subpacket/:id",
+  officesubpacket: "/office/subpacket/:id",
+  factorysubpacket: "/factory/subpacket/:id",
+  officedatasheet: "/officesheet",
+  factorydatasheet: "/factorysheet",
   order: "/order-summary",
   polishreport: "/polish-report",
   packetreport: "/packet-report",
@@ -18,5 +23,4 @@ const routes = {
   costMaster: "/cost-master",
   settingpage: "/SettingPage",
 };
-
 export default routes;

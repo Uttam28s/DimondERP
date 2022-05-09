@@ -3,6 +3,7 @@ import Search20 from "@carbon/icons-react/lib/search/20";
 import Notification20 from "@carbon/icons-react/lib/notification/20";
 import AppSwitcher20 from "@carbon/icons-react/lib/app-switcher/20";
 import HeaderContainer from "carbon-components-react/lib/components/UIShell/HeaderContainer";
+import { useHistory } from "react-router";
 import {
   Content,
   Header,
@@ -38,10 +39,12 @@ import {
 } from "@carbon/icons-react";
 import { withRouter } from "react-router";
 import routes from "../../js/Routes";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import PageTopSection from "./PageTopSection";
+import Datasheet from "../Office/DataSheet";
 
 const Sidebar = (props) => {
+ const history = useHistory()
   const [reportCollaps, setReport] = useState(
     props.location.pathname.split("/")[2] === "Report" ? true : false
   );
@@ -51,11 +54,38 @@ const Sidebar = (props) => {
   const [employeeCollaps, setEmployees] = useState(
     props.location.pathname.split("/")[2] === "Employees" ? true : false
   );
+  const [OfficeCollaps, setOffice] = useState(
+    props.location.pathname.split("/").includes("office") ? true : false
+  );
+  const [factoryCollaps, setFactory] = useState(
+    props.location.pathname.split("/").includes("factory")? true : false
+  );
+  console.log('factoryCollaps', factoryCollaps,props.location.pathname.split("/").includes(""))
   const NevigationArray = [
     { iconName: <Dashboard32 />, name: "Dashboard", url: routes.dashboard },
     { iconName: <ChartRadar32 />, name: "Rough", url: routes.rough },
-    { iconName: <Portfolio32 />, name: "Office", url: routes.office },
-    { iconName: <Industry32 />, name: "Factory", url: routes.factory },
+    {
+      dropdown: "yes",
+      iconName: <Portfolio32 />,
+      name: "Office",
+      collaps: OfficeCollaps,
+      innerNevigation: [
+        { iconName: <Portfolio32 />, name: "Office-Table", url: routes.office },
+        { iconName: <Report32 />, name: "Office-Sheet", url: routes.officedatasheet },
+      ],
+      extraRoute : ["/office/subpacket"]
+    },
+    {
+      dropdown: "yes",
+      iconName: <Industry32 />,
+      name: "Factory",
+      collaps: factoryCollaps,
+      innerNevigation: [
+        { iconName: <Industry32 />, name: "Factory-Table", url: routes.factory },
+        { iconName: <Report32 />, name: "DataSheet", url: routes.factorydatasheet },
+      ],
+      extraRoute : ["/factory/subpacket"]
+    },
     { iconName: <TextMining32 />, name: "Order Summary", url: routes.order },
     {
       dropdown: "yes",
@@ -100,21 +130,20 @@ const Sidebar = (props) => {
     { iconName: <Product32 />, name: "Cost Master", url: routes.costMaster },
     { iconName: <Settings32 />, name: "Setting", url: routes.settingpage },
   ];
-
   const onCollapsClick = (name) => {
-    console.log("onCollapsClick -> name", props);
+    console.log("onCollapsClick -> name", name);
     if (name === "Report") {
       setReport(!reportCollaps);
-      console.log("r", reportCollaps);
     } else if (name === "Selling") {
       setselling(!sellingCollaps);
-      console.log("s", sellingCollaps);
-    } else {
+    } else if (name === "Employees"){
       setEmployees(!employeeCollaps);
-      console.log("e", employeeCollaps);
+    } else if (name === "Office"){
+      setOffice(!OfficeCollaps);
+    } else if (name === "Factory"){
+      setFactory(!factoryCollaps);
     }
   };
-
   return (
     <div className="container">
       <HeaderContainer
@@ -146,10 +175,22 @@ const Sidebar = (props) => {
                 </HeaderGlobalAction>
               </HeaderGlobalBar>
             </Header>
+            <div className={props.modelSheet && "modelComponent"}>
             <Content id="main-content">
               <div className="bx--grid">
                 <div className="bx--row">
                   <section className="bx--offset-lg-3 bx--col-lg-13 sidebar-content">
+                  { props.tab  ?
+                    (
+                      <Datasheet
+                        data={props.data}
+                        valueRenderer={props.valueRenderer}
+                        onContextMenu={props.onContextMenu}
+                        onCellsChanged={props.onCellsChanged}
+                        tabContent={props.tab}
+                        modelSheet={props.modelSheet}
+                      />
+                    ) : (
                     <div>
                       {props.table === "no" ? (
                         ""
@@ -159,23 +200,29 @@ const Sidebar = (props) => {
                           button={props.button}
                           onClick={props.onClick}
                           handelAddData={props.addButtonFunction}
+                          handleManageData={props.manageButtonFunction}
                           rowData={props.rowData}
                           column={props.column}
-                            colour={props.colour}
-                            edit={props.edit}
-                            remove={props.remove}
+                          colour={props.colour}
+                          edit={props.edit}
+                          remove={props.remove}
                           tabview={props.tabview}
+                          tabContent={props.tabContent}
                           pageSize={props.pageSize}
                           totalData={props.totalData}
                           cureentTab={props.cureentTab}
+                          handelModelTabChange={props.handelModelTabChange}
+                          tabSelected={props.tabSelected}
                         />
                       )}
                       {props.children}
                     </div>
+                    )}
                   </section>
                 </div>
               </div>
             </Content>
+            </div>
             <SideNav aria-label="Side navigation" expanded={isSideNavExpanded}>
               <SideNavItems>
                 <div>
@@ -195,23 +242,24 @@ const Sidebar = (props) => {
                             key={i}
                           />
                         </div>
+                        {console.log('value.collaps', value)}
                         {value.collaps === true
                           ? value.innerNevigation.map((data) => (
-                            <Link
-                              to={data.url + `/${value.name}`}
+                            <NavLink
+                              to={data.url}
                               key={`${i}`}
-                            // onClick={() => onLinkClick(value.name)}
                             >
+                              {console.log('first',data.extraRoute,)}
                               <div
                                 className={`sidebar_div_wrapper sub-menu-side-bar ${props.match.path === data.url
                                   ? "activate-menu"
-                                  : ""
+                                  : props.match.path.includes(data.extraRoute) ? "activate-menu" : ""
                                   }`}
                               >
                                 {data.iconName}
                                 <p>{data.name}</p>
                               </div>
-                            </Link>
+                            </NavLink>
                           ))
                           : ""}
                       </>
@@ -238,5 +286,4 @@ const Sidebar = (props) => {
     </div>
   );
 };
-
 export default withRouter(Sidebar);
