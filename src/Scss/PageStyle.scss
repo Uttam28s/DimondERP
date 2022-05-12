@@ -64,11 +64,12 @@
 }
 
 .delete-row {
-  background-color: #000000 !important;
+  background-color: #00000073 !important;
   color: aliceblue !important;
+  opacity: 0.7;
 
   td {
-    background-color: #000000 !important;
+    background-color: #00000073 !important;
     color: aliceblue !important;
   }
 }

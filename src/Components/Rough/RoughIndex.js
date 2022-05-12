@@ -391,8 +391,6 @@ class RoughIndex extends Component {
             (subRoughModel ? subRoughTab : mainRoughTabArray)
           }
         />
-        {console.log('{this.state.open', this.state.open)}
-
       </Sidebar>
     );
   }

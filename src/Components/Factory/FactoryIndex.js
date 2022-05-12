@@ -16,6 +16,7 @@ import Polish from "./SubProcess/Polish";
 import {FactorySubProcess} from "../Collumn/Factory/FactorySubPacket";
 import _ from "lodash";
 import {removeFactorySubRough, removeFactoryRough} from "../../Actions/Delete"
+import ReturnFactoryPacket from "./ReturnFactoryPacket";
 
 
 class FactoryIndex extends Component {
@@ -314,11 +315,15 @@ class FactoryIndex extends Component {
           subRoughList={this.state.subRoughList}
           close={this.closeModal} />,
       },
-      // {
-      //   id: "3",
-      //   lebal: "Return Rough",
-      //   tabContent: <ReturnOfficeRough close={this.closeModal} />,
-      // },
+      {
+        id: "4",
+        lebal: "Return Rough",
+        tabContent: <ReturnFactoryPacket
+        getFactoryList={this.props.getFactoryList}
+          caratList={this.state.roughList}
+          subRoughList={this.state.subRoughList}
+        close={this.closeModal} />,
+      },
     ];
 
 
@@ -328,7 +333,7 @@ class FactoryIndex extends Component {
         button="Create Packet"
         onClick={this.onModelPopup}
         addButtonFunction={this.handelAddDataModal}
-        rowData={this.state.tableData || []}
+        rowData={this.state.tableData|| []}
         column={Factoryrough}
        // tabview={true}
         pageSize={this.onPageChange}
@@ -336,7 +341,6 @@ class FactoryIndex extends Component {
         edit={this.edit}
         remove={this.remove}
       >
-        {console.log('first', this.state.tableData, this.state.subPacketData)}
 
         <Model
           modalName="Factory Packet Details"

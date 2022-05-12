@@ -69,8 +69,7 @@ class AssignRough extends Component {
       const {preSelectedData} = this.props
       console.log("🚀 ~ file: AssignRough.js ~ line 40 ~ AssignRough ~ awaitthis.props.getUnusedList ~ data", data)
       let carat = workName.toLowerCase() == "office" ? (Number(data?.data?.copyCarat == undefined ? select.label : data?.data.copyCarat)) : Number(data.data?.mackable) || 0
-      carat = carat - (preSelectedData[`${workName}_total_carat`] || 0)
-      if (this.props.getDate)
+      carat = carat - (preSelectedData?.[`${workName}_total_carat`] || 0)
       this.setState({
         availableCaret: carat,
         remainingCarat: carat
@@ -121,8 +120,8 @@ class AssignRough extends Component {
               data = {...data, difference: toFixed4(values.carat) - this.props.preSelectedData[`${values.workPlace.toLocaleLowerCase()}_total_carat`]}
               this.props.editOfficeAndFactory(data)
             } else {
-            values.workPlace === "Office" && this.props.handelAssignOffice(officeData);
-              values.workPlace === "Factory" && this.props.handelAssignFactory(factoryData);
+            values.workPlace === "office" && this.props.handelAssignOffice(officeData);
+              values.workPlace === "factory" && this.props.handelAssignFactory(factoryData);
             }
             this.props.close();
             setTimeout(() => {
@@ -234,7 +233,7 @@ class AssignRough extends Component {
                     value={values.workPlace}
                     // itemToString={(item) => (item ? item.text : "")}
                     id="rough-workplace"
-                    items={["Office", "Factory"]}
+                    items={["office", "factory"]}
                     label="Select work place"
                     light
                     onChange={

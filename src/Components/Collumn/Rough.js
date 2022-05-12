@@ -112,7 +112,7 @@ export const OfficeSubRoughColumn = [
 ]
 
 
-const FactorySubRough = [
+export const FactorySubRoughColumn = [
   {
     header: "PacketId",
     key: "packetNo",
@@ -120,16 +120,16 @@ const FactorySubRough = [
   },
   {
     header: "Main Rough",
-    key: "carat"
+    key: "assign_date"
   },
   {
     header: "Assigned Name",
-    key: "office_assigne_name",
+    key: "factory_assigne_name",
     // size: "300px",
   },
   {
     header: "Assigned Caret",
-    key: "office_total_carat",
+    key: "factory_total_carat",
     // size: "50px",
   },
   {
@@ -139,7 +139,12 @@ const FactorySubRough = [
   {
     header: "Return Date",
     key: "return_date"
-  }
+  },
+  {
+    header:"Action",
+    key: "btn",
+    size: "150px",
+  },
   // {
   //     header: "Makable Carat",
   //     key: "mackable",
