@@ -250,7 +250,7 @@ class RoughIndex extends Component {
     console.log("🚀 ~ file: RoughIndex.js ~ line 243 ~ RoughIndex ~ data", data)
 
 
-    let editArray = data && data.brokername ? ["Add Rough", "Sorting Rough"] : ["Assign Rough"]
+    let editArray = data && data.brokername ? ["Add Rough"] : ["Assign Rough"]
 
     this.setState({
       subRoughModel: false,

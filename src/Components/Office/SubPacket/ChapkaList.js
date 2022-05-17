@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 
 export const ChapkaList = (props) => {
   console.log("ChapkaList")
+  console.log(props.rowData, "props.rowData => ChapkaListList.js")
   return (
     <div>
       <PageTopSection
@@ -19,6 +20,8 @@ export const ChapkaList = (props) => {
         title="Sub Office"
         subClose={props.subClose}
         handleManageData={props.manageButtonFunction}
+        handelModelTabChange={props.handelModelTabChange}
+        tabSelected={props.tabSelected}
       />
     </div>
   );

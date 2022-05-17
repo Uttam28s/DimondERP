@@ -57,8 +57,32 @@ class CreateSubPacket extends Component {
     //   this.setState({ toggle: !this.state.toggle });
     // }
   }
-  handelSubmit = (e) => {
-    console.log(e);
+  handelSubmit = async (values, resetForm) => {
+    // console.log(e);
+    resetForm()
+    let data = {
+      factory_id: values.factorySubPacket.id,
+      process_name: values.factoryIssueprocessName,
+      main_carat: Number(values.factoryIssueRoughId.label),
+      assign_name: values.factoryIssueAssignName,
+      factory_carat: Number(values.factorySubPacket.label),
+      assign_carat: values.factoryIssueCarat,
+      piece: values.factoryIssuepcs,
+      purity: values.factoryPacketPurity,
+      size: values.factoryPaketsize,
+      yeild: values.factoryPaketYeild,
+      assign_date: moment(values.factoryPaketcreateDate, "DD-MM-YYYY").format("YYYY-MM-DD"),
+    }
+    console.log("🚀 ~ file: CreateSubPacket.js ~ line 110 ~ CreateSubPacket ~ render ~ data", Number(values.factorySubPacket.label), values.factoryIssueCarat, data)
+
+    await this.props.createFactoryPacket(data).then((result) => {
+      console.log("🚀 ~ file: CreateSubPacket.js ~ line 116 ~ CreateSubPacket ~ awaitthis.props.createFactoryPacket ~ result", result)
+      // this.props.close();
+
+    }).catch((err) => {
+      console.log(err)
+    });
+
   };
 
   handelOnChange = (e) => {
@@ -118,31 +142,32 @@ class CreateSubPacket extends Component {
             factoryEndInputValue: ""
           }}
           validationSchema={validationSchema}
-          onSubmit={async (values, {setSubmitting, resetForm}) => {
+          onSubmit={(values, {setSubmitting, resetForm}) => {
             // When button submits form and form is in the process of submitting, submit button is disabled
             setSubmitting(true);
-            let data = {
-              factory_id: values.factorySubPacket.id,
-              process_name: values.factoryIssueprocessName,
-              main_carat: Number(values.factoryIssueRoughId.label),
-              assign_name: values.factoryIssueAssignName,
-              factory_carat: Number(values.factorySubPacket.label),
-              assign_carat: values.factoryIssueCarat,
-              piece: values.factoryIssuepcs,
-              purity: values.factoryPacketPurity,
-              size: values.factoryPaketsize,
-              yeild: values.factoryPaketYeild,
-              assign_date: moment(values.factoryPaketcreateDate, "DD-MM-YYYY").format("YYYY-MM-DD"),
-            }
-            console.log("🚀 ~ file: CreateSubPacket.js ~ line 110 ~ CreateSubPacket ~ render ~ data", Number(values.factorySubPacket.label), values.factoryIssueCarat, data)
+            this.handelSubmit(values, resetForm);
+            // let data = {
+            //   factory_id: values.factorySubPacket.id,
+            //   process_name: values.factoryIssueprocessName,
+            //   main_carat: Number(values.factoryIssueRoughId.label),
+            //   assign_name: values.factoryIssueAssignName,
+            //   factory_carat: Number(values.factorySubPacket.label),
+            //   assign_carat: values.factoryIssueCarat,
+            //   piece: values.factoryIssuepcs,
+            //   purity: values.factoryPacketPurity,
+            //   size: values.factoryPaketsize,
+            //   yeild: values.factoryPaketYeild,
+            //   assign_date: moment(values.factoryPaketcreateDate, "DD-MM-YYYY").format("YYYY-MM-DD"),
+            // }
+            // console.log("🚀 ~ file: CreateSubPacket.js ~ line 110 ~ CreateSubPacket ~ render ~ data", Number(values.factorySubPacket.label), values.factoryIssueCarat, data)
 
-            await this.props.createFactoryPacket(data).then((result) => {
-              console.log("🚀 ~ file: CreateSubPacket.js ~ line 116 ~ CreateSubPacket ~ awaitthis.props.createFactoryPacket ~ result", result)
-              // this.props.close();
+            // await this.props.createFactoryPacket(data).then((result) => {
+            //   console.log("🚀 ~ file: CreateSubPacket.js ~ line 116 ~ CreateSubPacket ~ awaitthis.props.createFactoryPacket ~ result", result)
+            //   // this.props.close();
 
-            }).catch((err) => {
-              console.log(err)
-            });
+            // }).catch((err) => {
+            //   console.log(err)
+            // });
 
             // Simulate submitting to database, shows us values submitted, resets form
             // setTimeout(() => {
@@ -266,7 +291,6 @@ class CreateSubPacket extends Component {
                 </div>
 
                 <div className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
-
                   <DropDownSelection
                     className={
                       touched.factoryIssueprocessName &&
@@ -663,7 +687,15 @@ class CreateSubPacket extends Component {
                     tabindex="0"
                     className="bx--btn bx--btn--primary"
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={ (values.factoryIssueRoughId 
+                              && values.factoryPaketcreateDate 
+                              && values.factorySubPacket 
+                              && values.factoryIssueprocessName 
+                              && values.factoryIssueAssignName 
+                              && values.factoryIssueCarat 
+                              && values.factoryIssuepcs 
+                              && values.factoryPacketPurity) ? isSubmitting : true
+                    }
                   >
                     Save
                   </button>

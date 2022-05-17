@@ -178,7 +178,11 @@ class AddRoughModal extends Component {
                     labelText="Carat :"
                     placeholder="enter carat here"
                     light={true}
-                    onChange={handleChange}
+                    onChange={(e)=> {
+                      if(Number(e.target.value) >= 0){
+                        return (handleChange(e))
+                      }
+                    }}
                     onBlur={handleBlur}
                     // onClick={function noRefCheck() {}}
                     required
@@ -201,7 +205,11 @@ class AddRoughModal extends Component {
                     invalidText="Please fill"
                     labelText="Rate :"
                     light={true}
-                    onChange={handleChange}
+                    onChange={(e)=> {
+                      if(Number(e.target.value) >= 0){
+                        return (handleChange(e))
+                      }
+                    }}
                     onBlur={handleBlur}
                     // onClick={function noRefCheck() {}}
                     required
@@ -265,7 +273,12 @@ class AddRoughModal extends Component {
                     invalidText="Please fill"
                     labelText="Payment Days :"
                     light={true}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                        if(Number(e.target.value >= 0)){
+                          handleChange(e)
+                        }
+                      }
+                    }
                     onBlur={handleBlur}
                     // onClick={function noRefCheck() {}}
                     required

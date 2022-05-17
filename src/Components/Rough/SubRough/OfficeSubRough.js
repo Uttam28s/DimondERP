@@ -17,6 +17,8 @@ export const OfficeSubRough = (props) => {
                 button="Close Sub Packet"
                 title="Sub Office"
                 subClose={props.subClose}
+                handelModelTabChange={props.handelModelTabChange}
+                tabSelected={props.tabSelected}
             />
         </div>
     );

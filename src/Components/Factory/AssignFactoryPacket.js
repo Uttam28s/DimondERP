@@ -46,7 +46,8 @@ class AssignSubPacket extends Component {
     }
   }
 
-  handelSubmit = async (values) => {
+  handelSubmit = async (values, resetForm) => {
+    resetForm()
     let data = {
       factory_id: values.factorySubPacketAssignRoughId.id,
       process_name: values.factoryAssignprocessName,
@@ -112,14 +113,14 @@ class AssignSubPacket extends Component {
           onSubmit={(values, { setSubmitting, resetForm }) => {
             // When button submits form and form is in the process of submitting, submit button is disabled
             setSubmitting(true);
-            this.handelSubmit(values)
-            this.props.close();
+            this.handelSubmit(values, resetForm)
+            // this.props.close();
             // Simulate submitting to database, shows us values submitted, resets form
-            setTimeout(() => {
-              // alert(JSON.stringify(values, null, 2));
-              resetForm();
-              setSubmitting(false);
-            }, 500);
+            // setTimeout(() => {
+            //   // alert(JSON.stringify(values, null, 2));
+            //   resetForm();
+            //   setSubmitting(false);
+            // }, 500);
           }}
         >
           {({
@@ -666,7 +667,15 @@ class AssignSubPacket extends Component {
                     tabindex="0"
                     className="bx--btn bx--btn--primary"
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={(values.factoryAssignRoughId 
+                            && values.factoryAssignPacketId 
+                            && values.factorySubPacketAssignRoughId 
+                            && values.factorySubPacketAssignRoughId 
+                            && values.factoryAssignprocessName 
+                            && values.factoryAssignAssignName 
+                            && values.factoryPacketPurity 
+                            && values.factoryPaketcreateDate ) ? isSubmitting : true
+                    }
                   >
                     Save
                   </button>

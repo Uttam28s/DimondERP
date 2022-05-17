@@ -104,22 +104,14 @@ export class DataSheetIndex extends Component {
         roughList: [],
         tabSelected: 0,
         isActive: false,
-        // modelSheet: true,
+        
         // subPacketpageinationRef: {
         //   totalCount: 0,
         //   limit: 10,
         //   skip: 0,  
         //   currentPage: 1,
         // },
-        // tableData: [],
-        // subPacketData: [],
-        // officeSubId: "",
-        // officeIdList: [], 
-        // srno: 0,
-        // // setValue: 5,
-        // textbox_value: 0,
-        // drop_value : 0,
-
+      
         grid: [
           [{ readOnly: true, value: "Index"}, { readOnly: true, value: "Item"},{ readOnly: true, value: "Data 1"}, { readOnly: true, value: "Data 2"}, { readOnly: true, value: "Data 3" }, { readOnly: true, value: "Data 4"}, { readOnly: true, value: "Data 5"}, { readOnly: true, value: "Data 6"} ],
           [{ readOnly: true, value: 1},{ value: 'Ordinary Bitter'}, { value: '20 - 35'}, { readOnly: true, value: '5 - 12'}, { id: "dropdown", value: "", valueViewer:SelectEditor, drop: this.onCellsChanged }, { value: 150 }, { value: "india"}, { value: "india"}],
@@ -137,12 +129,13 @@ export class DataSheetIndex extends Component {
           [{ readOnly: true, value: 13}, { value: 'Dark Mild Ale'}, { value: '10 - 24'}, { value: '17 - 34'}, { value: "" , valueViewer: SelectEditor, drop: this.onCellsChanged }, { value: 150 }, { value: "india"}, { value: "india"}],
           [{ readOnly: true, value: 14}, { value: 'Brown Ale'}, { value: '12 - 25'}, { value: '12 - 17'}, { value: "" , valueViewer: SelectEditor, drop: this.onCellsChanged }, { value: 150 }, { value: "india"}, { value: "india"}]
         ],
-  
-        update_grid: []
+        update_grid: [],
       };
+      console.log(this,"in custructor.......")
     }
 
   componentDidMount = () => {
+    console.log(".............................................")
     // this.props
     //   .getOfficeList(this.state.pageinationRef)
     //   .then((res) => {
@@ -169,8 +162,10 @@ export class DataSheetIndex extends Component {
     this.props
       .getRoughPrefrence()
       .then((res) => {
+        console.log(res.commonGet.caratList.map((data)=> data.carat),"OfficeDataSheet.js")
         this.setState({
           roughList: res.commonGet.caratList,
+          carat: res.commonGet.caratList.map((data)=> data.carat)
           // manageDataSheet: true
         });
       })
@@ -182,6 +177,7 @@ export class DataSheetIndex extends Component {
     //     caratList: res.commonGet.caratList,
     //   });
     // });
+      
   };
 
   closeModalSheet = () => {
@@ -216,8 +212,108 @@ export class DataSheetIndex extends Component {
       .returnOfficePacket(data)
       .then((res) => console.log(res))
       .catch((e) => console.log(e));
-  };
+    };
+    
+    gridData = async (data1, data2, packet) => {
+
+      console.log(data1, data2, packet,"data -> gridData -> OfficeDataSheet.js")
+
+      // console.log(packet.map((data) => data),"packet")
+      // const allPacketType = packet.map((data) => {
+      //   data.map( async (value) => 
+      //     await this.props
+      //       .getOfficeSubList({packetId: value._id })
+      //       .then((res) => { 
+      //         console.log(res,"res -> gridData -> OfficeDataSheet.js")
+      //     })
+      //   )
+      // })
+
+      // const mapLoop = async _ => {
+      //   console.log('Start')
+      //   const promises = fruitsToGet.map(async fruit => {
+      //     const numFruit = await getNumFruit(fruit)
+      //     return numFruit
+      //   })
+      //   const numFruits = await Promise.all(promises)
+      //   console.log(numFruits)
+      //   console.log('End')
+      // }
+
+      // const promises = await packet.packetSrNo.map( async (data) => {
+      //   const numFruit = await this.props
+      //     .getOfficeSubList({packetId: data._id })
+      //     .then((res) => {return res})
+      //     return numFruit
+      // })
+      // const numFruits = await Promise.all(promises)
+      // console.log(numFruits,"numFruits....")
+
+      // const arrayOfResult = await Promise.all(packet.packetSrNo.map( async (data) => {
+      //   await this.props
+      //     .getOfficeSubList({packetId: data._id })
+      //     .then((res) => {return res})
+      // }))
+      // // const numFruits = await Promise.all(promises)
+      // console.log(arrayOfResult,"arrayOfResult")
+
+      const arrayOfResult = packet.packetSrNo.map( async (data) => {
+        await this.props
+          .getOfficeSubList({packetId: data._id })
+          .then((res) => {return res})
+      })
+      console.log(arrayOfResult,"arrayOfResult")
+
+      // console.log(allPacketType,"allPacketType");
+
+    var update = [
+      [
+        { readOnly: true, value: "Index"},
+        { readOnly: true, value: "Rough"}, 
+        { readOnly: true, value: "Office Packet"},
+        { readOnly: true, value: "Packet id"}, 
+        { readOnly: true, value: "Process Name"}, 
+        { readOnly: true, value: "Return Carat"}, 
+        { readOnly: true, value: "Return rough Date"} 
+      ]
+    ]
+    const grid_value = packet.packetSrNo.map((data) => 
+
+      update.push([ {readOnly: true, id: 1 ,value: 1}, {value: data1.label}, {value: data2.label}, {value: data.srno}, {value: ""}, {value: ""}, {value: ""} ])
   
+    )
+    console.log(grid_value,"grid_value....")  
+    console.log(update,"update....")
+
+    this.setState({ 
+      grid: update,
+    })
+
+
+    // this.setState({
+    //   // RoughData: data1,
+    //   // OfficeData: data2,
+    // grid: [
+    //   [{ readOnly: true, value: "Index"}, { readOnly: true, value: "Rough"},{ readOnly: true, value: "Office Packet"}, { readOnly: true, value: "Packet id"}, { readOnly: true, value: "Process Name" }, { readOnly: true, value: "Return Carat"}, { readOnly: true, value: "Return rough Date"} ],
+    //   [{ readOnly: true, id: 1 ,value: 1},{ value: ""}, { value: ""}, { readOnly: true, value: ''}, { id:  "dropdown", value: "", valueViewer:SelectEditor, drop: this.onCellsChanged }, { value: '' }, { value: ""}],
+    //   [{ readOnly: true, id: 2 , value: 2}, { value: ''}, { value: ''}, {readOnly: true, value: ''}, { value: "" , valueViewer: SelectEditor, drop: this.onCellsChanged }, { value: '' }, { value: ""}],
+    //   [{ readOnly: true, id: 3 , value: 3}, { value: ''}, { value: ''}, { value: ''}, { value: "" , valueViewer: SelectEditor, drop: this.onCellsChanged }, { value: '' }, { value: ""}],
+    //   [{ readOnly: true, id: 4 , value: 4}, { value: ''}, { value: ''}, { value: ''}, { value: "" , valueViewer: SelectEditor, drop: this.onCellsChanged }, { value: '' }, { value: ""}],
+    //   [{ readOnly: true, id: 5 , value: 5}, { value: ''}, { value: ''}, { value: ''}, { value: "" , valueViewer: SelectEditor, drop: this.onCellsChanged }, { value: '' }, { value: ""}],
+    //   [{ readOnly: true, id: 6 , value: 6}, { value: ''}, { value: ''}, { value: ''}, { value: "" , valueViewer: SelectEditor, drop: this.onCellsChanged }, { value: '' }, { value: ""}],
+    //   [{ readOnly: true, id: 7 , value: 7}, { value: ''}, { value: ''}, { value: ''}, { value: "" , valueViewer: SelectEditor, drop: this.onCellsChanged }, { value: '' }, { value: ""}],
+    //   [{ readOnly: true, id: 8 , value: 8}, { value: ''}, { value: ''}, { value: ''}, { value: "" , valueViewer: SelectEditor, drop: this.onCellsChanged }, { value: '' }, { value: ""}],
+    //   [{ readOnly: true, id: 9 , value: 9}, { value: ''}, { value: ''}, { value: ''}, { value: "" , valueViewer: SelectEditor, drop: this.onCellsChanged }, { value: '' }, { value: ""}],
+    //   [{ readOnly: true, id: 10 , value: 10}, { value: ''}, { value: ''}, { value: ''}, { value: "" , valueViewer: SelectEditor, drop: this.onCellsChanged }, { value: '' }, { value: ""}],
+    //   // [{ readOnly: true, id:1 , value: 11}, { value: 'Old Ale'}, { value: '30 -65'}, { value: '12 - 30'}, { value: "" , valueViewer: SelectEditor, drop: this.onCellsChanged }, { value: 150 }, { value: "india"}, { value: "india"}],
+    //   // [{ readOnly: true, id:1 , value: 12}, { value: 'Pale Mild Ale'}, { value: '10 - 20'}, { value: '6 - 9'}, { value: "" , valueViewer: SelectEditor, drop: this.onCellsChanged }, { value: 150 }, { value: "india"}, { value: "india"}],
+    //   // [{ readOnly: true, id:1 , value: 13}, { value: 'Dark Mild Ale'}, { value: '10 - 24'}, { value: '17 - 34'}, { value: "" , valueViewer: SelectEditor, drop: this.onCellsChanged }, { value: 150 }, { value: "india"}, { value: "india"}],
+    //   // [{ readOnly: true, id:1 , value: 14}, { value: 'Brown Ale'}, { value: '12 - 25'}, { value: '12 - 17'}, { value: "" , valueViewer: SelectEditor, drop: this.onCellsChanged }, { value: 150 }, { value: "india"}, { value: "india"}]
+    // ],
+    // })
+
+  }
+ 
   openSheet = (textInput_start,textInput_end) => {
     const input_start = parseInt(textInput_start)
     const input_end = parseInt(textInput_end)
@@ -241,7 +337,8 @@ export class DataSheetIndex extends Component {
       ]
       for(let i=input_start ; i<=input_end ; i++){
         if(input_start && input_end){
-          update.push(this.state.grid[i])
+          // update.push(this.state.grid[i])
+          update.push([{ readOnly: true, value: i},{ value: 'Ordinary Bitter'}, { value: '20 - 35'}, { readOnly: true, value: '5 - 12'}, { id: "dropdown", value: "", valueViewer:SelectEditor, drop: this.onCellsChanged }, { value: 150 }, { value: "india"}, { value: "india"}],)
         }
       }
 
@@ -256,10 +353,10 @@ export class DataSheetIndex extends Component {
     this.props.history.push("/office")
     this.setState({
       tabSelected: 0,
-    })
+    })  
   }
 
-  valueRenderer = cell => cell.value;
+  valueRenderer = (cell) =>  cell.value;
   onCellsChanged = (opt,data,changes) => {
     console.log(opt,"opt...")
     console.log(data,"data...")
@@ -297,10 +394,10 @@ export class DataSheetIndex extends Component {
   };
   onContextMenu = (e, cell, i, j) =>
     cell.readOnly ? e.preventDefault() : null;
- 
     
     render() {
       console.log(this.state.update_grid,"this.state.update_grig - DataSheetIndex.js")
+      console.log(this.state.grid,"this.state.grid - DataSheetIndex.js")
 
       const tabArray = [
         {
@@ -316,6 +413,8 @@ export class DataSheetIndex extends Component {
               close={this.closeModelSheet}
               caratList={this.state.roughList}
               handleCreateSubpacket={this.handleCreateSubpacket}
+
+
               data={this.state.isActive === true ? this.state.update_grid : this.state.grid}
               valueRenderer={this.valueRenderer}
               onContextMenu={this.onContextMenu}
@@ -337,6 +436,9 @@ export class DataSheetIndex extends Component {
               close={this.closeModelSheet}
               caratList={this.state.roughList}
               handleCreateSubpacket={this.handleCreateSubpacket}
+              // gridData={this.gridData}
+
+
               data={this.state.isActive === true ? this.state.update_grid : this.state.grid}
               valueRenderer={this.valueRenderer}
               onContextMenu={this.onContextMenu}
@@ -358,6 +460,8 @@ export class DataSheetIndex extends Component {
               close={this.closeModelSheet}
               caratList={this.state.roughList}
               handelReturnOffice={this.handelReturnOffice}
+
+
               data={this.state.isActive === true ? this.state.update_grid : this.state.grid}
               valueRenderer={this.valueRenderer}
               onContextMenu={this.onContextMenu}

@@ -211,7 +211,8 @@ export class FactoryDataSheet extends Component {
       ]
       for(let i=input_start ; i<=input_end ; i++){
         if(input_start && input_end){
-          update.push(this.state.grid[i])
+          // update.push(this.state.grid[i])
+          update.push([{ readOnly: true, value: i},{ value: 'Ordinary Bitter'}, { value: '20 - 35'}, { readOnly: true, value: '5 - 12'}, { id: "dropdown", value: "", valueViewer:SelectEditor, drop: this.onCellsChanged }, { value: 150 }, { value: "india"}, { value: "india"}],)
         }
       }
 

@@ -75,7 +75,7 @@ class OfficeIndex extends Component {
     this.props
       .getOfficeList(this.state.pageinationRef)
       .then((res) => {
-
+        console.log(res,"res => getOfficeAndRough => OfficeIndex.js")
         for(let date of res.data){
           if(date.return_date){
             const format_date = date => date.toISOString().slice(0, 10);
@@ -146,7 +146,7 @@ class OfficeIndex extends Component {
             ...this.state.subPacketpageinationRef,
             totalCount: res.count,
           },
-        })
+        }),
       )
       .catch((e) => console.log(e));
     console.log('data', data)
@@ -162,9 +162,13 @@ class OfficeIndex extends Component {
 
     let editArray = data && ["Return Rough"]
 
+    if(data.return_date){
+      this.setState({ model: true })
+    }
+
     this.setState({
       // subRoughModel: false,
-      model: true,
+      // model: true,
       preSelectedData: data,
       editArray: editArray
     });
@@ -370,6 +374,7 @@ class OfficeIndex extends Component {
         pageSize={this.onPageChange}
         totalData={this.state.pageinationRef}
         edit={this.edit}
+        officeReturnrought={true}
         remove={this.remove}
         //colour={true}
 

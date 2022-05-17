@@ -6,6 +6,9 @@ import moment from "moment";
 export default class TableCells extends Component {
   render() {
     const cell = this.props.header;
+    const split = cell.id.split(":");
+    const singleData = this.props.row.find((data) => data.id === split[0]);
+    
     switch (cell.info.header) {
       case "btn":
         return (
@@ -13,6 +16,7 @@ export default class TableCells extends Component {
             <div className="action-wrapper">
               <Edit20
                 className="edit-in-table"
+                id={ (this.props.officeReturnrought && !(singleData.return_date)) && "improve-edit"}
                 onClick={() => this.props.handelOnEditClick(cell.id)}
               />
               <div className="devider"></div>

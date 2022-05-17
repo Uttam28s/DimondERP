@@ -55,8 +55,9 @@ class ReturnOfficePacket extends Component {
       this.setState({ preDefinedData: this.props.preDefinedData });
     }
   }
-
-  handelSubmit = (value) => {
+  
+  handelSubmit = (value, resetForm) => {
+    resetForm()
     const data = {
       packet_id: value.officeReturnpacketId.id,
       office_id: value.officeReturnOfficeList.id,
@@ -66,11 +67,12 @@ class ReturnOfficePacket extends Component {
       returnCarat: value.officeReturncarat || this.state.packetCarat,
       returnDate: moment(value.officeReturnDate, "DD-MM-YYYY").format(
         "YYYY-MM-DD"
-      ),
-    };
-    console.log("CreateOfficePacket -> handelSubmit -> data", data);
-    // this.props.close();
-    this.props.handleCreateSubpacket(data);
+        ),
+      };
+      console.log("CreateOfficePacket -> handelSubmit -> data", data);
+      this.setState({ packetType: "", packetCarat: 0 })
+      // this.props.close();
+      this.props.handleCreateSubpacket(data);
   };
 
   handelChangeRough = (data) => {
@@ -122,7 +124,7 @@ class ReturnOfficePacket extends Component {
 
   clearField = (func, data) => {
     data.map((val) => {func(val, "")})
-    this.setState({packetCarat: ""})
+    this.setState({packetCarat: 0})
   }
 
   render() {
@@ -153,9 +155,9 @@ class ReturnOfficePacket extends Component {
             officeEndInputValue: "",
             officeReturnpacketId: preSelectedData?.srno || "",
             // roughName: "",
-            officeReturncarat: (preSelectedData?.chapka_return_carat || preSelectedData?.sawing_return_carat) || this.state.packetCarat,
+            officeReturncarat: (preSelectedData?.chapka_return_carat || preSelectedData?.sawing_return_carat) || "",
             // officeReturnpiece: "",
-            officeReturnprocessName: preSelectedData?.type || this.state.packetType,
+            officeReturnprocessName: preSelectedData?.type || "",
             officeReturnDate: ((preSelectedData?.chapka_return_date || preSelectedData?.sawing_return_date) && moment(preSelectedData?.chapka_return_date || preSelectedData?.sawing_return_date).format("DD/MM/YYYY")) || "",
             officeReturnRoughList: preDefinedData?.carat || "",
             officeReturnOfficeList: preDefinedData?.office_total_carat || "" ,
@@ -167,13 +169,13 @@ class ReturnOfficePacket extends Component {
             // When button submits form and form is in the process of submitting, submit button is disabled
             setSubmitting(true);
             console.log("AddRoughModal -> render -> values", values);
-            this.handelSubmit(values);
+            this.handelSubmit(values, resetForm);
             // Simulate submitting to database, shows us values submitted, resets form
-            setTimeout(() => {
-              // alert(JSON.stringify(values, null, 2));
-              resetForm();
-              setSubmitting(false);
-            }, 500);
+            // setTimeout(() => {
+            //   // alert(JSON.stringify(values, null, 2));
+            //   resetForm();
+            //   setSubmitting(false);
+            // }, 500);
           }}
         >
           {({
@@ -207,8 +209,13 @@ class ReturnOfficePacket extends Component {
                     disabled={preDefinedData?.carat ? true : false}
                     light
                     onChange={(select) => {
-                      this.clearField(setFieldValue, ["officeReturnOfficeList", "officeReturnpacketId", "officeReturncarat"])
+                      // this.clearField(setFieldValue, ["officeReturnOfficeList", "officeReturnpacketId", "officeReturncarat"])
+
                       setFieldValue("officeReturnRoughList", select.selectedItem || "");
+                      setFieldValue("officeReturnOfficeList", "");
+                      setFieldValue("officeReturnpacketId", "");
+                      setFieldValue("officeReturncarat", "");
+
                       this.handelChangeRough(select.selectedItem);
                       // this.props.roughOnChange(
                       //   select.selectedItem ? select.selectedItem.id : 0
@@ -251,7 +258,10 @@ class ReturnOfficePacket extends Component {
                     light
                     onChange={(select) => {
                       setFieldValue("officeReturnOfficeList", select.selectedItem || "");
-                      this.clearField(setFieldValue, ["officeReturnpacketId", "officeReturncarat"])
+                      setFieldValue("officeReturnpacketId", "");
+                      setFieldValue("officeReturncarat", "");
+
+                      // this.clearField(setFieldValue, ["officeReturnpacketId", "officeReturncarat"])
                       this.handleOfficeSrno(select.selectedItem);
                       // this.props.selectedId(select.selectedItem.id);
                       // this.handelSelectedId(
@@ -288,7 +298,11 @@ class ReturnOfficePacket extends Component {
                     light
                     onChange={(select) => {
                       setFieldValue("officeReturnpacketId", select.selectedItem || "");
-                      this.clearField(setFieldValue, ["officeReturncarat"])
+                      setFieldValue("officeReturnprocessName", "");
+                      setFieldValue("officeReturncarat", "");
+                      this.setState({ packetType: "", packetCarat: 0 })
+
+                      // this.clearField(setFieldValue, ["officeReturncarat","officeReturnprocessName"])
                       this.handlePacketDetails(select.selectedItem);
                     }}
                     titleText="Packet id"
@@ -313,7 +327,7 @@ class ReturnOfficePacket extends Component {
                     }
                     name="officeReturnprocessName"
                     selectedItem={
-                      (preSelectedData?.type ? preSelectedData?.type : (values.officeReturnprocessName || this.state.packetType))
+                      (preSelectedData?.type ? preSelectedData?.type : (this.state.packetType ? this.state.packetType : values.officeReturnprocessName))
                     }
                     value={values.officeReturnprocessName}
                     direction="top"
@@ -357,7 +371,7 @@ class ReturnOfficePacket extends Component {
                     placeholder="enter carat here"
                     light={true}
                     onChange={(e) => {
-                      if (Number(e.target.value) <= Number(this.state.packetCarat) && Number(e.target.value) >= 0) {
+                      if ((Number(e.target.value) <= Number(this.state.packetCarat) && Number(e.target.value) >= 0) || ((Number(e.target.value) <= (preSelectedData?.chapka_issueCarat || preSelectedData?.sawing_issueCarat)) && Number(e.target.value) >= 0) ) {
                         handleChange(e)
                         this.setState({toggle: !this.state.toggle})
                       }
@@ -493,7 +507,7 @@ class ReturnOfficePacket extends Component {
                 <p style={{display: "grid"}} className={this.props.modelSheet ? "bx--col-md-2" : "bx--col-md-4"}>
                   Packet Carat
                   <span style={{color: "#DA1E28"}}>
-                    {( (preSelectedData?.chapka_issueCarat || preSelectedData?.sawing_issueCarat) || 0) || (this.state.packetCarat || 0)}
+                    { ((preSelectedData?.chapka_issueCarat || preSelectedData?.sawing_issueCarat) || 0) || (this.state.packetCarat || 0)}
                     {/* {this.state.packetCarat || 0} */}
                   </span>
                 </p>
@@ -501,7 +515,10 @@ class ReturnOfficePacket extends Component {
                   Wight lose
                   <span style={{color: "#DA1E28"}}>
                     {/* {toFixed4(((( (preSelectedData.chapka_issueCarat || 0) || (this.state?.packetCarat || 0) ) - (values?.officeReturncarat || 0)) / ( (preSelectedData.chapka_issueCarat || 1) || (this.state.packetCarat || 1) )) * 100) || 0}% */}
-                    {toFixed4((( (this.state?.packetCarat || 0)  - (values?.officeReturncarat || 0)) / (this.state.packetCarat || 1) ) * 100) || 0}%
+                    { preSelectedData ? 
+                        toFixed4((( (((preSelectedData?.chapka_issueCarat || preSelectedData?.sawing_issueCarat) || 0)  - (values?.officeReturncarat || 0)) / ((preSelectedData?.chapka_issueCarat || preSelectedData?.sawing_issueCarat) || 1) ) * 100) || 0 ) 
+                      : (toFixed4(( ((this.state?.packetCarat || 0)  - (values?.officeReturncarat || 0)) / (this.state.packetCarat || 1) ) * 100) || 0)
+                    }%
                   </span>
                 </p>
                
@@ -532,7 +549,9 @@ class ReturnOfficePacket extends Component {
                     tabindex="0"
                     className="bx--btn bx--btn--primary"
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={ (values.officeReturnRoughList && values.officeReturnOfficeList && values.officeReturnpacketId && values.officeReturncarat && values.officeReturnDate )
+                      ? isSubmitting : true
+                    }
                   >
                     Save
                   </button>

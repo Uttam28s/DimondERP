@@ -120,7 +120,7 @@ export const FactorySubRoughColumn = [
   },
   {
     header: "Main Rough",
-    key: "carat"
+    key: "main_carat"
   },
   {
     header: "Assigned Name",

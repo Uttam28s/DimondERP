@@ -53,9 +53,16 @@ class CreateOfficePacket extends Component {
       this.setState({ preDefinedData: this.props.preDefinedData });
     }
   }
-
-  handelSubmit = (value) => {
+  
+  handelSubmit = (value, resetForm) => {
+    resetForm()
     const {preSelectedData} = this.props
+    this.setState({ 
+      remaining: 0,
+      assigneName: "",
+      srno: ""
+     })
+    // console.log(resetForm,"callback() in CreateOfficePacket.js")
 
     const data = {
       office_id: value.officeIssueOfficeList.id,
@@ -69,11 +76,11 @@ class CreateOfficePacket extends Component {
     };
     console.log("CreateOfficePacket -> handelSubmit -> data", data);
     // this.props.close();
-    this.props.handleCreateSubpacket(data);
+    // this.props.handleCreateSubpacket(data);
     if (preSelectedData) {
       this.props.editOfficeSubPacket()
     } else {
-      this.props.handleCreateSubpacket(data);
+      this.props.handleCreateSubpacket(data)
     }
   };
 
@@ -119,6 +126,11 @@ class CreateOfficePacket extends Component {
     })
   }
 
+  clearField = (func, data) => {
+    data.map((val) => {func(val, "")})
+  }
+
+
   render() {
 
     const {preSelectedData, preDefinedData} = this.props
@@ -156,14 +168,18 @@ class CreateOfficePacket extends Component {
           }}
           validationSchema={validationSchema}
           onSubmit={(values, {setSubmitting, resetForm}) => {
+            console.log(values,"values in CreateOfficePacket.js")
             // When button submits form and form is in the process of submitting, submit button is disabled
             setSubmitting(true);
             //console.log("AddRoughModal -> render -> values", values);
-            this.handelSubmit(values);
+            this.handelSubmit(values,resetForm);
 
             // Simulate submitting to database, shows us values submitted, resets form
             // setTimeout(() => {
             //   // alert(JSON.stringify(values, null, 2));
+              // resetForm({ 
+              //   values : { officeEndInputValue: '', officeIssueOfficeList:'', officeIssueRoughList:'', officeIssueassigneName:'', officeIssuecarat:'', officeIssueprocessName:'', officePaketcreateDate:'', officeStartInputValue:''}
+              // });
             //   resetForm();
             //   setSubmitting(false);
             // }, 500);
@@ -200,10 +216,11 @@ class CreateOfficePacket extends Component {
                     disabled={preDefinedData?.carat ? true : false}
                     // light
                     onChange={(select) => {
-                      setFieldValue("officeIssueRoughList", select.selectedItem);
+                      setFieldValue("officeIssueRoughList", select.selectedItem || "");
                       setFieldValue("officeIssueOfficeList", "");
                       setFieldValue("officeIssuecarat", "")
                       this.clearState()
+                      // this.clearField(setFieldValue, ["officeIssueRoughList", "officeIssueOfficeList", "officeIssueassigneName", "officeIssueprocessName", "officeIssuecarat", "officePaketcreateDate"])
                       this.handelChangeRough(select.selectedItem);
                       // this.props.roughOnChange(
                       //   select.selectedItem ? select.selectedItem.id : 0
@@ -314,7 +331,7 @@ class CreateOfficePacket extends Component {
                         : "bx--col dropdown-padding"
                     }
                     name="officeIssueprocessName"
-                    selectedItem={ preSelectedData?.type ? preSelectedData?.type : values.officeIssueprocessName}
+                    selectedItem={values.officeIssueprocessName}
                     value={values.officeIssueprocessName}
                     direction="down"
                     // itemToString={(item) => (item ? item.text : "")}
@@ -380,7 +397,7 @@ class CreateOfficePacket extends Component {
                     placeholder="enter carat here"
                     light={true}
                     onChange={(e) => {
-                      if (Number(e.target.value) <= Number(this.state.remaining) && Number(e.target.value) >= 0) {
+                      if ( ((Number(e.target.value) <= Number(this.state.remaining)) && (Number(e.target.value) >= 0))  || ((Number(e.target.value) <= (preSelectedData?.chapka_issueCarat || preSelectedData?.sawing_issueCarat) + preDefinedData?.copyCarat) && (Number(e.target.value) >= 0)) ){
                         setFieldValue("officeIssuecarat", e.target.value)
                         this.setState({toggle: !this.state.toggle})
                       }
@@ -506,6 +523,7 @@ class CreateOfficePacket extends Component {
                     value={values.officePaketcreateDate}
                     onBlur={handleBlur}
                   />
+                  {console.log(values.officePaketcreateDate,"values.officePaketcreateDate ==> CreateOfficePacket.js")}
                   {touched.officePaketcreateDate &&
                     errors.officePaketcreateDate ? (
                     <div className="error-message">
@@ -567,7 +585,7 @@ class CreateOfficePacket extends Component {
                   <p style={{display: "grid"}}>
                     Remaining Carat :{" "}
                     <span style={{color: "#DA1E28"}}>
-                      { this.state.remaining - values?.officeIssuecarat || 0 }
+                      { preSelectedData ? ((preSelectedData?.chapka_issueCarat || preSelectedData?.sawing_issueCarat) + preDefinedData?.copyCarat) - Number(values?.officeIssuecarat) : this.state.remaining - Number(values?.officeIssuecarat) || 0}
                     </span>
                   </p>
                 </div>
@@ -647,7 +665,10 @@ class CreateOfficePacket extends Component {
                     tabindex="0"
                     className="bx--btn bx--btn--primary"
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={
+                      (values.officeIssueRoughList && values.officeIssueOfficeList && values.officeIssueassigneName && values.officeIssueprocessName && values.officeIssuecarat && values.officePaketcreateDate) 
+                      ? isSubmitting : true
+                    }
                   >
                     Save
                   </button>

@@ -71,6 +71,7 @@ export class RoughViewTab extends Component {
 
     handelModelTabChange = (e) => {
       console.log(e,"handelModelTabChange ==> RoughViewTab")
+      this.setState({ subpacketlist: [] })
       if(e==1){
         this.props.getFactoryList({roughId: this.props.match.params.id}).then((result) => {
           console.log('resultgetFactoryList', result)
@@ -151,12 +152,12 @@ export class RoughViewTab extends Component {
     };
     edit = (data) => {
       console.log(":rocket: ~ file: RoughIndex.js ~ line 243 ~ RoughIndex ~ data", data)
-      // let editArray = data && data.brokername ? ["Add Rough", "Sorting Rough"] : ["Assign Rough"]
+      let editArray = data && ["Assign Rough"]
       this.setState({
       //   subRoughModel: false,
         model: true,
         preSelectedData: data,
-      //   editArray: editArray
+        editArray: editArray
       });
     }
     remove = (data) => {
@@ -238,6 +239,9 @@ export class RoughViewTab extends Component {
     }
   render() {
     console.log(this.props,"props value in RoughViewIndex.js")
+
+    const {model,editArray} = this.state
+
     const mainRoughTabArray = [
       {
         id: "1",
@@ -294,6 +298,8 @@ export class RoughViewTab extends Component {
               totalData={this.state.subPacketpageinationRef}
               edit={this.edit}
               remove={this.remove}
+              handelModelTabChange={this.handelModelTabChange}
+              tabSelected={this.state.tabSelected}
             />)
         },
         {
@@ -308,6 +314,8 @@ export class RoughViewTab extends Component {
               totalData={this.state.subPacketpageinationRef}
               edit={this.edit}
               remove={this.remove}
+              handelModelTabChange={this.handelModelTabChange}
+              tabSelected={this.state.tabSelected}
             />)
         }
       ]
@@ -322,7 +330,11 @@ export class RoughViewTab extends Component {
           modalName="Rough Packet Details"
           open={this.state.model}
           close={this.closeModal}
-          tabContent={this.state.model && mainRoughTabArray||[]}
+          // tabContent={this.state.model && mainRoughTabArray||[]}
+          tabContent={editArray?.length ?
+            mainRoughTabArray.filter((data) => editArray.includes(data.lebal)) :
+            (model && mainRoughTabArray)
+          }
           // handelModelTabChange={this.handelModelTabChange}
           // tabSelected={this.state.tabSelected}
           // tabContent={this.state.subPacketModel === true ? subPacket : tabArray}

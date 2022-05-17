@@ -24,6 +24,7 @@ export class SubPacketIndex extends Component {
           modelData: "",
           officeSubId: "",
           subPacketData: [],
+          // TabChange: false,
           preDefinedData : "",
           preSelectedData: "",
           subPacketModel: false,
@@ -59,6 +60,7 @@ export class SubPacketIndex extends Component {
     }   
     
     onModelPopup = (data) => {
+    
       const value = {
         ...this.state.subPacketpageinationRef,
         id: this.props.match.params.id,
@@ -73,10 +75,12 @@ export class SubPacketIndex extends Component {
               ...this.state.subPacketpageinationRef,
               totalCount: res.count,
             },
+            // TabChange: true,
           })
         )
         .catch((e) => console.log(e));
       this.setState({
+      // TabChange: true,
       //   subPacketModel: true,
       //   model: true,
         officeSubId: this.props.match.params.id,
@@ -98,7 +102,7 @@ export class SubPacketIndex extends Component {
       this.setState({
         model: false,
         editArray:[],
-        tabSelected: 0,
+        // tabSelected: 0,
         preDefinedData: "",
         preSelectedData: "",
       });
@@ -111,9 +115,10 @@ export class SubPacketIndex extends Component {
         type: e === 0 ? "chapka" : "sawing",
       };
       console.log("OfficeIndex -> handelModelTabChange -> value", value, e);
+      this.setState({subPacketData:[]})
       this.props
         .getOfficeSubList(value)
-        .then((res) =>
+        .then((res) => 
           this.setState({
             subPacketData: res.data,
             subPacketpageinationRef: {
@@ -121,7 +126,8 @@ export class SubPacketIndex extends Component {
               totalCount: res.count,
             },
             tabSelected: e,
-          })
+            // TabChange: true,
+          }),
         )
         .catch((e) => console.log(e));
     };
@@ -169,8 +175,9 @@ export class SubPacketIndex extends Component {
 
       this.props
         .createSubPacket(data)
-        .then((res) => {}
-          //  console.log("OfficeIndex -> handleCreateSubpacket -> res", res)
+        .then((res) => {
+           console.log("OfficeIndex -> handleCreateSubpacket -> res", res)
+        }
         )
         .catch((e) => console.log(e));
     };    
@@ -206,6 +213,8 @@ export class SubPacketIndex extends Component {
     render() {
         console.log(this.props,"this.props.location.state ===================>")
         console.log(this.props.match.params.id,"params")
+        console.log(this.state.subPacketData,"subPacketData => OfficeViewTab.js")
+        console.log(this.state.tabSelected,"this.state.tabSelected => OfficeViewtab.js")
 
         const {model,editArray} = this.state
 
@@ -264,6 +273,8 @@ export class SubPacketIndex extends Component {
                   totalData={this.state.subPacketpageinationRef}
                   edit={this.edit}
                   manageButtonFunction={this.handelManageDataModal}
+                  handelModelTabChange={this.handelModelTabChange}
+                  tabSelected={this.state.tabSelected}
                 // data={this.state.singleOfiiceData}
                 /> 
               ),
@@ -280,6 +291,8 @@ export class SubPacketIndex extends Component {
                   totalData={this.state.subPacketpageinationRef}
                   edit={this.edit}
                   manageButtonFunction={this.handelManageDataModal}
+                  handelModelTabChange={this.handelModelTabChange}
+                  tabSelected={this.state.tabSelected}
                 /> 
               ),
             },
@@ -291,6 +304,7 @@ export class SubPacketIndex extends Component {
                 tabContent={subPacket}
                 handelModelTabChange={this.handelModelTabChange}
                 tabSelected={this.state.tabSelected}
+                // rowData={this.state.subPacketData}
                 edit={this.edit}
             >
               <Model

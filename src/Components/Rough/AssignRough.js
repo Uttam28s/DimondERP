@@ -27,11 +27,12 @@ class AssignRough extends Component {
 
     this.state = {
       availableCaret: 0,
-      remainingCarat: 0
+      remainingCarat: 0,
     };
   }
 
   componentDidMount = () => {
+    console.log(this.props.preSelectedData,"preSelectedData ==> AssignRough.js")
     const {preSelectedData} = this.props
     console.log('this.state', this.props.preSelectedData)
     // this.getRoughData()
@@ -99,12 +100,12 @@ class AssignRough extends Component {
     await this.props.getUnusedList(select.id).then((data) => {
       const {preSelectedData} = this.props
       console.log("🚀 ~ file: AssignRough.js ~ line 40 ~ AssignRough ~ awaitthis.props.getUnusedList ~ data", data)
-      let carat = workName.toLowerCase() == "office" ? (Number(data?.data?.copyCarat == undefined ? select.label : data?.data.copyCarat)) : Number(data.data?.mackable) || 0
-      carat = carat - (preSelectedData?.[`${workName}_total_carat`] || 0)
+      let copy_carat = workName.toLowerCase() == "office" ? (Number(data?.data?.copyCarat == undefined ? select.label : data?.data.copyCarat)) : Number(data.data?.mackable) || 0
+      // let carat = copy_carat - (preSelectedData?.[`${workName}_total_carat`] || 0)
       // if (this.props.getDate)
       this.setState({
-        availableCaret: carat,
-        remainingCarat: carat
+        availableCaret: copy_carat,
+        remainingCarat: copy_carat
       })
     })
 
@@ -113,16 +114,16 @@ class AssignRough extends Component {
 
     const {availableCaret, remainingCarat, items, preSelectedData} = this.state
 
-    console.log("🚀 ~ file: AssignRough.js ~ line 55 ~ AssignRough ~ render ~  this.state.preSelectedData", preSelectedData)
+    console.log("🚀 ~ file: AssignRough.js ~ line 55 ~ AssignRough ~ render ~  this.state.preSelectedData", preSelectedData, this.props.preSelectedData)
     return (
       <div style={{ marginBottom: "15%" }}>
         <Formik
           initialValues={{
             sortinRoughId: "",
-            workPlace: "",
-            assignName: "",
-            carat: "",
-            assignRoughDate: "",
+            workPlace: preSelectedData?.workplace || "",
+            assignName: preSelectedData?.assignName || "",
+            carat: (this.props.preSelectedData?.office_total_carat || this.props.preSelectedData?.factory_total_carat) || "",
+            assignRoughDate: (this.props.preSelectedData?.assign_date && moment(this.props.preSelectedData?.assign_date).format("DD/MM/YYYY")) || "" ,
 
           }}
           validationSchema={validationSchema}
@@ -209,6 +210,7 @@ class AssignRough extends Component {
                       items={items || []}
                       label="Select Rough"
                       light
+                      disabled={preSelectedData?.sortinRoughId ? true : false}
                       onChange={(select) => {
                         console.log('11111111111111111111111', select.selectedItem)
                         setFieldValue("sortinRoughId", select.selectedItem);
@@ -279,12 +281,13 @@ class AssignRough extends Component {
                     }
                     name="workPlace"
                     direction="bottom"
-                    selectedItem={values.workPlace}
+                    selectedItem={values.workPlace || preSelectedData?.workplace }
                     value={values.workPlace}
                     // itemToString={(item) => (item ? item.text : "")}
                     id="rough-workplace"
                     items={["office", "factory"]}
                     label="Select work place"
+                    disabled={preSelectedData?.workplace ? true : false}
                     light
                     onChange={
                       (select) => {
@@ -300,6 +303,7 @@ class AssignRough extends Component {
                     titleText="Work Place"
                     type="default"
                   />
+                  {console.log(typeof(values.workPlace),values.workPlace,"values.workPlace ==> AssignRough")} 
                   {touched.workPlace && errors.workPlace ? (
                     <div className="error-message">{errors.workPlace}</div>
                   ) : null}
@@ -314,7 +318,7 @@ class AssignRough extends Component {
                     }
                     name="assignName"
                     direction="bottom"
-                    selectedItem={values.assignName}
+                    selectedItem={ values.assignName || preSelectedData?.assignName }
                     value={values.assignName}
                     // itemToString={(item) => (item ? item.text : "")}
                     id="rough-assignee-name"
@@ -329,11 +333,12 @@ class AssignRough extends Component {
                     label="Select employee name"
                     light
                     onChange={(select) =>
-                      setFieldValue("assignName", select.selectedItem)
+                      setFieldValue("assignName", select.selectedItem || "")
                     }
                     titleText="Assign to Person"
                     type="default"
                   />
+                  {console.log(preSelectedData, "values.assignName ==> AssignRough")} 
                   {touched.assignName && errors.assignName ? (
                     <div className="error-message">{errors.assignName}</div>
                   ) : null}
@@ -355,9 +360,9 @@ class AssignRough extends Component {
                     placeholder="enter carat here"
                     light={true}
                     onChange={(e) => {
-                      if (Number(e.target.value) <= this.state.availableCaret) {
+                      if ( ((Number(e.target.value) <= (this.state.availableCaret)) && (Number(e.target.value) >=0))  || ((Number(e.target.value) <= (this.props.preSelectedData?.office_total_carat || this.props.preSelectedData?.factory_total_carat) + this.state.availableCaret) && (Number(e.target.value) >=0)) ) {
                         this.setState({
-                          remainingCarat: Number(this.state.availableCaret) - (Number(e.target.value))
+                          remainingCarat: this.props.preSelectedData ? ((this.props.preSelectedData?.office_total_carat || this.props.preSelectedData?.factory_total_carat) + this.state.availableCaret) - (Number(e.target.value)) :  Number(this.state.availableCaret) - (Number(e.target.value))
                         })
                         return (handleChange(e))
                       }
@@ -377,7 +382,7 @@ class AssignRough extends Component {
                 <div className="bx--col-md-3"> */}
                   <p style={{ marginTop: "6%" }}>
                     Remaining Carat :{" "}
-                    <span style={{color: "#FF3D00"}}>{remainingCarat?.toFixed(4) || 0}</span>
+                    <span style={{color: "#FF3D00"}}>{(remainingCarat?.toFixed(4) || 0)}</span>
                   </p>
                   <p style={{marginTop: "6%"}}>
                     Available Carat :{" "}

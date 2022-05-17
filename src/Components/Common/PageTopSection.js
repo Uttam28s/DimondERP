@@ -80,6 +80,11 @@ class PageTopSection extends Component {
     const split = id.split(":");
     const singleData = this.state.rowData.find((data) => data.id === split[0]);
     this.props.edit(singleData);
+
+    // if(singleData.return_date){
+    //   this.props.edit(singleData);
+    // }
+
     console.log("Press the Edit button",singleData)
   };
   handelOnDeleteClick = (id) => {
@@ -289,6 +294,8 @@ class PageTopSection extends Component {
                                   handelViewButton={this.handelViewButton}
                                   header={cell}
                                   key={`cell${i}`}
+                                  row={this.state.rowData}
+                                  officeReturnrought={this.props.officeReturnrought}
                                 />
                               )
                               // cell.info.header === "btn" ? (
@@ -336,8 +343,8 @@ class PageTopSection extends Component {
                                   <div className="button-box">
                                     <span
                                       className="green"
-                                      onClick={() => {
-                                        this.closeBox(row.id);
+                                      onClick={() => {  
+                                          this.closeBox(row.id);
                                       }}
                                     >
                                       <strong>Yes </strong>

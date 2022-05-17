@@ -205,6 +205,7 @@ const Sidebar = (props) => {
                           column={props.column}
                           colour={props.colour}
                           edit={props.edit}
+                          officeReturnrought={props.officeReturnrought}
                           remove={props.remove}
                           tabview={props.tabview}
                           tabContent={props.tabContent}

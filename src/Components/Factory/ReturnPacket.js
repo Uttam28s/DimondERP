@@ -48,7 +48,8 @@ class ReturnSubPacket extends Component {
     }
   }
 
-  handelSubmit = (values) => {
+  handelSubmit = (values, resetForm) => {
+    resetForm()
     let data = {
       process_carat_id: values.factoryReturnPacketId.process_id,
       returnData: {
@@ -134,14 +135,14 @@ class ReturnSubPacket extends Component {
             // When button submits form and form is in the process of submitting, submit button is disabled
             setSubmitting(true);
             console.log(" > render -> values", values);
-            this.handelSubmit(values)
-            this.props.close();
+            this.handelSubmit(values, resetForm)
+            // this.props.close();
             // Simulate submitting to database, shows us values submitted, resets form
-            setTimeout(() => {
-              // alert(JSON.stringify(values, null, 2));
-              resetForm();
-              setSubmitting(false);
-            }, 500);
+            // setTimeout(() => {
+            //   // alert(JSON.stringify(values, null, 2));
+            //   resetForm();
+            //   setSubmitting(false);
+            // }, 500);
           }}
         >
           {({
@@ -672,7 +673,13 @@ class ReturnSubPacket extends Component {
                     tabindex="0"
                     className="bx--btn bx--btn--primary"
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={(values.factoryIssueRoughId 
+                            && values.factoryRough
+                            && values.factoryReturnPacketId 
+                            && values.factoryPacketReturnDate
+                            && values.factoryReturncarat 
+                            && values.factoryReturnpiece ) ? isSubmitting : true
+                    }
                   >
                     Save
                   </button>

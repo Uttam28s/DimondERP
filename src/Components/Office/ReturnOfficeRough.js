@@ -55,23 +55,46 @@ class ReturnOfficeRough extends Component {
       sumOfAmount: 0,
       officeIdList: [],
       preSelectedData: "",
+      return_value: true,
     };
   }
 
   componentDidMount = () => {
-    if (this.props.preSelectedData) {
-      this.setState({ preSelectedData: this.props.preSelectedData });
+    if(this.props.preSelectedData){
+      this.setState({ preSelectedData: this.props.preSelectedData })
     }
+
+    // let items = [];
+    // //  console.log('this.props.caratList', this.props.caratList)
+    // this.props.caratList.map((value) =>
+    //   items.push({id: value._id, label: value.carat.toString()})
+    // );
+
+    // if (this.props.preSelectedData) {
+    //   // this.setState({ preSelectedData: this.props.preSelectedData });
+    //   const carat = items.find((data) => data.label == this.props.preSelectedData.carat.toString())
+    //   this.setState({ 
+    //     items: items,
+    //     officeRough: carat,
+    //     preSelectedData: this.props.preSelectedData
+    //   })
+    // }
+
+    // this.setState({
+    //   items: items,
+    // })
   }
 
-  handelSubmit = (value) => {
+  handelSubmit = (value, resetForm) => {
+    const {preSelectedData} = this.props
     console.log('Returnvalue', value, this.state)
     // this.props.close();
+    this.setState({ sumOfAmount: 0, sumOfCarat:0 })
+
+    resetForm()
     let state = this.state
 
     console.log('data', value.officePacketReturnDate)
-
-
 
     let data = {
       rough_id: value.officeReturnOfficeId.id,
@@ -155,8 +178,9 @@ class ReturnOfficeRough extends Component {
   };
 
   handelChangeRough = (data) => {
+    console.log(data,"CreateOfficePacket -> handelChangeRough -> data")
     this.props
-      .getRoughPrefrence({roughId: data === null ? 0 : data.id})
+      .getRoughPrefrence({roughId: this.state.officeRough ? this.state.officeRough.id : (data === null ? 0 : data.id) })
       .then((res) => {
         console.log("CreateOfficePacket -> handelChangeRough -> res", data.id, res);
         this.setState({
@@ -174,12 +198,19 @@ class ReturnOfficeRough extends Component {
 
   render() {
     const {preSelectedData} = this.props
+    // const {items, officeRough} = this.state
 
     let items = [];
     //  console.log('this.props.caratList', this.props.caratList)
     this.props.caratList.map((value) =>
       items.push({id: value._id, label: value.carat.toString()})
     );
+
+    // const officeReturnCarat = items.find((data) => data.label === preSelectedData.carat.toString())
+    // this.setState({ officeRough: officeReturnCarat })
+
+    console.log(preSelectedData,"preSelectedData => ReturnOfficeRough.js")
+
     let officeItem = [];
     this.state.officeIdList.map((value) =>
       officeItem.push({
@@ -197,8 +228,8 @@ class ReturnOfficeRough extends Component {
             officeStartInputValue: "",
             officeEndInputValue: "",
             officeReturnCaratId: preSelectedData?.carat || "",
-            officeReturnOfficeId: "",
-            officePacketReturnDate: "",
+            officeReturnOfficeId: preSelectedData?.office_total_carat || "",
+            officePacketReturnDate: (preSelectedData?.return_date && moment(preSelectedData?.return_date, 'DD-MM-YYYY').format("DD/MM/YYYY")) || "",
             copyCarat: "",
           }}
           validationSchema={validationSchema}
@@ -206,14 +237,14 @@ class ReturnOfficeRough extends Component {
             // When button submits form and form is in the process of submitting, submit button is disabled
             setSubmitting(true);
             // console.log("AddRoughModal -> render -> values", values);
-            this.handelSubmit(values);
+            this.handelSubmit(values, resetForm);
 
             // Simulate submitting to database, shows us values submitted, resets form
-            setTimeout(() => {
-              // alert(JSON.stringify(values, null, 2));
-              resetForm();
-              setSubmitting(false);
-            }, 500);
+            // setTimeout(() => {
+            //   // alert(JSON.stringify(values, null, 2));
+            //   resetForm();
+            //   setSubmitting(false);
+            // }, 500);
           }}
         >
           {({
@@ -237,13 +268,13 @@ class ReturnOfficeRough extends Component {
                         : "bx--col dropdown-padding"
                     }
                     name="officeReturnCaratId"
-                    selectedItem={ preSelectedData?.carat ? { label: preSelectedData?.carat } : values.officeReturnCaratId}
+                    selectedItem={preSelectedData?.carat ? {label: preSelectedData?.carat} :values.officeReturnCaratId}
                     value={values.officeReturnCaratId}
                     // itemToString={(item) => (item ? item.text : "")}
                     id="office-rough-list-issue"
                     items={items}
                     label="Select Rough"
-                    disabled={preSelectedData?.carat ? true : false}
+                    disabled={preSelectedData ? true : false}
                     light
                     onChange={(select) => {
                       setFieldValue("officeReturnCaratId", select.selectedItem || "");
@@ -278,13 +309,14 @@ class ReturnOfficeRough extends Component {
                         : "bx--col dropdown-padding"
                     }
                     name="officeReturnOfficeId"
-                    selectedItem={values.officeReturnOfficeId}
+                    selectedItem={ preSelectedData?.office_total_carat ? {label: preSelectedData?.office_total_carat} : values.officeReturnOfficeId}
                     value={values.officeReturnOfficeId}
                     // itemToString={(item) => (item ? item.text : "")}
                     id="order-buyer-name"
                     items={officeItem}
                     label="Select Office Packet"
                     light
+                    disabled={preSelectedData ? true : false}
                     onChange={(select) => {
                       setFieldValue("officeReturnOfficeId", select.selectedItem || "");
                       setFieldValue("copyCarat", select.selectedItem?.copyCarat || "")
@@ -292,6 +324,9 @@ class ReturnOfficeRough extends Component {
                       select.selectedItem?.id && this.props
                         .getOfficeSubList({officeID: select.selectedItem.id, checkStatus: true, })
                         .then((res) => {
+                          this.setState({ 
+                            return_value: res.returned
+                          })
                           setFieldValue("returned", res.returned)
                         })
                         .catch((e) => console.log(e));
@@ -351,7 +386,7 @@ class ReturnOfficeRough extends Component {
 
                 <div className="bx--col-md-1">
                   <label className="bx--label" style={{ fontSize:"14px" }}> AvailableRough: </label>
-                  <p>{`${toFixed4(values.copyCarat || 0)}`}</p>
+                  <p>{`${toFixed4((preSelectedData?.copyCarat) || (values.copyCarat || 0))}`}</p>
                   <label className="bx--label $code-01" style={{color:"red"}} >{`${values.returned == false ? "All Rough Is Not Returned From Sawing/Chapka" : ""}`}</label>
                   {console.log(values.returned,"values.returned")}
                 </div>
@@ -499,10 +534,11 @@ class ReturnOfficeRough extends Component {
                   Close
                 </button>
                 <button
+                  id="disable"
                   tabindex="0"
                   className={"bx--btn bx--btn--primary"}
                   type="submit"
-                  disabled={(values.returned && values.officeReturnCaratId?.label && (values?.copyCarat == this.state.sumOfCarat)) ? isSubmitting : true}
+                  disabled={(this.state.return_value && values.officeReturnCaratId && values.officeReturnOfficeId && values.officePacketReturnDate && ((values?.copyCarat || preSelectedData?.copyCarat) == this.state.sumOfCarat)) ? isSubmitting : true}
                 >
                   Save
                 </button>
